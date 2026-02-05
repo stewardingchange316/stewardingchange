@@ -1,65 +1,69 @@
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function Home() {
+  const navigate = useNavigate();
+
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        backgroundColor: "#0b0f14",
-        color: "#e7e9ee",
-        padding: "48px",
-        fontFamily:
-          'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont',
-      }}
-    >
-      <div style={{ marginBottom: "32px" }}>
-        <div style={{ fontSize: "14px", opacity: 0.7 }}>
-          Countryside Christian Church
+    <div className="container">
+      <section className="hero">
+        <div className="eyebrow">STEWARding CHANGE</div>
+        <h1 className="heroTitle">Give consistently. See the impact.</h1>
+        <p className="heroSub">
+          Create an account, pick your church and mission, set a weekly giving cap, and receive real updates —
+          families helped, meals funded, and where generosity goes.
+        </p>
+
+        <div className="heroCtas">
+          <button className="btn primary" onClick={() => navigate("/signup")}>
+            Create account
+          </button>
+          <button className="btn ghost" onClick={() => navigate("/signin")}>
+            Sign in
+          </button>
         </div>
 
-        <div style={{ fontSize: "18px", fontWeight: 600 }}>
-          Giving to the Helping Hands Foundation
+        <div className="trustLine">
+          <span className="dot" />
+          <span>Designed for clarity, trust, and accountability — like modern fintech, built for giving.</span>
         </div>
-      </div>
+      </section>
 
-      <h1 style={{ fontSize: "48px", marginBottom: "16px" }}>
-        Stewarding Change
-      </h1>
+      <section className="panel">
+        <div className="panelHead">
+          <h2>How it works</h2>
+          <p className="muted">Transparent giving with real-world outcomes</p>
+        </div>
 
-      <p style={{ fontSize: "18px", maxWidth: "520px", opacity: 0.85 }}>
-        A simple way for our church family to give consistently and receive
-        weekly updates on how generosity is making an impact.
-      </p>
+        <div className="grid2">
+          <div className="miniCard">
+            <div className="miniLabel">Choose a church</div>
+            <div className="miniValue">Local & trusted</div>
+          </div>
+          <div className="miniCard">
+            <div className="miniLabel">Set a cap</div>
+            <div className="miniValue">You stay in control</div>
+          </div>
+          <div className="miniCard">
+            <div className="miniLabel">Get updates</div>
+            <div className="miniValue">Weekly impact</div>
+          </div>
+          <div className="miniCard">
+            <div className="miniLabel">See results</div>
+            <div className="miniValue">Families helped</div>
+          </div>
+        </div>
 
-      <div style={{ marginTop: "32px", display: "flex", gap: "16px" }}>
-        <Link
-          to="/signup"
-          style={{
-            padding: "14px 24px",
-            backgroundColor: "#4ade80",
-            color: "#07130b",
-            borderRadius: "10px",
-            fontWeight: 700,
-            textDecoration: "none",
-          }}
-        >
-          Create Account
-        </Link>
-
-        <Link
-          to="/login"
-          style={{
-            padding: "14px 24px",
-            border: "1px solid rgba(255,255,255,0.2)",
-            borderRadius: "10px",
-            color: "#e7e9ee",
-            textDecoration: "none",
-            fontWeight: 600,
-          }}
-        >
-          Sign In
-        </Link>
-      </div>
+        <div className="progressRow">
+          <div className="progressMeta">
+            <span className="muted">Example progress</span>
+            <span className="muted">—</span>
+          </div>
+          <div className="progressBar">
+            <div className="progressFill" style={{ width: "62%" }} />
+          </div>
+          <div className="muted">Sign in to see real data for your church and mission.</div>
+        </div>
+      </section>
     </div>
   );
 }

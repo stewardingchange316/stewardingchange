@@ -1,86 +1,103 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { auth } from "../utils/auth";
+
+function validatePassword(pw) {
+  const min = pw.length >= 8;
+  return {
+    min,
+    ok: min,
+    message: min ? "" : "Password must be at least 8 characters.",
+  };
+}
 
 export default function Signup() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
+  const [pw, setPw] = useState("");
+  const [pw2, setPw2] = useState("");
   const [error, setError] = useState("");
 
-  function handleSubmit(e) {
+  const pwCheck = useMemo(() => validatePassword(pw), [pw]);
+  const match = pw2.length === 0 ? true : pw === pw2;
+
+  function onSubmit(e) {
     e.preventDefault();
+    setError("");
 
-    if (!email || !email.includes("@")) {
-      setError("Please enter a valid email address.");
-      return;
-    }
+    if (!email.trim()) return setError("Please enter your email.");
+    if (!pwCheck.ok) return setError(pwCheck.message);
+    if (pw !== pw2) return setError("Passwords do not match.");
 
-    // TEMP: store signup locally (we will centralize this later)
-    localStorage.setItem(
-      "stewardingChangeUser",
-      JSON.stringify({ email })
-    );
+    // "Create account" (local demo)
+    auth.login(email.trim().toLowerCase());
 
-    navigate("/dashboard");
+    // Step model:
+    // step: 2 => needs church select
+    auth.setOnboarding({ step: 2 });
+
+    navigate("/onboarding/church", { replace: true });
   }
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        backgroundColor: "#0b0f14",
-        color: "#e7e9ee",
-        padding: "48px",
-        fontFamily:
-          'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont',
-      }}
-    >
-      <h1 style={{ fontSize: "40px", marginBottom: "12px" }}>
-        Create your account
-      </h1>
+    <div className="container narrow">
+      <div className="authCard">
+        <div className="authHead">
+          <h1>Create your account</h1>
+          <p className="muted">Secure sign-in, simple onboarding, clear impact.</p>
+        </div>
 
-      <p style={{ marginBottom: "24px", opacity: 0.85 }}>
-        Countryside Christian Church · Helping Hands Foundation
-      </p>
+        <form className="form" onSubmit={onSubmit}>
+          <label className="label">
+            Email
+            <input
+              className="input"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@email.com"
+              type="email"
+              autoComplete="email"
+            />
+          </label>
 
-      <form onSubmit={handleSubmit} style={{ maxWidth: "420px" }}>
-        <input
-          type="email"
-          placeholder="Email address"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          style={{
-            width: "100%",
-            padding: "14px",
-            fontSize: "16px",
-            borderRadius: "10px",
-            border: "none",
-            marginBottom: "16px",
-          }}
-        />
+          <label className="label">
+            Password
+            <input
+              className="input"
+              value={pw}
+              onChange={(e) => setPw(e.target.value)}
+              placeholder="At least 8 characters"
+              type="password"
+              autoComplete="new-password"
+            />
+            {!pwCheck.ok && pw.length > 0 && <div className="hint bad">{pwCheck.message}</div>}
+            {pwCheck.ok && pw.length > 0 && <div className="hint good">Looks good.</div>}
+          </label>
 
-        {error && (
-          <div style={{ color: "#fca5a5", marginBottom: "12px" }}>
-            {error}
-          </div>
-        )}
+          <label className="label">
+            Verify password
+            <input
+              className="input"
+              value={pw2}
+              onChange={(e) => setPw2(e.target.value)}
+              placeholder="Re-enter password"
+              type="password"
+              autoComplete="new-password"
+            />
+            {pw2.length > 0 && !match && <div className="hint bad">Passwords must match.</div>}
+          </label>
 
-        <button
-          type="submit"
-          style={{
-            width: "100%",
-            padding: "14px",
-            fontSize: "16px",
-            borderRadius: "10px",
-            border: "none",
-            backgroundColor: "#4ade80",
-            color: "#07130b",
-            fontWeight: 700,
-            cursor: "pointer",
-          }}
-        >
-          Continue
-        </button>
-      </form>
+          {error && <div className="alert">{error}</div>}
+
+          <button className="btn primary full" type="submit">
+            Continue
+          </button>
+
+          <button className="btn ghost full" type="button" onClick={() => navigate("/signin")}>
+            Already have an account? Sign in
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
