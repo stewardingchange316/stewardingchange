@@ -336,3 +336,61 @@ button{ font:inherit; }
   .grid2{ grid-template-columns: 1fr; }
   .cardRow{ flex-direction:column; align-items:flex-start; }
 }
+/* =========================
+   Stewarding Change — Giving Slider ONLY
+   (Safe, scoped, non-breaking)
+========================= */
+
+.sc-giving-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: #1f2a25;
+  outline: none;
+}
+
+/* Chrome / Safari */
+.sc-giving-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #7ae6a4;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(122, 230, 164, 0.35);
+}
+
+/* Firefox */
+.sc-giving-slider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #7ae6a4;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(122, 230, 164, 0.35);
+}
+
+/* Disabled state */
+.sc-giving-slider:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+button {
+  background: linear-gradient(180deg, #7adf9b, #5ecb84);
+  color: #0b1f14;
+  font-weight: 600;
+  border: none;
+  border-radius: 999px;
+  padding: 12px 20px;
+  box-shadow: 0 8px 24px rgba(122, 223, 155, 0.35);
+}
+
+button:hover {
+  filter: brightness(1.05);
+}
+
+button:disabled {
+  opacity: 0.5;
+  box-shadow: none;
+}

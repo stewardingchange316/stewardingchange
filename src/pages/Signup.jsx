@@ -1,102 +1,123 @@
-import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { auth } from "../utils/auth";
-
-function validatePassword(pw) {
-  const min = pw.length >= 8;
-  return {
-    min,
-    ok: min,
-    message: min ? "" : "Password must be at least 8 characters.",
-  };
-}
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { signUp, setOnboarding } from "../utils/auth";
 
 export default function Signup() {
   const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
-  const [pw, setPw] = useState("");
-  const [pw2, setPw2] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const pwCheck = useMemo(() => validatePassword(pw), [pw]);
-  const match = pw2.length === 0 ? true : pw === pw2;
+  const passwordStrength = (() => {
+    let score = 0;
+    if (password.length >= 8) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[^A-Za-z0-9]/.test(password)) score++;
+    return score;
+  })();
 
-  function onSubmit(e) {
+  const strengthLabel =
+    passwordStrength <= 1
+      ? "Weak"
+      : passwordStrength === 2
+      ? "Okay"
+      : passwordStrength === 3
+      ? "Strong"
+      : "Very strong";
+
+  const canSubmit =
+    email &&
+    password &&
+    confirm &&
+    password === confirm &&
+    passwordStrength >= 3;
+
+  async function handleSubmit(e) {
     e.preventDefault();
     setError("");
 
-    if (!email.trim()) return setError("Please enter your email.");
-    if (!pwCheck.ok) return setError(pwCheck.message);
-    if (pw !== pw2) return setError("Passwords do not match.");
+    if (!canSubmit) {
+      setError(
+        "Password must be at least 8 characters and include a number and capital letter."
+      );
+      return;
+    }
 
-    // "Create account" (local demo)
-    auth.login(email.trim().toLowerCase());
+    try {
+      setSubmitting(true);
 
-    // Step model:
-    // step: 2 => needs church select
-    auth.setOnboarding({ step: 2 });
+      // create account
+      await signUp(email, password);
 
-    navigate("/onboarding/church", { replace: true });
+      // initialize onboarding flow
+      setOnboarding({ step: "church" });
+
+      navigate("/church-select");
+    } catch (err) {
+      setError(err.message || "Unable to create account.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
-    <div className="container narrow">
-      <div className="authCard">
-        <div className="authHead">
-          <h1>Create your account</h1>
-          <p className="muted">Secure sign-in, simple onboarding, clear impact.</p>
-        </div>
+    <div className="auth-page">
+      <div className="auth-card">
+        <h1>Create your account</h1>
+        <p className="auth-subtitle">
+          Secure sign-in, simple onboarding, clear impact.
+        </p>
 
-        <form className="form" onSubmit={onSubmit}>
-          <label className="label">
-            Email
-            <input
-              className="input"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@email.com"
-              type="email"
-              autoComplete="email"
-            />
-          </label>
+        <form onSubmit={handleSubmit}>
+          <label>Email</label>
+          <input
+            type="email"
+            placeholder="you@email.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+          />
 
-          <label className="label">
-            Password
-            <input
-              className="input"
-              value={pw}
-              onChange={(e) => setPw(e.target.value)}
-              placeholder="At least 8 characters"
-              type="password"
-              autoComplete="new-password"
-            />
-            {!pwCheck.ok && pw.length > 0 && <div className="hint bad">{pwCheck.message}</div>}
-            {pwCheck.ok && pw.length > 0 && <div className="hint good">Looks good.</div>}
-          </label>
+          <label>Password</label>
+          <input
+            type="password"
+            placeholder="At least 8 characters"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="new-password"
+          />
 
-          <label className="label">
-            Verify password
-            <input
-              className="input"
-              value={pw2}
-              onChange={(e) => setPw2(e.target.value)}
-              placeholder="Re-enter password"
-              type="password"
-              autoComplete="new-password"
-            />
-            {pw2.length > 0 && !match && <div className="hint bad">Passwords must match.</div>}
-          </label>
+          <div className={`password-strength s-${passwordStrength}`}>
+            Strength: <strong>{strengthLabel}</strong>
+          </div>
 
-          {error && <div className="alert">{error}</div>}
+          <label>Verify password</label>
+          <input
+            type="password"
+            placeholder="Re-enter password"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            autoComplete="new-password"
+          />
 
-          <button className="btn primary full" type="submit">
-            Continue
-          </button>
+          {error && <div className="auth-error">{error}</div>}
 
-          <button className="btn ghost full" type="button" onClick={() => navigate("/signin")}>
-            Already have an account? Sign in
+          <button
+            type="submit"
+            className="primary"
+            disabled={!canSubmit || submitting}
+          >
+            {submitting ? "Creating account…" : "Continue"}
           </button>
         </form>
+
+        <div className="auth-footer">
+          Already have an account? <Link to="/signin">Sign in</Link>
+        </div>
       </div>
     </div>
   );

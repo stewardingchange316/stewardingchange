@@ -1,63 +1,42 @@
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { auth } from "../utils/auth";
+// src/AppShell.jsx
+import { Link, useNavigate } from "react-router-dom";
+import { getUser, isAuthenticated, logout } from "./utils/auth";
 
-export default function AppShell() {
-  const location = useLocation();
+export default function AppShell({ children }) {
   const navigate = useNavigate();
-  const authed = auth.isAuthenticated();
-
-  const showAuthButtons =
-    !authed && (location.pathname === "/" || location.pathname === "/signin" || location.pathname === "/signup");
-
-  function handleBrandClick() {
-    if (authed) navigate("/dashboard");
-    else navigate("/");
-  }
+  const authed = isAuthenticated();
+  const user = getUser();
 
   function handleSignOut() {
-    auth.logout();
-    navigate("/", { replace: true });
+    logout();
+    navigate("/signin?mode=signin", { replace: true });
   }
 
   return (
-    <div className="app">
+    <div className="app-shell">
       <header className="topbar">
-        <button className="brand" onClick={handleBrandClick}>
-          <span className="logoDot" />
-          <span className="brandText">
-            <span className="brandName">Stewarding Change</span>
-            <span className="brandTag">Giving that feels personal — updates that feel real</span>
-          </span>
-        </button>
-
-        <div className="topbarRight">
-          {showAuthButtons && (
-            <>
-              <button className="btn ghost" onClick={() => navigate("/signin")}>
-                Sign in
-              </button>
-              <button className="btn primary" onClick={() => navigate("/signup")}>
-                Create account
-              </button>
-            </>
-          )}
-
-          {authed && (
-            <button className="btn ghost" onClick={handleSignOut}>
-              Sign out
-            </button>
-          )}
+        <div className="brand">
+          <Link to="/" className="brand-link">Stewarding Change</Link>
+          <div className="tagline">Giving that feels personal — updates that feel real</div>
         </div>
+
+        <nav className="nav">
+          <Link to="/" className="nav-link">Home</Link>
+          {authed && <Link to="/dashboard" className="nav-link">Dashboard</Link>}
+
+          {authed ? (
+            <button className="btn" type="button" onClick={handleSignOut}>
+              Sign out ({user?.email || "account"})
+            </button>
+          ) : (
+            <Link to="/signin?mode=signin" className="btn">
+              Sign in
+            </Link>
+          )}
+        </nav>
       </header>
 
-      <main className="main">
-        <Outlet />
-      </main>
-
-      <footer className="footerBar">
-        <span>© {new Date().getFullYear()} Stewarding Change</span>
-        <span className="muted">Built for clarity, trust, and impact.</span>
-      </footer>
+      <main className="main">{children}</main>
     </div>
   );
 }

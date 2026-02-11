@@ -1,68 +1,43 @@
-import { auth } from "../utils/auth";
+import { getUser, signOut } from "../utils/auth";
+import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
-  const user = auth.getUser();
-  const ob = auth.getOnboarding();
+  const user = getUser();
+  const nav = useNavigate();
 
-  const churchName = ob?.churchName ?? "Your church";
-  const missionName = ob?.missionName ?? "Mission";
-  const weeklyCap = ob?.weeklyCap ?? "No limit";
-
-  // Demo numbers (later API)
-  const goalFamilies = churchName.includes("Countryside") ? 120 : 90;
-  const helped = churchName.includes("Countryside") ? 37 : 22;
-  const active = churchName.includes("Countryside") ? 84 : 61;
-  const pct = Math.min(100, Math.round((helped / goalFamilies) * 100));
+  if (!user) {
+    nav("/signin");
+    return null;
+  }
 
   return (
-    <div className="container">
-      <div className="dashHead">
-        <div className="muted">{churchName}</div>
-        <h1 className="dashTitle">{missionName}</h1>
-        <div className="dashWelcome">
-          <div className="welcomeBig">Welcome,</div>
-          <div className="welcomeEmail">{user?.email}</div>
-        </div>
-        <p className="muted">
-          Your weekly giving cap is set to <b>{weeklyCap}</b>. This dashboard will show weekly updates, outcomes,
-          and where funds go.
-        </p>
+    <div className="dashboard">
+      <div className="dashboard-header">
+        <h1>Welcome {user.email}</h1>
+        <button
+          onClick={() => {
+            signOut();
+            nav("/");
+          }}
+        >
+          Sign out
+        </button>
       </div>
 
-      <div className="dashGrid">
-        <div className="panel">
-          <div className="panelHead">
-            <h2>This month’s goal</h2>
-            <p className="muted">Help {goalFamilies} families through the {missionName}.</p>
-          </div>
-        </div>
+      <section className="card">
+        <h3>Church</h3>
+        <p>Not selected</p>
+      </section>
 
-        <div className="panel">
-          <div className="panelHead">
-            <h2>Progress so far</h2>
-            <p className="muted">
-              {helped} out of {goalFamilies} families helped this month.
-            </p>
-          </div>
-          <div className="progressBar">
-            <div className="progressFill" style={{ width: `${pct}%` }} />
-          </div>
-          <div className="progressMeta">
-            <span className="muted">{pct}%</span>
-            <span className="muted">Active givers: {active}</span>
-          </div>
-        </div>
+      <section className="card">
+        <h3>Giving Cap</h3>
+        <p>Not set</p>
+      </section>
 
-        <div className="panel">
-          <div className="panelHead">
-            <h2>Next weekly update</h2>
-            <p className="muted">We’ll email a short, specific story + receipts-style breakdown of impact.</p>
-          </div>
-          <a className="link" href="#" onClick={(e) => e.preventDefault()}>
-            Visit mission site →
-          </a>
-        </div>
-      </div>
+      <section className="card">
+        <h3>Bank Connected</h3>
+        <p>Pending</p>
+      </section>
     </div>
   );
 }
