@@ -85,7 +85,7 @@ export default function Home() {
               </div>
 
               <div className="alert alert-success">
-                Turn your everyday CHANGE into last CHANGE.
+                Turn your everyday CHANGE into lasting CHANGE.
               </div>
             </div>
           </div>
