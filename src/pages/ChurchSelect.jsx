@@ -26,22 +26,25 @@ export default function ChurchSelect() {
     []
   );
 
-  const [selected, setSelected] = useState(onboarding.churchId || null);
+  const [selected, setSelected] = useState(
+    onboarding.churchId || onboarding.church?.id || ""
+  );
 
-function continueNext() {
-  if (!selected) return;
+  function continueNext() {
+    if (!selected) return;
 
-const updated = {
-  ...onboarding,
-  step: "cap",
-  churchId: selected,
-};
+    const selectedChurch = churches.find((c) => c.id === selected) || null;
 
-localStorage.setItem("sc_onboarding", JSON.stringify(updated));
-setOnboarding(updated);
-navigate("/giving-cap");
+    const updated = {
+      ...onboarding,
+      step: "cap",
+      churchId: selected,
+      church: selectedChurch, // ✅ store full object for the dashboard
+    };
 
-}
+    setOnboarding(updated);
+    navigate("/giving-cap");
+  }
 
   return (
     <div className="onboarding-page">
@@ -105,5 +108,4 @@ navigate("/giving-cap");
       </div>
     </div>
   );
-
 }

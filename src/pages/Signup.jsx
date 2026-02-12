@@ -5,11 +5,18 @@ import { signUp, setOnboarding } from "../utils/auth";
 export default function Signup() {
   const navigate = useNavigate();
 
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  const isValidEmail = (value) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  };
 
   const passwordStrength = (() => {
     let score = 0;
@@ -30,30 +37,50 @@ export default function Signup() {
       : "Very strong";
 
   const canSubmit =
-    email &&
-    password &&
-    confirm &&
-    password === confirm &&
-    passwordStrength >= 3;
+    firstName.length > 0 &&
+    lastName.length > 0 &&
+    phone.length > 0 &&
+    email.length > 0 &&
+    password.length > 0 &&
+    confirm.length > 0;
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
 
-    if (!canSubmit) {
+    if (!firstName || !lastName || !phone) {
+      setError("Please complete all required fields.");
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    if (passwordStrength < 3) {
       setError(
-        "Password must be at least 8 characters and include a number and capital letter."
+        "Password must be at least 8 characters and include a capital letter and number."
       );
+      return;
+    }
+
+    if (password !== confirm) {
+      setError("Passwords do not match.");
       return;
     }
 
     try {
       setSubmitting(true);
 
-      // create account
-      await signUp(email, password);
+      await signUp({
+        firstName,
+        lastName,
+        phone,
+        email,
+        password,
+      });
 
-      // initialize onboarding flow
       setOnboarding({ step: "church" });
 
       navigate("/church-select");
@@ -67,12 +94,39 @@ export default function Signup() {
   return (
     <div className="auth-page">
       <div className="auth-card">
+
+        <h2 className="brand-header">Stewarding Change</h2>
+
         <h1>Create your account</h1>
         <p className="auth-subtitle">
           Secure sign-in, simple onboarding, clear impact.
         </p>
 
         <form onSubmit={handleSubmit}>
+          <label>First Name</label>
+          <input
+            type="text"
+            placeholder="John"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+          />
+
+          <label>Last Name</label>
+          <input
+            type="text"
+            placeholder="Smith"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+          />
+
+          <label>Phone Number</label>
+          <input
+            type="tel"
+            placeholder="(555) 555-5555"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+          />
+
           <label>Email</label>
           <input
             type="email"

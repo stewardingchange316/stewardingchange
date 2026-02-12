@@ -376,21 +376,38 @@ button{ font:inherit; }
   opacity: 0.4;
   cursor: not-allowed;
 }
-button {
-  background: linear-gradient(180deg, #7adf9b, #5ecb84);
-  color: #0b1f14;
-  font-weight: 600;
-  border: none;
-  border-radius: 999px;
-  padding: 12px 20px;
-  box-shadow: 0 8px 24px rgba(122, 223, 155, 0.35);
+.dashboard-header .welcome-pill {
+  display: inline-block;
+  padding: 18px 36px;
+  border-radius: 9999px;
+
+  background: linear-gradient(
+    135deg,
+    rgba(34, 197, 94, 0.18),
+    rgba(59, 130, 246, 0.18)
+  );
+
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  border: 1px solid rgba(255, 255, 255, 0.15);
+
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.35),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+
+  transition: all 0.3s ease;
 }
 
-button:hover {
-  filter: brightness(1.05);
+.dashboard-header .welcome-pill:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 
-button:disabled {
-  opacity: 0.5;
-  box-shadow: none;
+.dashboard-header .welcome-pill h1 {
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }

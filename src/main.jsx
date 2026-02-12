@@ -4,8 +4,9 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 
 // 🔥 THESE TWO LINES ARE WHY YOUR UI WAS BEAUTIFUL
-import "./styles/base.css";
 import "./styles/tokens.css";
+import "./styles/base.css";
+import "./App.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

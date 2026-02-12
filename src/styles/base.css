@@ -969,3 +969,12 @@ button.primary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
+.brand-header {
+  text-align: center;
+  font-size: 1.2rem;
+  letter-spacing: 1px;
+  font-weight: 600;
+  color: #6ee7b7; /* matches your green tone */
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}

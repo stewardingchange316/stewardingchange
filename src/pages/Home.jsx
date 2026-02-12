@@ -44,8 +44,7 @@ export default function Home() {
             </h1>
 
             <p className="lede">
-              A modern, transparent giving platform designed for churches
-              that care about clarity, accountability, and long-term trust.
+             A transparent giving platform designed for YOUR church — helping your spare change serve your mission and glorify God.
             </p>
 
             <div className="hero-actions">
@@ -81,12 +80,12 @@ export default function Home() {
 
                 <div className="metric">
                   <div className="name">Giving transparency</div>
-                  <div className="value">Real-time</div>
+                  <div className="value">Weekly Updates</div>
                 </div>
               </div>
 
               <div className="alert alert-success">
-                Built for pastors, finance teams, and boards — not just donors.
+                Turn your everyday CHANGE into last CHANGE.
               </div>
             </div>
           </div>
