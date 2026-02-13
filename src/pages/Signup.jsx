@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { signUp, setOnboarding } from "../utils/auth";
+import { supabase } from "../lib/supabase";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -73,7 +74,8 @@ export default function Signup() {
     try {
       setSubmitting(true);
 
-      await signUp({
+      // 1️⃣ Create auth account
+      const { user } = await signUp({
         firstName,
         lastName,
         phone,
@@ -81,8 +83,22 @@ export default function Signup() {
         password,
       });
 
-      setOnboarding({ step: "church" });
+      // 2️⃣ Save profile in your custom users table
+      const { error: profileError } = await supabase.from("users").insert([
+        {
+          id: user.id,
+          email,
+          first_name: firstName,
+          church_id: null,
+          weekly_cap: null,
+          bank_connected: false,
+        },
+      ]);
 
+      if (profileError) throw profileError;
+
+      // 3️⃣ Continue onboarding flow
+      setOnboarding({ step: "church" });
       navigate("/church-select");
     } catch (err) {
       setError(err.message || "Unable to create account.");
@@ -94,7 +110,6 @@ export default function Signup() {
   return (
     <div className="auth-page">
       <div className="auth-card">
-
         <h2 className="brand-header">Stewarding Change</h2>
 
         <h1>Create your account</h1>
