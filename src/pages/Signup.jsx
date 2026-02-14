@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { signUp, setOnboarding } from "../utils/auth";
+import { setOnboarding } from "../utils/auth";
 import { supabase } from "../lib/supabase";
 
 export default function Signup() {
@@ -75,29 +75,36 @@ export default function Signup() {
       setSubmitting(true);
 
       // 1️⃣ Create auth account
-      const { user } = await signUp({
-        firstName,
-        lastName,
-        phone,
-        email,
-        password,
-      });
-
-      // 2️⃣ Save profile in your custom users table
-      const { error: profileError } = await supabase.from("users").insert([
-        {
-          id: user.id,
+      const { data: authData, error: authError } =
+        await supabase.auth.signUp({
           email,
-          first_name: firstName,
-          church_id: null,
-          weekly_cap: null,
-          bank_connected: false,
-        },
-      ]);
+          password,
+        });
+
+      if (authError) throw authError;
+
+      // 2️⃣ Get authenticated user (guaranteed way)
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError) throw userError;
+      if (!user) throw new Error("User authentication failed.");
+
+      // 3️⃣ Insert into custom users table
+      const { error: profileError } = await supabase.from("users").insert({
+        id: user.id,
+        email,
+        first_name: firstName,
+        church_id: null,
+        weekly_cap: null,
+        bank_connected: false,
+      });
 
       if (profileError) throw profileError;
 
-      // 3️⃣ Continue onboarding flow
+      // 4️⃣ Continue onboarding flow
       setOnboarding({ step: "church" });
       navigate("/church-select");
     } catch (err) {

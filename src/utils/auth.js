@@ -10,13 +10,16 @@ export function getUser() {
   return raw ? JSON.parse(raw) : null;
 }
 
+// Alias so older/newer imports won't break
+export const getCurrentUser = getUser;
+
 export function isAuthenticated() {
   return !!getUser();
 }
 
 /*
   SIGN UP
-  Now stores a full structured user object
+  Returns a user object (NOT { user: ... })
 */
 export function signUp(userData) {
   const user = {
@@ -37,7 +40,7 @@ export function signUp(userData) {
       totalGiven: 0,
       monthlyGoal: 0,
       impactScore: 0,
-    }
+    },
   };
 
   localStorage.setItem(USER_KEY, JSON.stringify(user));
@@ -60,16 +63,14 @@ export function signUp(userData) {
 export function signIn(email, password) {
   const existing = getUser();
 
+  // NOTE: this is still "local" auth for now (not Supabase auth yet)
   if (!existing || existing.email !== email) {
     throw new Error("Invalid email or password.");
   }
 
   // do NOT reset onboarding on sign-in
   if (!localStorage.getItem(FLOW_KEY)) {
-    localStorage.setItem(
-      FLOW_KEY,
-      JSON.stringify({ step: "church" })
-    );
+    localStorage.setItem(FLOW_KEY, JSON.stringify({ step: "church" }));
   }
 
   return existing;
@@ -89,20 +90,16 @@ export function deleteAccount() {
 
 export function updateUser(updates) {
   const user = getUser();
-  if (!user) return;
+  if (!user) return null;
 
-  const updated = {
-    ...user,
-    ...updates,
-  };
-
+  const updated = { ...user, ...updates };
   localStorage.setItem(USER_KEY, JSON.stringify(updated));
   return updated;
 }
 
 export function updateOnboardingData(data) {
   const user = getUser();
-  if (!user) return;
+  if (!user) return null;
 
   const updated = {
     ...user,
@@ -138,7 +135,6 @@ export function isOnboardingComplete() {
 
 export function getNextOnboardingPath() {
   const flow = getOnboarding();
-
   if (!flow) return "/signup";
 
   switch (flow.step) {
