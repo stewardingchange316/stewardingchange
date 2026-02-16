@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { setOnboarding } from "../utils/auth";
 import { supabase } from "../lib/supabase";
 
 export default function Signup() {
@@ -14,6 +13,20 @@ export default function Signup() {
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+
+  // ✅ If user lands here after confirming email,
+  // and session now exists, redirect to dashboard
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session?.user) {
+        navigate("/dashboard", { replace: true });
+      }
+    };
+
+    checkSession();
+  }, [navigate]);
 
   const isValidEmail = (value) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
@@ -38,16 +51,17 @@ export default function Signup() {
       : "Very strong";
 
   const canSubmit =
-    firstName.length > 0 &&
-    lastName.length > 0 &&
-    phone.length > 0 &&
-    email.length > 0 &&
-    password.length > 0 &&
-    confirm.length > 0;
+    firstName &&
+    lastName &&
+    phone &&
+    email &&
+    password &&
+    confirm;
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
+    setSuccessMessage("");
 
     if (!firstName || !lastName || !phone) {
       setError("Please complete all required fields.");
@@ -74,39 +88,36 @@ export default function Signup() {
     try {
       setSubmitting(true);
 
-      // 1️⃣ Create auth account
-      const { data: authData, error: authError } =
-        await supabase.auth.signUp({
-          email,
-          password,
-        });
+      const { error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: "https://stewardingchange.org",
+          data: {
+            first_name: firstName,
+            last_name: lastName,
+            phone,
+          },
+        },
+      });
 
       if (authError) throw authError;
 
-      // 2️⃣ Get authenticated user (guaranteed way)
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
+      // ✅ Do NOT try to fetch user here
+      // Email confirmation is required
 
-      if (userError) throw userError;
-      if (!user) throw new Error("User authentication failed.");
+      setSuccessMessage(
+        "Account created! Please check your email to confirm your account before signing in."
+      );
 
-      // 3️⃣ Insert into custom users table
-      const { error: profileError } = await supabase.from("users").insert({
-        id: user.id,
-        email,
-        first_name: firstName,
-        church_id: null,
-        weekly_cap: null,
-        bank_connected: false,
-      });
+      // Clear form
+      setFirstName("");
+      setLastName("");
+      setPhone("");
+      setEmail("");
+      setPassword("");
+      setConfirm("");
 
-      if (profileError) throw profileError;
-
-      // 4️⃣ Continue onboarding flow
-      setOnboarding({ step: "church" });
-      navigate("/church-select");
     } catch (err) {
       setError(err.message || "Unable to create account.");
     } finally {
@@ -182,6 +193,12 @@ export default function Signup() {
 
           {error && <div className="auth-error">{error}</div>}
 
+          {successMessage && (
+            <div className="alert alert-success mt-4">
+              {successMessage}
+            </div>
+          )}
+
           <button
             type="submit"
             className="primary"
@@ -192,7 +209,7 @@ export default function Signup() {
         </form>
 
         <div className="auth-footer">
-          Already have an account? <Link to="/signin">Sign in</Link>
+          Already have an account? <Link to="/">Sign in</Link>
         </div>
       </div>
     </div>
