@@ -30,21 +30,24 @@ export default function RequireAuth() {
     };
   }, []);
 
-  if (user === undefined) return null;
+  if (user === undefined) {
+    return (
+      <div style={{ padding: 40, textAlign: "center" }}>
+        Loading...
+      </div>
+    );
+  }
 
   const onboarding = getOnboarding();
 
-  // 🔁 NOT SIGNED IN → go to HOME (not /signin)
   if (!user) {
     return <Navigate to="/" replace />;
   }
 
-  // onboarding missing
   if (!onboarding || !onboarding.step) {
     return <Navigate to="/church-select" replace />;
   }
 
-  // enforce onboarding order
   if (onboarding.step !== "done") {
     const stepRouteMap = {
       church: "/church-select",
