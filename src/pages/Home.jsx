@@ -8,6 +8,7 @@ export default function Home() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // Auto-redirect if already signed in
   useEffect(() => {
@@ -23,6 +24,7 @@ export default function Home() {
   async function handleLogin(e) {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -31,6 +33,7 @@ export default function Home() {
 
     if (error) {
       setError(error.message);
+      setLoading(false);
       return;
     }
 
@@ -51,16 +54,6 @@ export default function Home() {
             />
             <div className="brand-name">Stewarding Change</div>
           </div>
-
-         <nav className="nav">
-  <button
-    className="btn btn-ghost btn-sm"
-    onClick={() => setShowLogin(true)}
-  >
-    Sign in
-  </button>
-</nav>
-
         </div>
       </header>
 
@@ -129,38 +122,53 @@ export default function Home() {
 
       {/* PREMIUM LOGIN MODAL */}
       {showLogin && (
-        <div className="login-overlay">
-          <div className="login-modal glass">
+        <div 
+          className="modal-overlay"
+          onClick={() => setShowLogin(false)}
+        >
+          <div 
+            className="modal-card glass"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
-              className="login-close"
+              className="modal-close"
               onClick={() => setShowLogin(false)}
+              aria-label="Close"
             >
               ✕
             </button>
 
-            <h2>Welcome back</h2>
-            <p className="muted mb-4">
+            <h2 className="modal-title">Welcome back</h2>
+            <p className="modal-subtitle">
               Sign in to continue stewarding with clarity.
             </p>
 
-            <form onSubmit={handleLogin} className="stack-4">
-              <input
-                type="email"
-                placeholder="Email"
-                className="input"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+            <form onSubmit={handleLogin} className="modal-form">
+              <div className="form-group">
+                <label htmlFor="email">Email</label>
+                <input
+                  id="email"
+                  type="email"
+                  placeholder="you@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  autoComplete="email"
+                />
+              </div>
 
-              <input
-                type="password"
-                placeholder="Password"
-                className="input"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+              <div className="form-group">
+                <label htmlFor="password">Password</label>
+                <input
+                  id="password"
+                  type="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  autoComplete="current-password"
+                />
+              </div>
 
               {error && (
                 <div className="alert alert-danger">
@@ -168,9 +176,27 @@ export default function Home() {
                 </div>
               )}
 
-              <button type="submit" className="btn btn-primary btn-wide">
-                Sign in
+              <button 
+                type="submit" 
+                className="btn btn-primary btn-wide"
+                disabled={loading}
+              >
+                {loading ? "Signing in..." : "Sign in"}
               </button>
+
+              <div className="modal-footer">
+                Don't have an account?{" "}
+                <button
+                  type="button"
+                  className="link-button"
+                  onClick={() => {
+                    setShowLogin(false);
+                    nav("/signup");
+                  }}
+                >
+                  Sign up
+                </button>
+              </div>
             </form>
           </div>
         </div>

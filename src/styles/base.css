@@ -972,3 +972,333 @@ button.primary:disabled {
   margin-bottom: 8px;
   text-transform: uppercase;
 }
+/* =========================================================
+   17) Premium Modal Overlay (Sign In)
+========================================================= */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+  animation: fadeIn var(--dur-3) var(--ease-out);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Modal Card */
+.modal-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+  border: 1px solid var(--stroke-1);
+  border-radius: var(--r-2xl);
+  padding: var(--s-8);
+  max-width: 440px;
+  width: 100%;
+  position: relative;
+  animation: slideUp var(--dur-4) var(--ease-out);
+  box-shadow: var(--shadow-3);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Close Button */
+.modal-close {
+  position: absolute;
+  top: var(--s-4);
+  right: var(--s-4);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--stroke-0);
+  border-radius: 12px;
+  color: var(--text-2);
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: var(--s-2);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: all var(--dur-2) var(--ease-out);
+}
+
+.modal-close:hover {
+  color: var(--text-0);
+  background: rgba(255,255,255,0.08);
+  border-color: var(--stroke-1);
+}
+
+/* Modal Content */
+.modal-title {
+  font-size: var(--fs-6);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--s-2);
+  color: var(--text-0);
+}
+
+.modal-subtitle {
+  color: var(--text-2);
+  margin-bottom: var(--s-7);
+  font-size: var(--fs-2);
+  line-height: var(--lh-relaxed);
+}
+
+/* Modal Form */
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.form-group label {
+  font-size: var(--fs-1);
+  font-weight: 600;
+  color: var(--text-1);
+  letter-spacing: -0.01em;
+}
+
+.form-group input {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--stroke-0);
+  border-radius: var(--r-sm);
+  padding: 14px 16px;
+  color: var(--text-0);
+  font-size: var(--fs-2);
+  transition: all var(--dur-2) var(--ease-out);
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: rgba(17,240,180,0.35);
+  background: rgba(255,255,255,0.08);
+  box-shadow: var(--focus-ring);
+}
+
+.form-group input::placeholder {
+  color: var(--text-3);
+}
+
+/* Modal Footer */
+.modal-footer {
+  text-align: center;
+  margin-top: var(--s-4);
+  font-size: var(--fs-1);
+  color: var(--text-2);
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: var(--brand-0);
+  cursor: pointer;
+  text-decoration: none;
+  font-size: inherit;
+  padding: 0;
+  font-weight: 600;
+  transition: color var(--dur-2) var(--ease-out);
+}
+
+.link-button:hover {
+  color: var(--brand-1);
+  text-decoration: underline;
+}
+
+/* Mobile Responsive */
+@media (max-width: 640px) {
+  .modal-card {
+    padding: var(--s-7) var(--s-6);
+    margin: var(--s-4);
+  }
+
+  .modal-title {
+    font-size: var(--fs-5);
+  }
+}/* =========================================================
+   18) Mobile Optimizations
+========================================================= */
+
+/* Better mobile spacing */
+@media (max-width: 768px) {
+  /* Add breathing room on mobile */
+  .container {
+    width: calc(100% - 32px);
+    padding: 0 16px;
+  }
+
+  /* Header adjustments */
+  .header-inner {
+    width: calc(100% - 32px);
+    padding: 0 16px;
+  }
+
+  .brand {
+    gap: 8px;
+  }
+
+  .brand-mark {
+    height: 48px !important;
+    width: 48px !important;
+  }
+
+  .brand-name {
+    font-size: 16px;
+  }
+
+  /* Hero spacing */
+  .hero {
+    padding: var(--s-8) 0 var(--s-9);
+  }
+
+  .hero-title {
+    margin: var(--s-4) 0 var(--s-4);
+  }
+
+  .lede {
+    font-size: 16px;
+    margin-bottom: var(--s-6);
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .hero-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Kicker smaller on mobile */
+  .kicker {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+
+  /* Hero panel adjustments */
+  .hero-panel {
+    padding: var(--s-6);
+  }
+
+  .metric {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .metric .name {
+    font-size: 12px;
+  }
+
+  .metric .value {
+    font-size: 18px;
+  }
+
+  /* Footer spacing */
+  .footer-inner {
+    width: calc(100% - 32px);
+    padding: 0 16px;
+  }
+}
+
+/* Extra small screens (iPhone SE, etc.) */
+@media (max-width: 375px) {
+  .container {
+    width: calc(100% - 24px);
+    padding: 0 12px;
+  }
+
+  .header-inner {
+    width: calc(100% - 24px);
+  }
+
+  .hero-title {
+    font-size: 36px;
+  }
+
+  .modal-card {
+    padding: var(--s-6) var(--s-5);
+    margin: var(--s-3);
+  }
+}
+
+/* Modal mobile improvements */
+@media (max-width: 640px) {
+  .modal-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .modal-card {
+    max-width: 100%;
+    width: 100%;
+    border-radius: var(--r-2xl) var(--r-2xl) 0 0;
+    animation: slideUpMobile var(--dur-4) var(--ease-out);
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  @keyframes slideUpMobile {
+    from {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .modal-title {
+    font-size: var(--fs-5);
+  }
+
+  .form-group input {
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
+}
+
+/* Landscape mobile - keep modal centered */
+@media (max-width: 900px) and (orientation: landscape) {
+  .modal-overlay {
+    align-items: center;
+  }
+
+  .modal-card {
+    border-radius: var(--r-2xl);
+    max-height: 85vh;
+  }
+}

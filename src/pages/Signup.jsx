@@ -88,7 +88,8 @@ export default function Signup() {
     try {
       setSubmitting(true);
 
-      const { error: authError } = await supabase.auth.signUp({
+      // Attempt signup
+      const { data, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -103,8 +104,14 @@ export default function Signup() {
 
       if (authError) throw authError;
 
-      // ✅ Do NOT try to fetch user here
-      // Email confirmation is required
+      // ✅ Check if user already exists (Supabase sends identities: [] for existing users)
+      if (data.user && data.user.identities && data.user.identities.length === 0) {
+        setError(
+          "This email is already registered. Please sign in instead or check your email for the confirmation link."
+        );
+        setSubmitting(false);
+        return;
+      }
 
       setSuccessMessage(
         "Account created! Please check your email to confirm your account before signing in."
@@ -119,7 +126,12 @@ export default function Signup() {
       setConfirm("");
 
     } catch (err) {
-      setError(err.message || "Unable to create account.");
+      // Handle specific Supabase auth errors
+      if (err.message.includes("already registered") || err.message.includes("already exists")) {
+        setError("This email is already registered. Please sign in instead.");
+      } else {
+        setError(err.message || "Unable to create account.");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -191,7 +203,18 @@ export default function Signup() {
             autoComplete="new-password"
           />
 
-          {error && <div className="auth-error">{error}</div>}
+          {error && (
+            <div className="auth-error">
+              {error}
+              {error.includes("already registered") && (
+                <div style={{ marginTop: "8px" }}>
+                  <Link to="/" style={{ color: "inherit", textDecoration: "underline" }}>
+                    Click here to sign in
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
 
           {successMessage && (
             <div className="alert alert-success mt-4">

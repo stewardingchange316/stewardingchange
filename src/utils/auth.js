@@ -1,140 +1,245 @@
 // src/utils/auth.js
+import { supabase } from "../lib/supabase";
 
-const USER_KEY = "sc_user";
-const FLOW_KEY = "sc_onboarding";
+const FLOW_KEY = "sc_onboarding"; // Keep for backward compatibility during transition
 
 /* ================= AUTH ================= */
 
-export function getUser() {
-  const raw = localStorage.getItem(USER_KEY);
-  return raw ? JSON.parse(raw) : null;
+export async function getUser() {
+  try {
+    // Get current Supabase session
+    const { data: { user: authUser }, error: sessionError } = await supabase.auth.getUser();
+    
+    if (sessionError || !authUser) {
+      return null;
+    }
+
+    // Fetch user profile from database
+    const { data: profile, error: profileError } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", authUser.id)
+      .single();
+
+    if (profileError) {
+      console.error("Error fetching user profile:", profileError);
+      return null;
+    }
+
+    // Transform database format to match your existing user object structure
+    return {
+      id: profile.id,
+      email: profile.email,
+      firstName: profile.first_name || "",
+      lastName: "", // Add last_name to schema if needed
+      phone: profile.phone || "",
+      createdAt: profile.created_at,
+
+      onboarding: {
+        church: profile.church_id ? {
+          id: profile.church_id,
+          name: profile.church_name
+        } : null,
+        givingCap: profile.weekly_cap,
+        bankConnected: profile.bank_connected || false,
+      },
+
+      stats: {
+        totalGiven: 0, // Will come from transactions table later
+        monthlyGoal: profile.weekly_cap ? profile.weekly_cap * 4 : 0,
+        impactScore: 0,
+      },
+    };
+  } catch (error) {
+    console.error("Error in getUser:", error);
+    return null;
+  }
 }
 
 // Alias so older/newer imports won't break
 export const getCurrentUser = getUser;
 
-export function isAuthenticated() {
-  return !!getUser();
+export async function isAuthenticated() {
+  const { data: { session } } = await supabase.auth.getSession();
+  return !!session;
 }
 
 /*
   SIGN UP
-  Returns a user object (NOT { user: ... })
+  Now handled by Supabase auth in Signup.jsx
+  This function is kept for compatibility but shouldn't be called directly
 */
 export function signUp(userData) {
-  const user = {
-    id: "SC-" + Math.random().toString(36).substring(2, 10).toUpperCase(),
-    email: userData.email,
-    firstName: userData.firstName || "",
-    lastName: userData.lastName || "",
-    phone: userData.phone || "",
-    createdAt: Date.now(),
-
-    onboarding: {
-      church: null,
-      givingCap: null,
-      bankConnected: false,
-    },
-
-    stats: {
-      totalGiven: 0,
-      monthlyGoal: 0,
-      impactScore: 0,
-    },
-  };
-
-  localStorage.setItem(USER_KEY, JSON.stringify(user));
-
-  // initialize onboarding flow
-  localStorage.setItem(
-    FLOW_KEY,
-    JSON.stringify({
-      step: "church",
-    })
-  );
-
-  return user;
+  console.warn("signUp() is deprecated. Use supabase.auth.signUp() directly in components.");
+  return null;
 }
 
 /*
   SIGN IN
-  Keeps existing stored user intact
+  Now handled by Supabase auth
 */
 export function signIn(email, password) {
-  const existing = getUser();
-
-  // NOTE: this is still "local" auth for now (not Supabase auth yet)
-  if (!existing || existing.email !== email) {
-    throw new Error("Invalid email or password.");
-  }
-
-  // do NOT reset onboarding on sign-in
-  if (!localStorage.getItem(FLOW_KEY)) {
-    localStorage.setItem(FLOW_KEY, JSON.stringify({ step: "church" }));
-  }
-
-  return existing;
+  console.warn("signIn() is deprecated. Use supabase.auth.signInWithPassword() directly.");
+  return null;
 }
 
-export function signOut() {
-  localStorage.removeItem(USER_KEY);
+export async function signOut() {
+  // Clear localStorage onboarding cache
   localStorage.removeItem(FLOW_KEY);
+  
+  // Sign out from Supabase
+  const { error } = await supabase.auth.signOut();
+  if (error) {
+    console.error("Error signing out:", error);
+  }
 }
 
-export function deleteAccount() {
-  localStorage.removeItem(USER_KEY);
-  localStorage.removeItem(FLOW_KEY);
+export async function deleteAccount() {
+  // This should trigger a Supabase RLS policy or edge function
+  // For now, just sign out
+  await signOut();
 }
 
 /* ================= USER UPDATES ================= */
 
-export function updateUser(updates) {
-  const user = getUser();
-  if (!user) return null;
+export async function updateUser(updates) {
+  try {
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    if (!authUser) return null;
 
-  const updated = { ...user, ...updates };
-  localStorage.setItem(USER_KEY, JSON.stringify(updated));
-  return updated;
+    const { data, error } = await supabase
+      .from("users")
+      .update({
+        first_name: updates.firstName,
+        phone: updates.phone,
+        // Add other fields as needed
+      })
+      .eq("id", authUser.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return await getUser(); // Return fresh user object
+  } catch (error) {
+    console.error("Error updating user:", error);
+    return null;
+  }
 }
 
-export function updateOnboardingData(data) {
-  const user = getUser();
-  if (!user) return null;
+export async function updateOnboardingData(data) {
+  try {
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    if (!authUser) return null;
 
-  const updated = {
-    ...user,
-    onboarding: {
-      ...user.onboarding,
-      ...data,
-    },
-  };
+    const updatePayload = {};
+    
+    if (data.church) {
+      updatePayload.church_id = data.church.id;
+      updatePayload.church_name = data.church.name;
+    }
+    
+    if (data.givingCap !== undefined) {
+      updatePayload.weekly_cap = data.givingCap;
+    }
+    
+    if (data.bankConnected !== undefined) {
+      updatePayload.bank_connected = data.bankConnected;
+    }
 
-  localStorage.setItem(USER_KEY, JSON.stringify(updated));
-  return updated;
+    const { error } = await supabase
+      .from("users")
+      .update(updatePayload)
+      .eq("id", authUser.id);
+
+    if (error) throw error;
+    return await getUser();
+  } catch (error) {
+    console.error("Error updating onboarding data:", error);
+    return null;
+  }
 }
 
 /* ================= ONBOARDING FLOW ================= */
 
-export function getOnboarding() {
-  const raw = localStorage.getItem(FLOW_KEY);
-  return raw ? JSON.parse(raw) : null;
+export async function getOnboarding() {
+  try {
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    if (!authUser) return null;
+
+    const { data: profile, error } = await supabase
+      .from("users")
+      .select("onboarding_step, church_id, church_name, weekly_cap, bank_connected")
+      .eq("id", authUser.id)
+      .single();
+
+    if (error) throw error;
+
+    return {
+      step: profile.onboarding_step || "church",
+      churchId: profile.church_id,
+      church: profile.church_id ? {
+        id: profile.church_id,
+        name: profile.church_name
+      } : null,
+      weeklyCap: profile.weekly_cap,
+      bankConnected: profile.bank_connected || false,
+    };
+  } catch (error) {
+    console.error("Error getting onboarding:", error);
+    return { step: "church" }; // Default fallback
+  }
 }
 
-export function setOnboarding(data) {
-  localStorage.setItem(FLOW_KEY, JSON.stringify(data));
+export async function setOnboarding(data) {
+  try {
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    if (!authUser) return;
+
+    const updatePayload = {};
+    
+    if (data.step !== undefined) {
+      updatePayload.onboarding_step = data.step;
+    }
+    
+    if (data.churchId !== undefined) {
+      updatePayload.church_id = data.churchId;
+    }
+    
+    if (data.church !== undefined) {
+      updatePayload.church_id = data.church.id;
+      updatePayload.church_name = data.church.name;
+    }
+    
+    if (data.weeklyCap !== undefined) {
+      updatePayload.weekly_cap = data.weeklyCap;
+    }
+    
+    if (data.bankConnected !== undefined) {
+      updatePayload.bank_connected = data.bankConnected;
+    }
+
+    const { error } = await supabase
+      .from("users")
+      .update(updatePayload)
+      .eq("id", authUser.id);
+
+    if (error) throw error;
+  } catch (error) {
+    console.error("Error setting onboarding:", error);
+  }
 }
 
-export function advanceOnboarding(nextStep) {
-  setOnboarding({ step: nextStep });
+export async function advanceOnboarding(nextStep) {
+  await setOnboarding({ step: nextStep });
 }
 
-export function isOnboardingComplete() {
-  const flow = getOnboarding();
-  return flow?.step === "complete";
+export async function isOnboardingComplete() {
+  const flow = await getOnboarding();
+  return flow?.step === "done" || flow?.step === "complete";
 }
 
-export function getNextOnboardingPath() {
-  const flow = getOnboarding();
+export async function getNextOnboardingPath() {
+  const flow = await getOnboarding();
   if (!flow) return "/signup";
 
   switch (flow.step) {
@@ -144,6 +249,7 @@ export function getNextOnboardingPath() {
       return "/giving-cap";
     case "bank":
       return "/bank";
+    case "done":
     case "complete":
       return "/dashboard";
     default:
