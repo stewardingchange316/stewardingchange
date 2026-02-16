@@ -1,36 +1,43 @@
 import { useEffect, useState } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
-import { getOnboarding } from "../../utils/auth";
 
 export default function RequireAuth() {
   const location = useLocation();
   const [user, setUser] = useState(undefined);
+  const [profile, setProfile] = useState(undefined);
 
   useEffect(() => {
     let mounted = true;
 
-    const loadSession = async () => {
-      const { data } = await supabase.auth.getSession();
+    async function load() {
+      const { data: { user } } = await supabase.auth.getUser();
+
       if (!mounted) return;
-      setUser(data.session?.user ?? null);
-    };
+      setUser(user ?? null);
 
-    loadSession();
+      if (user) {
+        const { data } = await supabase
+          .from("users")
+          .select("onboarding_step")
+          .eq("id", user.id)
+          .single();
 
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUser(session?.user ?? null);
+        if (!mounted) return;
+        setProfile(data ?? null);
+      } else {
+        setProfile(null);
       }
-    );
+    }
+
+    load();
 
     return () => {
       mounted = false;
-      listener.subscription.unsubscribe();
     };
   }, []);
 
-  if (user === undefined) {
+  if (user === undefined || profile === undefined) {
     return (
       <div style={{ padding: 40, textAlign: "center" }}>
         Loading...
@@ -38,29 +45,22 @@ export default function RequireAuth() {
     );
   }
 
-  const onboarding = getOnboarding();
-
   if (!user) {
     return <Navigate to="/" replace />;
   }
 
-if (!onboarding || !onboarding.step) {
-  // If we're already on the first onboarding step, allow it to render
-  if (location.pathname === "/church-select") {
-    return <Outlet />;
+  const stepRouteMap = {
+    church: "/church-select",
+    cap: "/giving-cap",
+    bank: "/bank",
+  };
+
+  if (!profile?.onboarding_step) {
+    return <Navigate to="/church-select" replace />;
   }
-  return <Navigate to="/church-select" replace />;
-}
 
-
-  if (onboarding.step !== "done") {
-    const stepRouteMap = {
-      church: "/church-select",
-      cap: "/giving-cap",
-      bank: "/bank",
-    };
-
-    const target = stepRouteMap[onboarding.step];
+  if (profile.onboarding_step !== "done") {
+    const target = stepRouteMap[profile.onboarding_step];
 
     if (target && location.pathname !== target) {
       return <Navigate to={target} replace />;
