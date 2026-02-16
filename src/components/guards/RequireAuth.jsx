@@ -17,14 +17,20 @@ export default function RequireAuth() {
       setUser(user ?? null);
 
       if (user) {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from("users")
           .select("onboarding_step")
           .eq("id", user.id)
           .single();
 
         if (!mounted) return;
-        setProfile(data ?? null);
+
+        if (error) {
+          console.error("Profile load error:", error);
+          setProfile(null);
+        } else {
+          setProfile(data);
+        }
       } else {
         setProfile(null);
       }
@@ -38,11 +44,7 @@ export default function RequireAuth() {
   }, []);
 
   if (user === undefined || profile === undefined) {
-    return (
-      <div style={{ padding: 40, textAlign: "center" }}>
-        Loading...
-      </div>
-    );
+    return <div style={{ padding: 40, textAlign: "center" }}>Loading...</div>;
   }
 
   if (!user) {
@@ -55,12 +57,14 @@ export default function RequireAuth() {
     bank: "/bank",
   };
 
-  if (!profile?.onboarding_step) {
+  const currentStep = profile?.onboarding_step;
+
+  if (!currentStep) {
     return <Navigate to="/church-select" replace />;
   }
 
-  if (profile.onboarding_step !== "done") {
-    const target = stepRouteMap[profile.onboarding_step];
+  if (currentStep !== "done") {
+    const target = stepRouteMap[currentStep];
 
     if (target && location.pathname !== target) {
       return <Navigate to={target} replace />;
