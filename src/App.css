@@ -47,11 +47,7 @@ button{ font:inherit; }
   background:transparent; border:0; color:var(--text);
   cursor:pointer;
 }
-.logoDot{
-  width:40px; height:40px; border-radius:14px;
-  background: radial-gradient(circle at 30% 30%, rgba(121,226,154,.95), rgba(121,226,154,.55));
-  box-shadow: 0 12px 30px rgba(121,226,154,.20);
-}
+
 .brandText{ display:flex; flex-direction:column; line-height:1.15; text-align:left; }
 .brandName{ font-weight:800; font-size:18px; letter-spacing:.2px; }
 .brandTag{ font-size:14px; color:var(--muted); margin-top:3px; }

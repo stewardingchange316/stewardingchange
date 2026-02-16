@@ -424,13 +424,7 @@ button, input, textarea, select {
   gap: 12px;
 }
 
-.brand-mark {
-  width: 36px;
-  height: 36px;
-  border-radius: 14px;
-  background: radial-gradient(circle at 30% 30%, rgba(47,128,255,0.85), rgba(17,240,180,0.85));
-  box-shadow: 0 0 0 1px rgba(255,255,255,0.12), 0 18px 60px rgba(17,240,180,0.16);
-}
+
 
 .brand-name {
   font-weight: 800;

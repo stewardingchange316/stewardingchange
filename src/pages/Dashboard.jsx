@@ -7,42 +7,17 @@ import { useNavigate } from "react-router-dom";
 export default function Dashboard() {
   const nav = useNavigate();
   const [user, setUser] = useState(null);
-  const [churchUserCount, setChurchUserCount] = useState(0);
 
   useEffect(() => {
     const loadUser = async () => {
       const { data } = await supabase.auth.getUser();
-
-      if (!data?.user) return; // 🔥 RequireAuth handles redirect
-
+      if (!data?.user) return;
       setUser(data.user);
-
-      const raw = localStorage.getItem("sc_onboarding");
-      if (!raw) return;
-
-      let onboarding = null;
-      try {
-        onboarding = JSON.parse(raw);
-      } catch {
-        return;
-      }
-
-      if (!onboarding?.church?.id) return;
-
-      const { count } = await supabase
-        .from("users")
-        .select("*", { count: "exact", head: true })
-        .eq("church_id", onboarding.church.id);
-
-      if (count !== null) {
-        setChurchUserCount(count);
-      }
     };
-
     loadUser();
   }, []);
 
-  // ✅ Onboarding data (unchanged)
+  // Onboarding data
   let onboarding = null;
   const raw = localStorage.getItem("sc_onboarding");
 
@@ -63,108 +38,131 @@ export default function Dashboard() {
       ? `$${onboarding.weeklyCap} per week`
       : "Not set";
 
-  const bankStatus =
-    onboarding?.bankConnected === true
-      ? "Connected"
-      : onboarding?.bankConnected === false
-      ? "Not connected"
-      : "Pending";
+  const bankConnected = onboarding?.bankConnected === true;
 
-  // Mock Impact Numbers
-  const familiesHelped = 148;
-  const monthlyGoal = 10000;
-  const currentImpact = 6420;
-
-  const impactPercent = Math.min(
-    Math.round((currentImpact / monthlyGoal) * 100),
-    100
-  );
+  const firstName =
+    user?.email?.split("@")[0]?.replace(/[0-9]/g, "") || "Friend";
 
   return (
-    <div className="dashboard">
-      <div className="dashboard-header">
-        <div className="welcome-pill">
-          <h1>
-            Welcome: Stewarding {user?.email}
-          </h1>
-        </div>
+    <div className="page">
+      <div className="container-narrow stack-8">
 
-        <button
-          onClick={async () => {
-            await supabase.auth.signOut();
-            nav("/");
-          }}
-        >
-          Sign out
-        </button>
-      </div>
+        {/* Welcome */}
+        <div className="row-between">
+          <div className="stack-2">
+            <h2>Welcome back, {firstName} 👋</h2>
+            <div className="muted">
+              You’re stewarding with {churchName}.
+            </div>
+          </div>
 
-      <section className="card">
-        <h3>Church</h3>
-        <p>{churchName}</p>
-      </section>
-
-      <section className="card">
-        <h3>Giving Cap</h3>
-        <p>{givingCap}</p>
-      </section>
-
-      <section className="card">
-        <h3>Bank Connected</h3>
-        <p>{bankStatus}</p>
-      </section>
-
-      <section className="card">
-        <h3>Community Participation</h3>
-        <p>
-          {churchUserCount} members from your church are stewarding with clarity.
-        </p>
-      </section>
-
-      <section className="card">
-        <h3>Helping Hands – Clearwater, FL</h3>
-        <p>
-          {familiesHelped} families supported this year.
-        </p>
-        <a
-          href="https://countrysidecares.com"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn more about Helping Hands
-        </a>
-      </section>
-
-      <section className="card">
-        <h3>Impact Progress</h3>
-        <p>
-          ${currentImpact.toLocaleString()} raised toward $
-          {monthlyGoal.toLocaleString()} monthly goal.
-        </p>
-
-        <div
-          style={{
-            height: "12px",
-            background: "#1e1e1e",
-            borderRadius: "6px",
-            overflow: "hidden",
-            marginTop: "8px",
-          }}
-        >
-          <div
-            style={{
-              width: `${impactPercent}%`,
-              background: "#4ade80",
-              height: "100%",
-              transition: "width 0.3s ease",
+          <button
+            className="btn btn-ghost btn-sm"
+            onClick={async () => {
+              await supabase.auth.signOut();
+              nav("/");
             }}
-          />
+          >
+            Sign out
+          </button>
         </div>
 
-        <p style={{ marginTop: "6px", fontSize: "0.9rem", opacity: 0.7 }}>
-          {impactPercent}% of monthly impact goal achieved
-        </p>
-      </section>
+        {/* Profile Card */}
+        <div className="glass card stack-6">
+          <h3>Your Stewarding Profile</h3>
+
+          <div className="row-between">
+            <div>
+              <div className="muted small">Church</div>
+              <div>{churchName}</div>
+            </div>
+          </div>
+
+          <div className="row-between">
+            <div>
+              <div className="muted small">Weekly Cap</div>
+              <div>{givingCap}</div>
+            </div>
+
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={() => nav("/giving-cap")}
+            >
+              Edit
+            </button>
+          </div>
+
+          <div className="row-between">
+            <div>
+              <div className="muted small">Bank Status</div>
+              <div>
+                {bankConnected ? "Connected securely" : "Not connected"}
+              </div>
+            </div>
+
+            {!bankConnected && (
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={() => nav("/bank")}
+              >
+                Connect Now
+              </button>
+            )}
+          </div>
+
+          <div className="small muted">
+            Every cent given is a tax-deductible donation.
+            Weekly statements and an annual giving summary
+            are automatically provided.
+          </div>
+        </div>
+
+        {/* Mission Card */}
+        <div className="glass card stack-6">
+          <div className="stack-2">
+            <h3>Current Church Goal</h3>
+            <h2>Food Truck Outreach Initiative</h2>
+          </div>
+
+          <div className="muted">
+            Our church is working toward launching a food truck
+            that will serve warm meals across Clearwater to families in need.
+            Once funded, outreach days will be shared so you can see
+            the impact firsthand.
+          </div>
+
+          {/* Vague Progress */}
+          <div className="stack-2">
+            <div className="muted small">
+              We’re making meaningful progress toward this mission.
+            </div>
+
+            <div
+              style={{
+                height: "10px",
+                borderRadius: "999px",
+                background: "rgba(255,255,255,0.08)",
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  width: "64%",
+                  height: "100%",
+                  background:
+                    "linear-gradient(90deg, rgba(17,240,180,1), rgba(47,128,255,1))",
+                  borderRadius: "999px",
+                }}
+              />
+            </div>
+
+            <div className="muted small">
+              Every swipe helps move this goal forward.
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 }

@@ -5,8 +5,7 @@ import { getOnboarding } from "../../utils/auth";
 
 export default function RequireAuth() {
   const location = useLocation();
-
-  const [user, setUser] = useState(undefined); // undefined = still loading
+  const [user, setUser] = useState(undefined);
 
   useEffect(() => {
     let mounted = true;
@@ -31,28 +30,21 @@ export default function RequireAuth() {
     };
   }, []);
 
-  // 🔒 Still loading session
   if (user === undefined) return null;
 
   const onboarding = getOnboarding();
 
-  // 1️⃣ Not signed in
+  // 🔁 NOT SIGNED IN → go to HOME (not /signin)
   if (!user) {
-    return (
-      <Navigate
-        to="/signin"
-        replace
-        state={{ from: location }}
-      />
-    );
+    return <Navigate to="/" replace />;
   }
 
-  // 2️⃣ Signed in but onboarding missing
+  // onboarding missing
   if (!onboarding || !onboarding.step) {
     return <Navigate to="/church-select" replace />;
   }
 
-  // 3️⃣ Enforce onboarding order
+  // enforce onboarding order
   if (onboarding.step !== "done") {
     const stepRouteMap = {
       church: "/church-select",
@@ -67,6 +59,5 @@ export default function RequireAuth() {
     }
   }
 
-  // ✅ All good
   return <Outlet />;
 }
