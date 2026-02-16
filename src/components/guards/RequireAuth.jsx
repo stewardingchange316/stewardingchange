@@ -44,9 +44,14 @@ export default function RequireAuth() {
     return <Navigate to="/" replace />;
   }
 
-  if (!onboarding || !onboarding.step) {
-    return <Navigate to="/church-select" replace />;
+if (!onboarding || !onboarding.step) {
+  // If we're already on the first onboarding step, allow it to render
+  if (location.pathname === "/church-select") {
+    return <Outlet />;
   }
+  return <Navigate to="/church-select" replace />;
+}
+
 
   if (onboarding.step !== "done") {
     const stepRouteMap = {
