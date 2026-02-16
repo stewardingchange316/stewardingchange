@@ -1,30 +1,106 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "../lib/supabase";
 
 const PRESETS = [10, 25, 50];
 
 export default function GivingCap() {
   const navigate = useNavigate();
   const [weeklyCap, setWeeklyCap] = useState(25);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  // Load existing weekly cap from Supabase
+  useEffect(() => {
+    async function loadUserData() {
+      try {
+        const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
+        
+        if (authError || !authUser) {
+          navigate("/", { replace: true });
+          return;
+        }
+
+        const { data: profile, error: profileError } = await supabase
+          .from("users")
+          .select("weekly_cap")
+          .eq("id", authUser.id)
+          .single();
+
+        if (profileError) {
+          console.error("Error loading profile:", profileError);
+        } else if (profile?.weekly_cap) {
+          setWeeklyCap(profile.weekly_cap);
+        }
+      } catch (err) {
+        console.error("Error in loadUserData:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadUserData();
+  }, [navigate]);
 
   function setNoLimit() {
     setWeeklyCap(null);
   }
 
-  function handleContinue() {
-    const raw = localStorage.getItem("sc_onboarding");
-    if (!raw) return;
+  async function handleContinue() {
+    setError("");
+    setSaving(true);
 
-    const data = JSON.parse(raw);
+    try {
+      const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !authUser) {
+        throw new Error("Not authenticated");
+      }
 
-    const updated = {
-      ...data,
-      weeklyCap,
-      step: "bank",
-    };
+      console.log("Saving weekly cap:", weeklyCap); // DEBUG
 
-    localStorage.setItem("sc_onboarding", JSON.stringify(updated));
-    navigate("/bank");
+      // Save to Supabase
+      const { data: updateData, error: updateError } = await supabase
+        .from("users")
+        .update({
+          weekly_cap: weeklyCap,
+          onboarding_step: "bank",
+        })
+        .eq("id", authUser.id)
+        .select();
+
+      console.log("Update response:", { data: updateData, error: updateError }); // DEBUG
+
+      if (updateError) {
+        console.error("Update error:", updateError);
+        throw updateError;
+      }
+
+      if (!updateData || updateData.length === 0) {
+        throw new Error("Update affected 0 rows");
+      }
+
+      console.log("Update successful, navigating..."); // DEBUG
+
+      // Navigate to next step
+      navigate("/bank");
+      
+    } catch (err) {
+      console.error("Error saving weekly cap:", err);
+      setError("Unable to save your selection. Please try again.");
+      setSaving(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="page">
+        <div className="container-narrow center" style={{ minHeight: "60vh" }}>
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -48,6 +124,12 @@ export default function GivingCap() {
             support your church each week. You remain in control at all times.
           </p>
         </div>
+
+        {error && (
+          <div className="alert alert-danger">
+            {error}
+          </div>
+        )}
 
         {/* Cap Card */}
         <div className="glass card stack-6">
@@ -121,8 +203,9 @@ export default function GivingCap() {
           <button
             className="btn btn-primary btn-lg"
             onClick={handleContinue}
+            disabled={saving}
           >
-            Continue
+            {saving ? "Saving..." : "Continue"}
           </button>
         </div>
 
