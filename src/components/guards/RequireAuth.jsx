@@ -21,7 +21,7 @@ export default function RequireAuth() {
           .from("users")
           .select("onboarding_step")
           .eq("id", user.id)
-          .single();
+          .maybesingle();
 
         if (!mounted) return;
 
