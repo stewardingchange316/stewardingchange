@@ -1,10 +1,9 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getOnboarding, setOnboarding } from "../utils/auth";
+import { supabase } from "../lib/supabase";
 
 export default function ChurchSelect() {
   const navigate = useNavigate();
-  const onboarding = getOnboarding() || {};
 
   const churches = useMemo(
     () => [
@@ -26,24 +25,91 @@ export default function ChurchSelect() {
     []
   );
 
-  const [selected, setSelected] = useState(
-    onboarding.churchId || onboarding.church?.id || ""
-  );
+  const [selected, setSelected] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
-  function continueNext() {
+  // Load existing selection from Supabase
+  useEffect(() => {
+    async function loadUserData() {
+      try {
+        const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
+        
+        if (authError || !authUser) {
+          navigate("/", { replace: true });
+          return;
+        }
+
+        const { data: profile, error: profileError } = await supabase
+          .from("users")
+          .select("church_id")
+          .eq("id", authUser.id)
+          .single();
+
+        if (profileError) {
+          console.error("Error loading profile:", profileError);
+        } else if (profile?.church_id) {
+          setSelected(profile.church_id);
+        }
+      } catch (err) {
+        console.error("Error in loadUserData:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadUserData();
+  }, [navigate]);
+
+  async function continueNext() {
     if (!selected) return;
 
-    const selectedChurch = churches.find((c) => c.id === selected) || null;
+    setError("");
+    setSaving(true);
 
-    const updated = {
-      ...onboarding,
-      step: "cap",
-      churchId: selected,
-      church: selectedChurch, // ✅ store full object for the dashboard
-    };
+    try {
+      const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !authUser) {
+        throw new Error("Not authenticated");
+      }
 
-    setOnboarding(updated);
-    navigate("/giving-cap");
+      const selectedChurch = churches.find((c) => c.id === selected);
+      if (!selectedChurch) {
+        throw new Error("Church not found");
+      }
+
+      // Save to Supabase
+      const { error: updateError } = await supabase
+        .from("users")
+        .update({
+          church_id: selected,
+          church_name: selectedChurch.name,
+          onboarding_step: "cap",
+        })
+        .eq("id", authUser.id);
+
+      if (updateError) throw updateError;
+
+      // Navigate to next step
+      navigate("/giving-cap");
+      
+    } catch (err) {
+      console.error("Error saving church selection:", err);
+      setError("Unable to save your selection. Please try again.");
+      setSaving(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="onboarding-page">
+        <div className="center" style={{ minHeight: "60vh" }}>
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -55,6 +121,12 @@ export default function ChurchSelect() {
       <p className="onboarding-subtext">
         This sets your dashboard context. You can add more churches later.
       </p>
+
+      {error && (
+        <div className="alert alert-danger mb-4">
+          {error}
+        </div>
+      )}
 
       <div className="church-list">
         {churches.map((church) => {
@@ -99,10 +171,10 @@ export default function ChurchSelect() {
 
           <button
             className="primary"
-            disabled={!selected}
+            disabled={!selected || saving}
             onClick={continueNext}
           >
-            Continue
+            {saving ? "Saving..." : "Continue"}
           </button>
         </div>
       </div>
