@@ -105,7 +105,7 @@ export default function Home() {
               <div className="hero-metric">
                 <div className="metric">
                   <div className="name">Average setup time</div>
-                  <div className="value">≈ 60 seconds</div>
+                  <div className="value">≈ under 1 minute</div>
                 </div>
 
                 <div className="metric">
