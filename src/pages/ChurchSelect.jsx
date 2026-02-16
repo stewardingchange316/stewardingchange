@@ -71,6 +71,8 @@ export default function ChurchSelect() {
     try {
       const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
       
+      console.log("Auth user:", authUser); // DEBUG
+      
       if (authError || !authUser) {
         throw new Error("Not authenticated");
       }
@@ -80,23 +82,39 @@ export default function ChurchSelect() {
         throw new Error("Church not found");
       }
 
+      console.log("Attempting update for user:", authUser.id); // DEBUG
+      console.log("Selected church:", selectedChurch); // DEBUG
+
       // Save to Supabase
-      const { error: updateError } = await supabase
+      const { data: updateData, error: updateError } = await supabase
         .from("users")
         .update({
           church_id: selected,
           church_name: selectedChurch.name,
           onboarding_step: "cap",
         })
-        .eq("id", authUser.id);
+        .eq("id", authUser.id)
+        .select(); // ADD .select() to return updated row
 
-      if (updateError) throw updateError;
+      console.log("Update response:", { data: updateData, error: updateError }); // DEBUG
+
+      if (updateError) {
+        console.error("Update error details:", updateError); // DEBUG
+        throw updateError;
+      }
+
+      if (!updateData || updateData.length === 0) {
+        console.error("No rows updated!"); // DEBUG
+        throw new Error("Update affected 0 rows");
+      }
+
+      console.log("Update successful, navigating..."); // DEBUG
 
       // Navigate to next step
       navigate("/giving-cap");
       
     } catch (err) {
-      console.error("Error saving church selection:", err);
+      console.error("Error in continueNext:", err); // DEBUG
       setError("Unable to save your selection. Please try again.");
       setSaving(false);
     }
