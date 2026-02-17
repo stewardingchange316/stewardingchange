@@ -1,6 +1,4 @@
-import { useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { supabase } from "./lib/supabase";
 
 import Home from "./pages/Home";
 import Signin from "./pages/Signin";
@@ -13,19 +11,6 @@ import Bank from "./pages/Bank";
 import RequireAuth from "./components/guards/RequireAuth";
 
 export default function App() {
-
-  // 🔥 THIS FIXES EMAIL CONFIRM PKCE FLOW
-  useEffect(() => {
-    const handleCodeExchange = async () => {
-      const { error } = await supabase.auth.exchangeCodeForSession();
-      if (error) {
-        console.error("Code exchange failed:", error.message);
-      }
-    };
-
-    handleCodeExchange();
-  }, []);
-
   return (
     <Routes>
       {/* Public */}
