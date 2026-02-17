@@ -7,10 +7,10 @@ export default function Home() {
   const [showLogin, setShowLogin] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // 👈 ADDED
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 🔥 CLEAN STRAY SUPABASE AUTH PARAMS (FIXES PKCE ERROR)
   useEffect(() => {
     const url = new URL(window.location.href);
 
@@ -25,7 +25,6 @@ export default function Home() {
     }
   }, []);
 
-  // Auto-redirect if already signed in
   useEffect(() => {
     const checkUser = async () => {
       const { data } = await supabase.auth.getSession();
@@ -57,7 +56,6 @@ export default function Home() {
 
   return (
     <div className="bg-wrap">
-      {/* HEADER */}
       <header className="header">
         <div className="header-inner">
           <div className="brand">
@@ -72,7 +70,6 @@ export default function Home() {
         </div>
       </header>
 
-      {/* HERO */}
       <main className="container hero">
         <div className="hero-grid">
           <div>
@@ -107,7 +104,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* RIGHT PANEL */}
           <div className="hero-panel">
             <div className="stack-6">
               <div className="hero-metric">
@@ -135,7 +131,6 @@ export default function Home() {
         </div>
       </main>
 
-      {/* PREMIUM LOGIN MODAL */}
       {showLogin && (
         <div
           className="modal-overlay"
@@ -174,15 +169,69 @@ export default function Home() {
 
               <div className="form-group">
                 <label htmlFor="password">Password</label>
-                <input
-                  id="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  autoComplete="current-password"
-                />
+
+                {/* 👁 PASSWORD WITH TOGGLE */}
+                <div style={{ position: "relative" }}>
+                  <input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    autoComplete="current-password"
+                    style={{ paddingRight: "42px" }}
+                  />
+
+              <button
+  type="button"
+  onClick={() => setShowPassword(!showPassword)}
+  style={{
+    position: "absolute",
+    right: "12px",
+    top: "50%",
+    transform: "translateY(-50%)",
+    background: "none",
+    border: "none",
+    cursor: "pointer",
+    padding: 0,
+    display: "flex",
+    alignItems: "center",
+    opacity: 0.8
+  }}
+  aria-label="Toggle password visibility"
+>
+  {showPassword ? (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C7 20 2.73 16.11 1 12c.6-1.42 1.47-2.73 2.57-3.86M9.9 4.24A10.94 10.94 0 0 1 12 4c5 0 9.27 3.89 11 8a10.96 10.96 0 0 1-4.08 5.08M1 1l22 22" />
+    </svg>
+  ) : (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  )}
+</button>
+
+                </div>
               </div>
 
               {error && (
@@ -217,7 +266,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* FOOTER */}
       <footer className="footer">
         <div className="footer-inner">
           <div>© {new Date().getFullYear()} Stewarding Change</div>
