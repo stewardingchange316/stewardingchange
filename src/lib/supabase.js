@@ -10,7 +10,8 @@ export const supabase = createClient(
     auth: {
       persistSession: true,
       autoRefreshToken: true,
-      detectSessionInUrl: false, // MUST be false
-    },
+      detectSessionInUrl: false,
+      flowType: "implicit"   // 👈 FORCE implicit flow
+    }
   }
 );
