@@ -30,9 +30,9 @@ export default function ChurchSelect() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  // 🔹 Load existing selection
+  // 🔥 Load user + guarantee profile exists
   useEffect(() => {
-    async function loadUserData() {
+    async function init() {
       const { data: { user } } = await supabase.auth.getUser();
 
       if (!user) {
@@ -40,20 +40,34 @@ export default function ChurchSelect() {
         return;
       }
 
-      const { data } = await supabase
+      // Try load profile
+      const { data: existing } = await supabase
         .from("users")
         .select("church_id")
         .eq("id", user.id)
         .maybeSingle();
 
-      if (data?.church_id) {
-        setSelected(data.church_id);
+      // If no row exists, create one
+      if (!existing) {
+        await supabase.from("users").upsert(
+          {
+            id: user.id,
+            email: user.email,
+            onboarding_step: "church",
+            church_id: null,
+            weekly_cap: null,
+            bank_connected: false,
+          },
+          { onConflict: "id" }
+        );
+      } else if (existing?.church_id) {
+        setSelected(existing.church_id);
       }
 
       setLoading(false);
     }
 
-    loadUserData();
+    init();
   }, [navigate]);
 
   async function continueNext() {
@@ -65,29 +79,28 @@ export default function ChurchSelect() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
 
-      if (!user) {
-        throw new Error("Not authenticated");
-      }
+      if (!user) throw new Error("Not authenticated");
 
-      const { data: updateData, error: updateError } = await supabase
+      console.log("Updating church for:", user.id);
+
+      const { data, error } = await supabase
         .from("users")
         .update({
           church_id: selected,
           onboarding_step: "cap",
         })
         .eq("id", user.id)
-        .select();
+        .select()
+        .single();
 
-      if (updateError) throw updateError;
+      if (error) throw error;
 
-      if (!updateData || updateData.length === 0) {
-        throw new Error("Update affected 0 rows");
-      }
+      console.log("Update successful:", data);
 
       navigate("/giving-cap");
 
     } catch (err) {
-      console.error("Error saving church:", err);
+      console.error("Church save error:", err);
       setError("Unable to save your selection. Please try again.");
       setSaving(false);
     }
