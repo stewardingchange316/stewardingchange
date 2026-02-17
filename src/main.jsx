@@ -9,11 +9,17 @@ import "./styles/base.css";
 import "./App.css";
 
 async function bootstrap() {
-  // If we returned from email confirmation
+  // If returning from email confirmation (PKCE flow)
   if (window.location.search.includes("code=")) {
     try {
       await supabase.auth.exchangeCodeForSession(window.location.href);
+
+      // Clean URL
       window.history.replaceState({}, document.title, window.location.pathname);
+
+      // 🔥 AFTER CONFIRMATION → SEND TO FIRST ONBOARDING STEP
+      window.location.replace("/church-select");
+      return; // stop rendering until redirect happens
     } catch (err) {
       console.error("Code exchange failed:", err);
     }
@@ -27,5 +33,6 @@ async function bootstrap() {
     </React.StrictMode>
   );
 }
+
 
 bootstrap();
