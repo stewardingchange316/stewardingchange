@@ -10,6 +10,21 @@ export default function Home() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // 🔥 CLEAN STRAY SUPABASE AUTH PARAMS (FIXES PKCE ERROR)
+  useEffect(() => {
+    const url = new URL(window.location.href);
+
+    const hasAuthParams =
+      url.searchParams.has("code") ||
+      url.searchParams.has("access_token") ||
+      url.hash.includes("access_token") ||
+      url.hash.includes("error");
+
+    if (hasAuthParams) {
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, []);
+
   // Auto-redirect if already signed in
   useEffect(() => {
     const checkUser = async () => {
@@ -122,11 +137,11 @@ export default function Home() {
 
       {/* PREMIUM LOGIN MODAL */}
       {showLogin && (
-        <div 
+        <div
           className="modal-overlay"
           onClick={() => setShowLogin(false)}
         >
-          <div 
+          <div
             className="modal-card glass"
             onClick={(e) => e.stopPropagation()}
           >
@@ -176,8 +191,8 @@ export default function Home() {
                 </div>
               )}
 
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="btn btn-primary btn-wide"
                 disabled={loading}
               >
