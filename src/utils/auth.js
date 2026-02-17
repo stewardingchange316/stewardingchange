@@ -163,16 +163,49 @@ export async function updateOnboardingData(data) {
 
 export async function getOnboarding() {
   try {
-    const { data: { user: authUser } } = await supabase.auth.getUser();
-    if (!authUser) return null;
+    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
+    if (authError || !authUser) return null;
 
-    const { data: profile, error } = await supabase
+    // 1) Try to load the profile row
+    let { data: profile, error } = await supabase
       .from("users")
       .select("onboarding_step, church_id, church_name, weekly_cap, bank_connected")
       .eq("id", authUser.id)
       .single();
 
-    if (error) throw error;
+    // 2) If it doesn't exist yet (common right after signup/confirm), create it then retry
+    if (error && (error.code === "PGRST116" || error.status === 406)) {
+      const insertRes = await supabase
+        .from("users")
+        .insert({
+          id: authUser.id,
+          email: authUser.email,
+        });
+
+      if (insertRes.error) {
+        console.error("Error creating missing user row:", insertRes.error);
+        return { step: "church" };
+      }
+
+      const retryRes = await supabase
+        .from("users")
+        .select("onboarding_step, church_id, church_name, weekly_cap, bank_connected")
+        .eq("id", authUser.id)
+        .single();
+
+      if (retryRes.error) {
+        console.error("Error reloading onboarding after insert:", retryRes.error);
+        return { step: "church" };
+      }
+
+      profile = retryRes.data;
+    } else if (error) {
+      // Any other error should be logged and fallback
+      console.error("Error getting onboarding:", error);
+      return { step: "church" };
+    }
+
+    if (!profile) return { step: "church" };
 
     return {
       step: profile.onboarding_step || "church",
