@@ -13,9 +13,8 @@ export default function RequireAuth() {
     let mounted = true;
 
     async function init() {
-      setLoading(true); // 🔥 ensure loading resets on route change
+      setLoading(true);
 
-      // 🔹 1. Get auth user
       const { data: { user } } = await supabase.auth.getUser();
 
       if (!mounted) return;
@@ -29,18 +28,16 @@ export default function RequireAuth() {
 
       setUser(user);
 
-      // 🔹 2. Load profile row fresh EVERY time route changes
-      const { data: existing, error: selectError } = await supabase
+      const { data: existing, error } = await supabase
         .from("users")
         .select("id, onboarding_step")
         .eq("id", user.id)
         .maybeSingle();
 
-      if (selectError) {
-        console.error("Profile load error:", selectError);
+      if (error) {
+        console.error("Profile load error:", error);
       }
 
-      // 🔥 3. If no row exists, CREATE IT
       if (!existing) {
         const { error: insertError } = await supabase
           .from("users")
@@ -79,9 +76,6 @@ export default function RequireAuth() {
     return () => {
       mounted = false;
     };
-
-    // 🔥 THIS IS THE FIX
-    // Re-run this effect whenever the route changes
   }, [location.pathname]);
 
   if (loading) {
@@ -108,11 +102,16 @@ export default function RequireAuth() {
     return <Navigate to="/church-select" replace />;
   }
 
-  if (currentStep !== "done") {
-    const target = stepRouteMap[currentStep];
-    if (target && location.pathname !== target) {
-      return <Navigate to={target} replace />;
-    }
+  // ✅ CRITICAL FIX
+  // If onboarding is complete, allow free navigation inside app
+  if (currentStep === "done") {
+    return <Outlet />;
+  }
+
+  // 🔒 Otherwise enforce onboarding flow
+  const target = stepRouteMap[currentStep];
+  if (target && location.pathname !== target) {
+    return <Navigate to={target} replace />;
   }
 
   return <Outlet />;
