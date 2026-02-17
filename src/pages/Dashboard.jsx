@@ -53,7 +53,13 @@ export default function Dashboard() {
 
   /* ================= Derived Values ================= */
 
-  const churchName = profile.church_name || "Not selected";
+  const churchMap = {
+  countryside: "Countryside Christian Church",
+  grace: "Grace Community Church",
+};
+
+const churchName = churchMap[profile.church_id] || "Not selected";
+
 
   const givingCap =
     profile.weekly_cap === null

@@ -112,18 +112,18 @@ export default function Home() {
             <div className="stack-6">
               <div className="hero-metric">
                 <div className="metric">
-                  <div className="name">Average setup time</div>
-                  <div className="value">≈ Under 1 minute</div>
+                  <div className="name">Step 1</div>
+                  <div className="value">Select your church</div>
                 </div>
 
                 <div className="metric">
-                  <div className="name">Audit clarity</div>
-                  <div className="value">100%</div>
+                  <div className="name">Step 2</div>
+                  <div className="value">Set a giving cap</div>
                 </div>
 
                 <div className="metric">
-                  <div className="name">Giving transparency</div>
-                  <div className="value">Weekly Updates</div>
+                  <div className="name">Step 3</div>
+                  <div className="value">Connect your bank or card</div>
                 </div>
               </div>
 

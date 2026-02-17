@@ -1,12 +1,15 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 
 export default function Bank() {
   const navigate = useNavigate();
+  const [isFinishing, setIsFinishing] = useState(false); // ✅ Added
 
   useEffect(() => {
     async function validateStep() {
+      if (isFinishing) return; // ✅ Prevent redirect race
+
       const { data: { user } } = await supabase.auth.getUser();
 
       if (!user) {
@@ -25,21 +28,22 @@ export default function Bank() {
         return;
       }
 
-     if (
-  data.onboarding_step !== "bank" &&
-  data.onboarding_step !== "done"
-) {
-  navigate("/dashboard", { replace: true });
-}
-
+      if (
+        data.onboarding_step !== "bank" &&
+        data.onboarding_step !== "done"
+      ) {
+        navigate("/dashboard", { replace: true });
+      }
     }
 
     validateStep();
-  }, [navigate]);
+  }, [navigate, isFinishing]); // ✅ Added dependency
 
   async function finishOnboarding(bankConnected) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
+
+    setIsFinishing(true); // ✅ lock redirects
 
     const { error } = await supabase
       .from("users")
@@ -47,21 +51,23 @@ export default function Bank() {
         onboarding_step: "done",
         bank_connected: bankConnected
       })
-      .eq("id", user.id);
+      .eq("id", user.id)
+      .select() // ✅ Force DB commit to return updated row
 
     if (!error) {
       navigate("/dashboard", { replace: true });
     } else {
       console.error("Failed to finish onboarding:", error);
+      setIsFinishing(false);
     }
   }
 
-  function handleSkipForNow() {
-    finishOnboarding(false);
+  async function handleSkipForNow() {
+    await finishOnboarding(false);
   }
 
-  function handleConnectBank() {
-    finishOnboarding(true);
+  async function handleConnectBank() {
+    await finishOnboarding(true);
   }
 
   return (

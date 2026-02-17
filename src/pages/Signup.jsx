@@ -11,33 +11,27 @@ export default function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
 
-  // ✅ FIX: Always hard-reset auth state on /signup so a "previously verified browser"
-  // can't cause the next signUp to auto-confirm a new email.
   useEffect(() => {
     const resetAuthState = async () => {
-      // Best-effort cleanup. If there isn't a session, signOut is harmless.
       try {
         await supabase.auth.signOut();
-      } catch (e) {
-        // ignore
-      }
+      } catch (e) {}
     };
-
     resetAuthState();
   }, []);
 
-  // If user lands here after confirming email
   useEffect(() => {
     const checkSessionAndEnsureProfile = async () => {
       const { data } = await supabase.auth.getSession();
       const user = data.session?.user;
 
       if (user) {
-        // 🔥 Ensure public.users row exists
         const { data: existing } = await supabase
           .from("users")
           .select("id")
@@ -161,6 +155,32 @@ export default function Signup() {
     }
   }
 
+  const EyeIcon = ({ open }) => (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ opacity: 0.6 }}
+    >
+      {open ? (
+        <>
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+          <circle cx="12" cy="12" r="3" />
+        </>
+      ) : (
+        <>
+          <path d="M17.94 17.94A10.94 10.94 0 0112 20c-7 0-11-8-11-8a21.77 21.77 0 015.06-6.94" />
+          <path d="M1 1l22 22" />
+        </>
+      )}
+    </svg>
+  );
+
   return (
     <div className="auth-page">
       <div className="auth-card">
@@ -173,84 +193,71 @@ export default function Signup() {
 
         <form onSubmit={handleSubmit}>
           <label>First Name</label>
-          <input
-            type="text"
-            placeholder="John"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-          />
+          <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
 
           <label>Last Name</label>
-          <input
-            type="text"
-            placeholder="Smith"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-          />
+          <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} />
 
           <label>Phone Number</label>
-          <input
-            type="tel"
-            placeholder="(555) 555-5555"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-          />
+          <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
 
           <label>Email</label>
-          <input
-            type="email"
-            placeholder="you@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
-          />
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
 
           <label>Password</label>
-          <input
-            type="password"
-            placeholder="At least 8 characters"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="new-password"
-          />
+          <div style={{ position: "relative" }}>
+            <input
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="new-password"
+              style={{ paddingRight: "40px" }}
+            />
+            <span
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                position: "absolute",
+                right: "12px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                cursor: "pointer"
+              }}
+            >
+              <EyeIcon open={showPassword} />
+            </span>
+          </div>
 
           <div className={`password-strength s-${passwordStrength}`}>
             Strength: <strong>{strengthLabel}</strong>
           </div>
 
           <label>Verify password</label>
-          <input
-            type="password"
-            placeholder="Re-enter password"
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
-            autoComplete="new-password"
-          />
+          <div style={{ position: "relative" }}>
+            <input
+              type={showConfirm ? "text" : "password"}
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              autoComplete="new-password"
+              style={{ paddingRight: "40px" }}
+            />
+            <span
+              onClick={() => setShowConfirm(!showConfirm)}
+              style={{
+                position: "absolute",
+                right: "12px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                cursor: "pointer"
+              }}
+            >
+              <EyeIcon open={showConfirm} />
+            </span>
+          </div>
 
-          {error && (
-            <div className="auth-error">
-              {error}
-              {error.includes("already registered") && (
-                <div style={{ marginTop: "8px" }}>
-                  <Link to="/" style={{ textDecoration: "underline" }}>
-                    Click here to sign in
-                  </Link>
-                </div>
-              )}
-            </div>
-          )}
+          {error && <div className="auth-error">{error}</div>}
+          {successMessage && <div className="alert alert-success mt-4">{successMessage}</div>}
 
-          {successMessage && (
-            <div className="alert alert-success mt-4">
-              {successMessage}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            className="primary"
-            disabled={!canSubmit || submitting}
-          >
+          <button type="submit" className="primary" disabled={!canSubmit || submitting}>
             {submitting ? "Creating account…" : "Continue"}
           </button>
         </form>
