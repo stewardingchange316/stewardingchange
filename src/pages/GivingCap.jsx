@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
+import { getNextOnboardingPath } from "../utils/auth";
 
 const PRESETS = [10, 25, 50];
 
@@ -30,7 +31,7 @@ export default function GivingCap() {
 
         if (profileError) {
           console.error("Error loading profile:", profileError);
-        } else if (profile?.weekly_cap) {
+        } else if (profile?.weekly_cap !== null && profile?.weekly_cap !== undefined) {
           setWeeklyCap(profile.weekly_cap);
         }
       } catch (err) {
@@ -58,34 +59,22 @@ export default function GivingCap() {
         throw new Error("Not authenticated");
       }
 
-      console.log("Saving weekly cap:", weeklyCap); // DEBUG
-
-      // Save to Supabase
-      const { data: updateData, error: updateError } = await supabase
+      const { error: updateError } = await supabase
         .from("users")
         .update({
           weekly_cap: weeklyCap,
           onboarding_step: "bank",
         })
-        .eq("id", authUser.id)
-        .select();
-
-      console.log("Update response:", { data: updateData, error: updateError }); // DEBUG
+        .eq("id", authUser.id);
 
       if (updateError) {
-        console.error("Update error:", updateError);
         throw updateError;
       }
 
-      if (!updateData || updateData.length === 0) {
-        throw new Error("Update affected 0 rows");
-      }
+      // 🔥 FIX: Ask auth util where to go next
+      const nextPath = await getNextOnboardingPath();
+      navigate(nextPath, { replace: true });
 
-      console.log("Update successful, navigating..."); // DEBUG
-
-      // Navigate to next step
-      navigate("/bank");
-      
     } catch (err) {
       console.error("Error saving weekly cap:", err);
       setError("Unable to save your selection. Please try again.");
@@ -107,13 +96,11 @@ export default function GivingCap() {
     <div className="page">
       <div className="container-narrow stack-8">
 
-        {/* Step Indicator */}
         <div className="kicker">
           <span className="dot" />
           Step 2 of 3
         </div>
 
-        {/* Headline */}
         <div className="stack-3">
           <h1 className="page-title">
             Set your weekly giving cap
@@ -131,10 +118,8 @@ export default function GivingCap() {
           </div>
         )}
 
-        {/* Cap Card */}
         <div className="glass card stack-6">
 
-          {/* Big Value Display */}
           <div className="text-center">
             {weeklyCap === null ? (
               <div className="h2">No limit</div>
@@ -146,7 +131,6 @@ export default function GivingCap() {
             )}
           </div>
 
-          {/* Slider */}
           <input
             type="range"
             min="5"
@@ -158,7 +142,6 @@ export default function GivingCap() {
             className="sc-giving-slider"
           />
 
-          {/* Presets */}
           <div className="row center">
             {PRESETS.map((amount) => (
               <button
@@ -183,7 +166,6 @@ export default function GivingCap() {
           </div>
         </div>
 
-        {/* Tax Deductible Trust Block */}
         <div className="glass card-tight stack-3">
           <strong>100% Tax-Deductible Donations</strong>
           <div className="small">
@@ -194,7 +176,6 @@ export default function GivingCap() {
           </div>
         </div>
 
-        {/* Continue Section */}
         <div className="row-between mt-6">
           <div className="muted small">
             Next: Securely connect your bank account

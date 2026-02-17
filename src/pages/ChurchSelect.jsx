@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
+import { getNextOnboardingPath } from "../utils/auth";
 
 export default function ChurchSelect() {
   const navigate = useNavigate();
@@ -40,14 +41,12 @@ export default function ChurchSelect() {
         return;
       }
 
-      // Try load profile
       const { data: existing } = await supabase
         .from("users")
         .select("church_id")
         .eq("id", user.id)
         .maybeSingle();
 
-      // If no row exists, create one
       if (!existing) {
         await supabase.from("users").upsert(
           {
@@ -78,26 +77,23 @@ export default function ChurchSelect() {
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
-
       if (!user) throw new Error("Not authenticated");
 
-      console.log("Updating church for:", user.id);
-
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("users")
         .update({
           church_id: selected,
           onboarding_step: "cap",
         })
-        .eq("id", user.id)
-        .select()
-        .single();
+        .eq("id", user.id);
 
       if (error) throw error;
 
-      console.log("Update successful:", data);
-
-      navigate("/giving-cap");
+      // 🔥 THIS IS THE FIX
+      // Instead of hardcoding /giving-cap,
+      // re-evaluate onboarding state and route accordingly
+      const nextPath = await getNextOnboardingPath();
+      navigate(nextPath, { replace: true });
 
     } catch (err) {
       console.error("Church save error:", err);
