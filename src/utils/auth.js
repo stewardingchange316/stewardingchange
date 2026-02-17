@@ -163,65 +163,50 @@ export async function updateOnboardingData(data) {
 
 export async function getOnboarding() {
   try {
-    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
-    if (authError || !authUser) return null;
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    if (!authUser) return null;
 
-    // 1) Try to load the profile row
     let { data: profile, error } = await supabase
       .from("users")
       .select("onboarding_step, church_id, church_name, weekly_cap, bank_connected")
       .eq("id", authUser.id)
       .single();
 
-    // 2) If it doesn't exist yet (common right after signup/confirm), create it then retry
-    if (error && (error.code === "PGRST116" || error.status === 406)) {
-      const insertRes = await supabase
+    // 🔥 If no profile exists, create one
+    if (error && error.code === "PGRST116") {
+      const { error: insertError } = await supabase
         .from("users")
         .insert({
           id: authUser.id,
           email: authUser.email,
+          onboarding_step: "church",
         });
 
-      if (insertRes.error) {
-        console.error("Error creating missing user row:", insertRes.error);
-        return { step: "church" };
-      }
+      if (insertError) throw insertError;
 
-      const retryRes = await supabase
-        .from("users")
-        .select("onboarding_step, church_id, church_name, weekly_cap, bank_connected")
-        .eq("id", authUser.id)
-        .single();
-
-      if (retryRes.error) {
-        console.error("Error reloading onboarding after insert:", retryRes.error);
-        return { step: "church" };
-      }
-
-      profile = retryRes.data;
-    } else if (error) {
-      // Any other error should be logged and fallback
-      console.error("Error getting onboarding:", error);
       return { step: "church" };
     }
 
-    if (!profile) return { step: "church" };
+    if (error) throw error;
 
     return {
       step: profile.onboarding_step || "church",
       churchId: profile.church_id,
-      church: profile.church_id ? {
-        id: profile.church_id,
-        name: profile.church_name
-      } : null,
+      church: profile.church_id
+        ? {
+            id: profile.church_id,
+            name: profile.church_name,
+          }
+        : null,
       weeklyCap: profile.weekly_cap,
       bankConnected: profile.bank_connected || false,
     };
   } catch (error) {
     console.error("Error getting onboarding:", error);
-    return { step: "church" }; // Default fallback
+    return { step: "church" };
   }
 }
+
 
 export async function setOnboarding(data) {
   try {
