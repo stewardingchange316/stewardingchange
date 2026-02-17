@@ -15,8 +15,7 @@ export default function Signup() {
   const [submitting, setSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
 
-  // ✅ If user lands here after confirming email,
-  // and session now exists, redirect to dashboard
+  // If user lands here after confirming email
   useEffect(() => {
     const checkSession = async () => {
       const { data } = await supabase.auth.getSession();
@@ -24,13 +23,11 @@ export default function Signup() {
         navigate("/dashboard", { replace: true });
       }
     };
-
     checkSession();
   }, [navigate]);
 
-  const isValidEmail = (value) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-  };
+  const isValidEmail = (value) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
   const passwordStrength = (() => {
     let score = 0;
@@ -88,7 +85,7 @@ export default function Signup() {
     try {
       setSubmitting(true);
 
-      // Attempt signup
+      // 🔥 STEP 1: Create Auth User
       const { data, error: authError } = await supabase.auth.signUp({
         email,
         password,
@@ -104,13 +101,19 @@ export default function Signup() {
 
       if (authError) throw authError;
 
-      // ✅ Check if user already exists (Supabase sends identities: [] for existing users)
-      if (data.user && data.user.identities && data.user.identities.length === 0) {
-        setError(
-          "This email is already registered. Please sign in instead or check your email for the confirmation link."
-        );
-        setSubmitting(false);
-        return;
+      // 🔥 STEP 2: Insert Into public.users Table
+      if (data.user) {
+        const { error: insertError } = await supabase
+          .from("users")
+          .insert({
+            id: data.user.id, // must match auth user ID
+            email: data.user.email,
+            first_name: firstName,
+          });
+
+        if (insertError) {
+          console.error("User insert failed:", insertError);
+        }
       }
 
       setSuccessMessage(
@@ -126,8 +129,10 @@ export default function Signup() {
       setConfirm("");
 
     } catch (err) {
-      // Handle specific Supabase auth errors
-      if (err.message.includes("already registered") || err.message.includes("already exists")) {
+      if (
+        err.message.includes("already registered") ||
+        err.message.includes("already exists")
+      ) {
         setError("This email is already registered. Please sign in instead.");
       } else {
         setError(err.message || "Unable to create account.");
@@ -208,7 +213,7 @@ export default function Signup() {
               {error}
               {error.includes("already registered") && (
                 <div style={{ marginTop: "8px" }}>
-                  <Link to="/" style={{ color: "inherit", textDecoration: "underline" }}>
+                  <Link to="/" style={{ textDecoration: "underline" }}>
                     Click here to sign in
                   </Link>
                 </div>
