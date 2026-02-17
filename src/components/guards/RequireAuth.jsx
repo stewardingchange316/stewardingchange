@@ -13,6 +13,8 @@ export default function RequireAuth() {
     let mounted = true;
 
     async function init() {
+      setLoading(true); // 🔥 ensure loading resets on route change
+
       // 🔹 1. Get auth user
       const { data: { user } } = await supabase.auth.getUser();
 
@@ -27,7 +29,7 @@ export default function RequireAuth() {
 
       setUser(user);
 
-      // 🔹 2. Try to load profile row
+      // 🔹 2. Load profile row fresh EVERY time route changes
       const { data: existing, error: selectError } = await supabase
         .from("users")
         .select("id, onboarding_step")
@@ -77,7 +79,10 @@ export default function RequireAuth() {
     return () => {
       mounted = false;
     };
-  }, []);
+
+    // 🔥 THIS IS THE FIX
+    // Re-run this effect whenever the route changes
+  }, [location.pathname]);
 
   if (loading) {
     return (
