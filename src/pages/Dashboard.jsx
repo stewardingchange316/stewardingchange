@@ -6,42 +6,70 @@ import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
   const nav = useNavigate();
-  const [user, setUser] = useState(null);
+
+  const [loading, setLoading] = useState(true);
+  const [authUser, setAuthUser] = useState(null);
+  const [profile, setProfile] = useState(null);
 
   useEffect(() => {
-    const loadUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (!data?.user) return;
-      setUser(data.user);
-    };
-    loadUser();
-  }, []);
+    async function load() {
+      const { data: { user } } = await supabase.auth.getUser();
 
-  // Onboarding data
-  let onboarding = null;
-  const raw = localStorage.getItem("sc_onboarding");
+      if (!user) {
+        nav("/", { replace: true });
+        return;
+      }
 
-  if (raw) {
-    try {
-      onboarding = JSON.parse(raw);
-    } catch {
-      onboarding = null;
+      setAuthUser(user);
+
+      const { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (error) {
+        console.error("Failed to load profile:", error);
+        nav("/", { replace: true });
+        return;
+      }
+
+      setProfile(data);
+      setLoading(false);
     }
+
+    load();
+  }, [nav]);
+
+  if (loading || !profile) {
+    return (
+      <div className="page">
+        <div className="container-narrow">
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
   }
 
-  const churchName = onboarding?.church?.name || "Not selected";
+  /* ================= Derived Values ================= */
+
+  const churchName = profile.church_name || "Not selected";
 
   const givingCap =
-    onboarding?.weeklyCap === null
+    profile.weekly_cap === null
       ? "No limit"
-      : typeof onboarding?.weeklyCap === "number"
-      ? `$${onboarding.weeklyCap} per week`
+      : typeof profile.weekly_cap === "number"
+      ? `$${profile.weekly_cap} per week`
       : "Not set";
 
-  const bankConnected = onboarding?.bankConnected === true;
+  const bankConnected = profile.bank_connected === true;
 
   const firstName =
-    user?.email?.split("@")[0]?.replace(/[0-9]/g, "") || "Friend";
+    profile.first_name ||
+    authUser?.email?.split("@")[0]?.replace(/[0-9]/g, "") ||
+    "Friend";
+
+  /* ================= UI ================= */
 
   return (
     <div className="page">
@@ -117,7 +145,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Mission Card */}
+        {/* Mission Card (UNCHANGED UI) */}
         <div className="glass card stack-6">
           <div className="stack-2">
             <h3>Current Church Goal</h3>

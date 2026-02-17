@@ -1,20 +1,17 @@
 // src/utils/auth.js
 import { supabase } from "../lib/supabase";
 
-const FLOW_KEY = "sc_onboarding"; // Keep for backward compatibility during transition
-
 /* ================= AUTH ================= */
 
 export async function getUser() {
   try {
-    // Get current Supabase session
-    const { data: { user: authUser }, error: sessionError } = await supabase.auth.getUser();
-    
+    const { data: { user: authUser }, error: sessionError } =
+      await supabase.auth.getUser();
+
     if (sessionError || !authUser) {
       return null;
     }
 
-    // Fetch user profile from database
     const { data: profile, error: profileError } = await supabase
       .from("users")
       .select("*")
@@ -26,26 +23,27 @@ export async function getUser() {
       return null;
     }
 
-    // Transform database format to match your existing user object structure
     return {
       id: profile.id,
       email: profile.email,
       firstName: profile.first_name || "",
-      lastName: "", // Add last_name to schema if needed
+      lastName: "",
       phone: profile.phone || "",
       createdAt: profile.created_at,
 
       onboarding: {
-        church: profile.church_id ? {
-          id: profile.church_id,
-          name: profile.church_name
-        } : null,
+        church: profile.church_id
+          ? {
+              id: profile.church_id,
+              name: profile.church_name,
+            }
+          : null,
         givingCap: profile.weekly_cap,
         bankConnected: profile.bank_connected || false,
       },
 
       stats: {
-        totalGiven: 0, // Will come from transactions table later
+        totalGiven: 0,
         monthlyGoal: profile.weekly_cap ? profile.weekly_cap * 4 : 0,
         impactScore: 0,
       },
@@ -56,7 +54,6 @@ export async function getUser() {
   }
 }
 
-// Alias so older/newer imports won't break
 export const getCurrentUser = getUser;
 
 export async function isAuthenticated() {
@@ -64,30 +61,23 @@ export async function isAuthenticated() {
   return !!session;
 }
 
-/*
-  SIGN UP
-  Now handled by Supabase auth in Signup.jsx
-  This function is kept for compatibility but shouldn't be called directly
-*/
-export function signUp(userData) {
-  console.warn("signUp() is deprecated. Use supabase.auth.signUp() directly in components.");
+/* ================= AUTH ACTIONS ================= */
+
+export function signUp() {
+  console.warn(
+    "signUp() is deprecated. Use supabase.auth.signUp() directly in components."
+  );
   return null;
 }
 
-/*
-  SIGN IN
-  Now handled by Supabase auth
-*/
-export function signIn(email, password) {
-  console.warn("signIn() is deprecated. Use supabase.auth.signInWithPassword() directly.");
+export function signIn() {
+  console.warn(
+    "signIn() is deprecated. Use supabase.auth.signInWithPassword() directly."
+  );
   return null;
 }
 
 export async function signOut() {
-  // Clear localStorage onboarding cache
-  localStorage.removeItem(FLOW_KEY);
-  
-  // Sign out from Supabase
   const { error } = await supabase.auth.signOut();
   if (error) {
     console.error("Error signing out:", error);
@@ -95,8 +85,6 @@ export async function signOut() {
 }
 
 export async function deleteAccount() {
-  // This should trigger a Supabase RLS policy or edge function
-  // For now, just sign out
   await signOut();
 }
 
@@ -107,19 +95,16 @@ export async function updateUser(updates) {
     const { data: { user: authUser } } = await supabase.auth.getUser();
     if (!authUser) return null;
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("users")
       .update({
         first_name: updates.firstName,
         phone: updates.phone,
-        // Add other fields as needed
       })
-      .eq("id", authUser.id)
-      .select()
-      .single();
+      .eq("id", authUser.id);
 
     if (error) throw error;
-    return await getUser(); // Return fresh user object
+    return await getUser();
   } catch (error) {
     console.error("Error updating user:", error);
     return null;
@@ -132,16 +117,16 @@ export async function updateOnboardingData(data) {
     if (!authUser) return null;
 
     const updatePayload = {};
-    
+
     if (data.church) {
       updatePayload.church_id = data.church.id;
       updatePayload.church_name = data.church.name;
     }
-    
+
     if (data.givingCap !== undefined) {
       updatePayload.weekly_cap = data.givingCap;
     }
-    
+
     if (data.bankConnected !== undefined) {
       updatePayload.bank_connected = data.bankConnected;
     }
@@ -159,7 +144,7 @@ export async function updateOnboardingData(data) {
   }
 }
 
-/* ================= ONBOARDING FLOW ================= */
+/* ================= ONBOARDING ================= */
 
 export async function getOnboarding() {
   try {
@@ -172,7 +157,6 @@ export async function getOnboarding() {
       .eq("id", authUser.id)
       .single();
 
-    // 🔥 If no profile exists, create one
     if (error && error.code === "PGRST116") {
       const { error: insertError } = await supabase
         .from("users")
@@ -193,10 +177,7 @@ export async function getOnboarding() {
       step: profile.onboarding_step || "church",
       churchId: profile.church_id,
       church: profile.church_id
-        ? {
-            id: profile.church_id,
-            name: profile.church_name,
-          }
+        ? { id: profile.church_id, name: profile.church_name }
         : null,
       weeklyCap: profile.weekly_cap,
       bankConnected: profile.bank_connected || false,
@@ -207,31 +188,26 @@ export async function getOnboarding() {
   }
 }
 
-
 export async function setOnboarding(data) {
   try {
     const { data: { user: authUser } } = await supabase.auth.getUser();
     if (!authUser) return;
 
     const updatePayload = {};
-    
+
     if (data.step !== undefined) {
       updatePayload.onboarding_step = data.step;
     }
-    
-    if (data.churchId !== undefined) {
-      updatePayload.church_id = data.churchId;
-    }
-    
+
     if (data.church !== undefined) {
       updatePayload.church_id = data.church.id;
       updatePayload.church_name = data.church.name;
     }
-    
+
     if (data.weeklyCap !== undefined) {
       updatePayload.weekly_cap = data.weeklyCap;
     }
-    
+
     if (data.bankConnected !== undefined) {
       updatePayload.bank_connected = data.bankConnected;
     }
@@ -253,7 +229,7 @@ export async function advanceOnboarding(nextStep) {
 
 export async function isOnboardingComplete() {
   const flow = await getOnboarding();
-  return flow?.step === "done" || flow?.step === "complete";
+  return flow?.step === "done";
 }
 
 export async function getNextOnboardingPath() {
@@ -268,7 +244,6 @@ export async function getNextOnboardingPath() {
     case "bank":
       return "/bank";
     case "done":
-    case "complete":
       return "/dashboard";
     default:
       return "/church-select";

@@ -1,83 +1,74 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "../lib/supabase";
 
 export default function Bank() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const raw = localStorage.getItem("sc_onboarding");
-    if (!raw) {
-      navigate("/church-select", { replace: true });
-      return;
+    async function validateStep() {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        navigate("/", { replace: true });
+        return;
+      }
+
+      const { data } = await supabase
+        .from("users")
+        .select("onboarding_step")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (!data) {
+        navigate("/church-select", { replace: true });
+        return;
+      }
+
+      if (data.onboarding_step !== "bank") {
+        navigate("/dashboard", { replace: true });
+      }
     }
 
-    let ob;
-    try {
-      ob = JSON.parse(raw);
-    } catch {
-      localStorage.removeItem("sc_onboarding");
-      navigate("/church-select", { replace: true });
-      return;
-    }
-
-    const step = ob?.step;
-
-    if (step !== "bank" && step !== "done") {
-      const stepRouteMap = {
-        church: "/church-select",
-        cap: "/giving-cap",
-      };
-
-      const target = stepRouteMap[step] || "/church-select";
-      navigate(target, { replace: true });
-    }
+    validateStep();
   }, [navigate]);
 
-  function finishSetup({ bankConnected }) {
-    const raw = localStorage.getItem("sc_onboarding");
-    if (!raw) {
-      navigate("/church-select", { replace: true });
-      return;
+  async function finishOnboarding(bankConnected) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { error } = await supabase
+      .from("users")
+      .update({
+        onboarding_step: "done",
+        bank_connected: bankConnected
+      })
+      .eq("id", user.id);
+
+    if (!error) {
+      navigate("/dashboard", { replace: true });
+    } else {
+      console.error("Failed to finish onboarding:", error);
     }
-
-    let ob;
-    try {
-      ob = JSON.parse(raw);
-    } catch {
-      localStorage.removeItem("sc_onboarding");
-      navigate("/church-select", { replace: true });
-      return;
-    }
-
-    const updated = {
-      ...ob,
-      step: "done",
-      bankConnected: !!bankConnected,
-    };
-
-    localStorage.setItem("sc_onboarding", JSON.stringify(updated));
-    navigate("/dashboard", { replace: true });
   }
 
   function handleSkipForNow() {
-    finishSetup({ bankConnected: false });
+    finishOnboarding(false);
   }
 
   function handleConnectBank() {
-    finishSetup({ bankConnected: true });
+    finishOnboarding(true);
   }
 
   return (
     <div className="page">
       <div className="container-narrow">
 
-        {/* Step indicator */}
         <div className="kicker mb-6">
           <span className="dot" />
           Step 3 of 3
         </div>
 
-        {/* Title */}
         <h1 className="page-title">
           Connect your bank
         </h1>
@@ -87,7 +78,6 @@ export default function Bank() {
           donations. You remain fully in control at all times.
         </p>
 
-        {/* Glass Card */}
         <div className="glass card stack-6 mt-8">
 
           <div>
