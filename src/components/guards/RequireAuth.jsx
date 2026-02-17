@@ -14,26 +14,37 @@ export default function RequireAuth() {
       const { data: { user } } = await supabase.auth.getUser();
 
       if (!mounted) return;
-      setUser(user ?? null);
 
-      if (user) {
-        const { data, error } = await supabase
-          .from("users")
-          .select("onboarding_step")
-          .eq("id", user.id)
-          .single();
-
-        if (!mounted) return;
-
-        if (error) {
-          console.error("Profile load error:", error);
-          setProfile(null);
-        } else {
-          setProfile(data);
-        }
-      } else {
+      if (!user) {
+        setUser(null);
         setProfile(null);
+        return;
       }
+
+      setUser(user);
+
+      // 🔥 SAFE PROFILE FETCH
+      const { data, error } = await supabase
+        .from("users")
+        .select("onboarding_step")
+        .eq("id", user.id)
+        .limit(1);
+
+      if (!mounted) return;
+
+      if (error) {
+        console.error("Profile load error:", error);
+        setProfile(null);
+        return;
+      }
+
+      // If no row exists yet, default to first onboarding step
+      if (!data || data.length === 0) {
+        setProfile({ onboarding_step: "church" });
+        return;
+      }
+
+      setProfile(data[0]);
     }
 
     load();
@@ -44,7 +55,11 @@ export default function RequireAuth() {
   }, []);
 
   if (user === undefined || profile === undefined) {
-    return <div style={{ padding: 40, textAlign: "center" }}>Loading...</div>;
+    return (
+      <div style={{ padding: 40, textAlign: "center" }}>
+        Loading...
+      </div>
+    );
   }
 
   if (!user) {
@@ -59,6 +74,7 @@ export default function RequireAuth() {
 
   const currentStep = profile?.onboarding_step;
 
+  // If no step exists, start onboarding
   if (!currentStep) {
     return <Navigate to="/church-select" replace />;
   }
