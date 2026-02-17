@@ -30,33 +30,27 @@ export default function ChurchSelect() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  // Load existing selection from Supabase
+  // 🔹 Load existing selection
   useEffect(() => {
     async function loadUserData() {
-      try {
-        const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
-        
-        if (authError || !authUser) {
-          navigate("/", { replace: true });
-          return;
-        }
+      const { data: { user } } = await supabase.auth.getUser();
 
-        const { data: profile, error: profileError } = await supabase
-          .from("users")
-          .select("church_id")
-          .eq("id", authUser.id)
-          .single();
-
-        if (profileError) {
-          console.error("Error loading profile:", profileError);
-        } else if (profile?.church_id) {
-          setSelected(profile.church_id);
-        }
-      } catch (err) {
-        console.error("Error in loadUserData:", err);
-      } finally {
-        setLoading(false);
+      if (!user) {
+        navigate("/", { replace: true });
+        return;
       }
+
+      const { data } = await supabase
+        .from("users")
+        .select("church_id")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (data?.church_id) {
+        setSelected(data.church_id);
+      }
+
+      setLoading(false);
     }
 
     loadUserData();
@@ -69,52 +63,31 @@ export default function ChurchSelect() {
     setSaving(true);
 
     try {
-      const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
-      
-      console.log("Auth user:", authUser); // DEBUG
-      
-      if (authError || !authUser) {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
         throw new Error("Not authenticated");
       }
 
-      const selectedChurch = churches.find((c) => c.id === selected);
-      if (!selectedChurch) {
-        throw new Error("Church not found");
-      }
-
-      console.log("Attempting update for user:", authUser.id); // DEBUG
-      console.log("Selected church:", selectedChurch); // DEBUG
-
-      // Save to Supabase
       const { data: updateData, error: updateError } = await supabase
         .from("users")
         .update({
           church_id: selected,
-          church_name: selectedChurch.name,
           onboarding_step: "cap",
         })
-        .eq("id", authUser.id)
-        .select(); // ADD .select() to return updated row
+        .eq("id", user.id)
+        .select();
 
-      console.log("Update response:", { data: updateData, error: updateError }); // DEBUG
-
-      if (updateError) {
-        console.error("Update error details:", updateError); // DEBUG
-        throw updateError;
-      }
+      if (updateError) throw updateError;
 
       if (!updateData || updateData.length === 0) {
-        console.error("No rows updated!"); // DEBUG
         throw new Error("Update affected 0 rows");
       }
 
-      console.log("Update successful, navigating..."); // DEBUG
-
-      // Navigate to next step
       navigate("/giving-cap");
-      
+
     } catch (err) {
-      console.error("Error in continueNext:", err); // DEBUG
+      console.error("Error saving church:", err);
       setError("Unable to save your selection. Please try again.");
       setSaving(false);
     }
@@ -132,7 +105,6 @@ export default function ChurchSelect() {
 
   return (
     <div className="onboarding-page">
-      {/* Step indicator */}
       <div className="onboarding-step">Step 1 of 3</div>
 
       <h1>Select your church</h1>

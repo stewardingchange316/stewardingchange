@@ -4,13 +4,16 @@ import { supabase } from "../../lib/supabase";
 
 export default function RequireAuth() {
   const location = useLocation();
-  const [user, setUser] = useState(undefined);
-  const [profile, setProfile] = useState(undefined);
+
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
 
   useEffect(() => {
     let mounted = true;
 
-    async function load() {
+    async function init() {
+      // 🔹 1. Get auth user
       const { data: { user } } = await supabase.auth.getUser();
 
       if (!mounted) return;
@@ -18,43 +21,65 @@ export default function RequireAuth() {
       if (!user) {
         setUser(null);
         setProfile(null);
+        setLoading(false);
         return;
       }
 
       setUser(user);
 
-      // 🔥 SAFE PROFILE FETCH
-      const { data, error } = await supabase
+      // 🔹 2. Try to load profile row
+      const { data: existing, error: selectError } = await supabase
         .from("users")
-        .select("onboarding_step")
+        .select("id, onboarding_step")
         .eq("id", user.id)
-        .limit(1);
+        .maybeSingle();
 
-      if (!mounted) return;
-
-      if (error) {
-        console.error("Profile load error:", error);
-        setProfile(null);
-        return;
+      if (selectError) {
+        console.error("Profile load error:", selectError);
       }
 
-      // If no row exists yet, default to first onboarding step
-      if (!data || data.length === 0) {
+      // 🔥 3. If no row exists, CREATE IT
+      if (!existing) {
+        const { error: insertError } = await supabase
+          .from("users")
+          .upsert(
+            {
+              id: user.id,
+              email: user.email,
+              first_name: user.user_metadata?.first_name || null,
+              last_name: user.user_metadata?.last_name || null,
+              phone: user.user_metadata?.phone || null,
+              onboarding_step: "church",
+              church_id: null,
+              weekly_cap: null,
+              bank_connected: false,
+            },
+            { onConflict: "id" }
+          );
+
+        if (insertError) {
+          console.error("Profile creation failed:", insertError);
+        }
+
+        if (!mounted) return;
+
         setProfile({ onboarding_step: "church" });
+        setLoading(false);
         return;
       }
 
-      setProfile(data[0]);
+      setProfile(existing);
+      setLoading(false);
     }
 
-    load();
+    init();
 
     return () => {
       mounted = false;
     };
   }, []);
 
-  if (user === undefined || profile === undefined) {
+  if (loading) {
     return (
       <div style={{ padding: 40, textAlign: "center" }}>
         Loading...
@@ -74,14 +99,12 @@ export default function RequireAuth() {
 
   const currentStep = profile?.onboarding_step;
 
-  // If no step exists, start onboarding
   if (!currentStep) {
     return <Navigate to="/church-select" replace />;
   }
 
   if (currentStep !== "done") {
     const target = stepRouteMap[currentStep];
-
     if (target && location.pathname !== target) {
       return <Navigate to={target} replace />;
     }
