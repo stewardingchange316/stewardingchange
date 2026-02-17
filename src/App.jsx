@@ -7,6 +7,7 @@ import Dashboard from "./pages/Dashboard";
 import ChurchSelect from "./pages/ChurchSelect";
 import GivingCap from "./pages/GivingCap";
 import Bank from "./pages/Bank";
+import AuthCallback from "./pages/AuthCallback";
 
 import RequireAuth from "./components/guards/RequireAuth";
 
@@ -17,6 +18,8 @@ export default function App() {
       <Route path="/" element={<Home />} />
       <Route path="/signin" element={<Signin />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/auth/callback" element={<AuthCallback />} />
+
 
       {/* Protected + Onboarding */}
       <Route element={<RequireAuth />}>
