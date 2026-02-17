@@ -25,9 +25,13 @@ export default function Bank() {
         return;
       }
 
-      if (data.onboarding_step !== "bank") {
-        navigate("/dashboard", { replace: true });
-      }
+     if (
+  data.onboarding_step !== "bank" &&
+  data.onboarding_step !== "done"
+) {
+  navigate("/dashboard", { replace: true });
+}
+
     }
 
     validateStep();
