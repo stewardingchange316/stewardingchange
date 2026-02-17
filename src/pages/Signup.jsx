@@ -15,6 +15,21 @@ export default function Signup() {
   const [submitting, setSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
 
+  // ✅ FIX: Always hard-reset auth state on /signup so a "previously verified browser"
+  // can't cause the next signUp to auto-confirm a new email.
+  useEffect(() => {
+    const resetAuthState = async () => {
+      // Best-effort cleanup. If there isn't a session, signOut is harmless.
+      try {
+        await supabase.auth.signOut();
+      } catch (e) {
+        // ignore
+      }
+    };
+
+    resetAuthState();
+  }, []);
+
   // If user lands here after confirming email
   useEffect(() => {
     const checkSessionAndEnsureProfile = async () => {
