@@ -17,13 +17,34 @@ export default function Signup() {
 
   // If user lands here after confirming email
   useEffect(() => {
-    const checkSession = async () => {
+    const checkSessionAndEnsureProfile = async () => {
       const { data } = await supabase.auth.getSession();
-      if (data.session?.user) {
-        navigate("/dashboard", { replace: true });
+      const user = data.session?.user;
+
+      if (user) {
+        // 🔥 Ensure public.users row exists
+        const { data: existing } = await supabase
+          .from("users")
+          .select("id")
+          .eq("id", user.id)
+          .single();
+
+        if (!existing) {
+          await supabase.from("users").insert({
+            id: user.id,
+            email: user.email,
+            first_name: user.user_metadata?.first_name || null,
+            church_id: null,
+            weekly_cap: null,
+            bank_connected: false
+          });
+        }
+
+        navigate("/church-select", { replace: true });
       }
     };
-    checkSession();
+
+    checkSessionAndEnsureProfile();
   }, [navigate]);
 
   const isValidEmail = (value) =>
@@ -85,8 +106,7 @@ export default function Signup() {
     try {
       setSubmitting(true);
 
-      // 🔥 STEP 1: Create Auth User
-      const { data, error: authError } = await supabase.auth.signUp({
+      const { error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -101,26 +121,10 @@ export default function Signup() {
 
       if (authError) throw authError;
 
-      // 🔥 STEP 2: Insert Into public.users Table
-      if (data.user) {
-        const { error: insertError } = await supabase
-          .from("users")
-          .insert({
-            id: data.user.id, // must match auth user ID
-            email: data.user.email,
-            first_name: firstName,
-          });
-
-        if (insertError) {
-          console.error("User insert failed:", insertError);
-        }
-      }
-
       setSuccessMessage(
         "Account created! Please check your email to confirm your account before signing in."
       );
 
-      // Clear form
       setFirstName("");
       setLastName("");
       setPhone("");
@@ -130,8 +134,8 @@ export default function Signup() {
 
     } catch (err) {
       if (
-        err.message.includes("already registered") ||
-        err.message.includes("already exists")
+        err.message?.includes("already registered") ||
+        err.message?.includes("already exists")
       ) {
         setError("This email is already registered. Please sign in instead.");
       } else {
