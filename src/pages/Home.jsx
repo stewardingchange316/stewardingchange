@@ -77,26 +77,30 @@ useEffect(() => {
     nav("/dashboard");
   }
 
-  async function handleReset(e) {
-    e.preventDefault();
-    setError("");
-    setResetLoading(true);
+ async function handleReset(e) {
+  e.preventDefault();
+  setError("");
+  setResetLoading(true);
 
-    const { error } = await supabase.auth.resetPasswordForEmail(
-      resetEmail,
-      {
-        redirectTo: `${window.location.origin}/update-password`,
-      }
-    );
+  const redirectUrl = `${window.location.origin}/update-password`;
+  console.log("Reset redirect URL:", redirectUrl);
 
-    setResetLoading(false);
-
-    if (error) {
-      setError(error.message);
-    } else {
-      setResetSent(true);
+  const { error } = await supabase.auth.resetPasswordForEmail(
+    resetEmail,
+    {
+      redirectTo: redirectUrl,
     }
+  );
+
+  setResetLoading(false);
+
+  if (error) {
+    setError(error.message);
+  } else {
+    setResetSent(true);
   }
+}
+
 
   return (
     <div className="bg-wrap">
