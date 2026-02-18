@@ -12,19 +12,30 @@ export default function UpdatePassword() {
   const [loading, setLoading] = useState(false);
   const [ready, setReady] = useState(false);
 
-  useEffect(() => {
-    // Supabase puts session in URL hash
-    const checkSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (!data.session) {
-        navigate("/", { replace: true });
-        return;
-      }
-      setReady(true);
-    };
+ useEffect(() => {
+  const init = async () => {
+    const { data } = await supabase.auth.getSession();
 
-    checkSession();
-  }, [navigate]);
+    if (data.session) {
+      setReady(true);
+      return;
+    }
+
+    // Give Supabase a moment to process URL hash
+    setTimeout(async () => {
+      const { data: retry } = await supabase.auth.getSession();
+
+      if (retry.session) {
+        setReady(true);
+      } else {
+        navigate("/", { replace: true });
+      }
+    }, 500);
+  };
+
+  init();
+}, [navigate]);
+
 
   async function handleUpdate(e) {
     e.preventDefault();

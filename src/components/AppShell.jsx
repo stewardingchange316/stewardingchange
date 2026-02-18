@@ -9,7 +9,7 @@ export default function AppShell({ children }) {
 
   function handleSignOut() {
     logout();
-    navigate("/signin?mode=signin", { replace: true });
+   
   }
 
   return (
@@ -31,7 +31,7 @@ export default function AppShell({ children }) {
         <nav className="nav">
           <Link to="/" className="nav-link">Home</Link>
           {authed && <Link to="/dashboard" className="nav-link">Dashboard</Link>}
-
+ 
           {authed ? (
             <button className="btn" type="button" onClick={handleSignOut}>
               Sign out ({user?.email || "account"})

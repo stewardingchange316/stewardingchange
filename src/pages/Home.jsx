@@ -20,30 +20,43 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
 
   // Clean URL after auth
-  useEffect(() => {
-    const url = new URL(window.location.href);
+ // Clean URL after auth (but NOT during password recovery)
+useEffect(() => {
+  // If we're on update-password, DO NOT touch the URL
+  if (window.location.pathname === "/update-password") {
+    return;
+  }
 
-    const hasAuthParams =
-      url.searchParams.has("code") ||
-      url.searchParams.has("access_token") ||
-      url.hash.includes("access_token") ||
-      url.hash.includes("error");
+  const url = new URL(window.location.href);
 
-    if (hasAuthParams) {
-      window.history.replaceState({}, "", window.location.pathname);
-    }
-  }, []);
+  const hasAuthParams =
+    url.searchParams.has("code") ||
+    url.searchParams.has("access_token") ||
+    url.hash.includes("access_token") ||
+    url.hash.includes("error");
+
+  if (hasAuthParams) {
+    window.history.replaceState({}, "", window.location.pathname);
+  }
+}, []);
 
   // Redirect if already logged in
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (data.session?.user) {
-        nav("/dashboard", { replace: true });
-      }
-    };
-    checkUser();
-  }, [nav]);
+useEffect(() => {
+  const checkUser = async () => {
+    const { data } = await supabase.auth.getSession();
+
+    // Do NOT auto-redirect during password recovery
+    if (
+      data.session?.user &&
+      window.location.pathname !== "/update-password"
+    ) {
+      nav("/dashboard", { replace: true });
+    }
+  };
+
+  checkUser();
+}, [nav]);
+
 
   async function handleLogin(e) {
     e.preventDefault();
