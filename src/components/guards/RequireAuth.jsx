@@ -98,9 +98,15 @@ export default function RequireAuth() {
 
   const currentStep = profile?.onboarding_step;
 
-  if (!currentStep) {
-    return <Navigate to="/church-select" replace />;
-  }
+ // Allow verified screen before enforcing onboarding
+if (location.pathname === "/verified") {
+  return <Outlet />;
+}
+
+if (!currentStep) {
+  return <Navigate to="/church-select" replace />;
+}
+
 
   // ✅ CRITICAL FIX
   // If onboarding is complete, allow free navigation inside app
@@ -108,11 +114,17 @@ export default function RequireAuth() {
     return <Outlet />;
   }
 
-  // 🔒 Otherwise enforce onboarding flow
-  const target = stepRouteMap[currentStep];
-  if (target && location.pathname !== target) {
-    return <Navigate to={target} replace />;
-  }
+ // Allow verified screen even if onboarding not complete
+if (location.pathname === "/verified") {
+  return <Outlet />;
+}
+
+// 🔒 Otherwise enforce onboarding flow
+const target = stepRouteMap[currentStep];
+if (target && location.pathname !== target) {
+  return <Navigate to={target} replace />;
+}
+
 
   return <Outlet />;
 }

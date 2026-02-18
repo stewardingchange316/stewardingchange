@@ -697,6 +697,10 @@ button, input, textarea, select {
    14) Footer
 ========================================================= */
 
+/* =========================================================
+   14) Footer
+========================================================= */
+
 .footer {
   padding: var(--s-9) 0 var(--s-8);
   border-top: 1px solid rgba(255,255,255,0.08);
@@ -716,12 +720,28 @@ button, input, textarea, select {
   font-size: var(--fs-1);
 }
 
+.footer-links {
+  display: flex;
+  gap: 16px;
+}
+
+.footer-links a {
+  color: var(--text-2);
+  transition: color var(--dur-2) var(--ease-out);
+}
+
+.footer-links a:hover {
+  color: var(--text-0);
+}
+
 @media (max-width: 700px) {
   .footer-inner {
     flex-direction: column;
     align-items: flex-start;
+    gap: var(--s-4);
   }
 }
+
 
 /* =========================================================
    15) Utility helpers (you’ll use these constantly)

@@ -15,7 +15,11 @@ export default function Signup() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+
+
+  // NEW
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   useEffect(() => {
     const resetAuthState = async () => {
@@ -31,7 +35,8 @@ export default function Signup() {
       const { data } = await supabase.auth.getSession();
       const user = data.session?.user;
 
-      if (user) {
+      if (user && window.location.pathname !== "/verified") {
+
         const { data: existing } = await supabase
           .from("users")
           .select("id")
@@ -78,17 +83,18 @@ export default function Signup() {
       : "Very strong";
 
   const canSubmit =
-    firstName &&
-    lastName &&
-    phone &&
-    email &&
-    password &&
-    confirm;
+  firstName &&
+  lastName &&
+  phone &&
+  email &&
+  password &&
+  confirm &&
+  acceptedTerms;
+
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
-    setSuccessMessage("");
 
     if (!firstName || !lastName || !phone) {
       setError("Please complete all required fields.");
@@ -99,6 +105,10 @@ export default function Signup() {
       setError("Please enter a valid email address.");
       return;
     }
+if (!acceptedTerms) {
+  setError("You must agree to the Terms of Service and Privacy Policy.");
+  return;
+}
 
     if (passwordStrength < 3) {
       setError(
@@ -130,16 +140,8 @@ export default function Signup() {
 
       if (authError) throw authError;
 
-      setSuccessMessage(
-        "Account created! Please check your email to confirm your account before signing in."
-      );
-
-      setFirstName("");
-      setLastName("");
-      setPhone("");
-      setEmail("");
-      setPassword("");
-      setConfirm("");
+      // 🔥 Instead of clearing form, show modal
+      setShowConfirmModal(true);
 
     } catch (err) {
       if (
@@ -253,9 +255,29 @@ export default function Signup() {
               <EyeIcon open={showConfirm} />
             </span>
           </div>
+          <div style={{ marginTop: 16 }}>
+  <label style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+    <input
+      type="checkbox"
+      checked={acceptedTerms}
+      onChange={(e) => setAcceptedTerms(e.target.checked)}
+      style={{ marginTop: 4 }}
+    />
+    <span style={{ fontSize: 14 }}>
+      I agree to the{" "}
+      <Link to="/terms" target="_blank" className="link-button">
+        Terms of Service
+      </Link>{" "}
+      and{" "}
+      <Link to="/privacy" target="_blank" className="link-button">
+        Privacy Policy
+      </Link>.
+    </span>
+  </label>
+</div>
+
 
           {error && <div className="auth-error">{error}</div>}
-          {successMessage && <div className="alert alert-success mt-4">{successMessage}</div>}
 
           <button type="submit" className="primary" disabled={!canSubmit || submitting}>
             {submitting ? "Creating account…" : "Continue"}
@@ -266,6 +288,28 @@ export default function Signup() {
           Already have an account? <Link to="/">Sign in</Link>
         </div>
       </div>
+
+      {/* 🔥 Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="modal-overlay">
+          <div className="modal-card">
+            <h2 className="modal-title">Check Your Email</h2>
+            <p className="modal-subtitle">
+              A confirmation link has been sent to <strong>{email}</strong>.
+              <br /><br />
+              Please click the link to verify your account.
+              If you don’t see it, check your spam folder.
+            </p>
+
+            <button
+              className="btn btn-primary btn-wide"
+              onClick={() => setShowConfirmModal(false)}
+            >
+              Back to Signup
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

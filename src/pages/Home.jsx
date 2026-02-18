@@ -4,13 +4,22 @@ import { supabase } from "../lib/supabase";
 
 export default function Home() {
   const nav = useNavigate();
+
   const [showLogin, setShowLogin] = useState(false);
+  const [mode, setMode] = useState("login"); // "login" | "reset"
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // 👈 ADDED
+  const [showPassword, setShowPassword] = useState(false);
+
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetSent, setResetSent] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
+
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Clean URL after auth
   useEffect(() => {
     const url = new URL(window.location.href);
 
@@ -25,6 +34,7 @@ export default function Home() {
     }
   }, []);
 
+  // Redirect if already logged in
   useEffect(() => {
     const checkUser = async () => {
       const { data } = await supabase.auth.getSession();
@@ -52,6 +62,27 @@ export default function Home() {
     }
 
     nav("/dashboard");
+  }
+
+  async function handleReset(e) {
+    e.preventDefault();
+    setError("");
+    setResetLoading(true);
+
+    const { error } = await supabase.auth.resetPasswordForEmail(
+      resetEmail,
+      {
+        redirectTo: `${window.location.origin}/update-password`,
+      }
+    );
+
+    setResetLoading(false);
+
+    if (error) {
+      setError(error.message);
+    } else {
+      setResetSent(true);
+    }
   }
 
   return (
@@ -97,13 +128,17 @@ export default function Home() {
 
               <button
                 className="btn btn-secondary btn-lg"
-                onClick={() => setShowLogin(true)}
+                onClick={() => {
+                  setMode("login");
+                  setShowLogin(true);
+                }}
               >
                 Sign in
               </button>
             </div>
           </div>
 
+          {/* KEEPING YOUR ENTIRE HERO PANEL */}
           <div className="hero-panel">
             <div className="stack-6">
               <div className="hero-metric">
@@ -148,132 +183,188 @@ export default function Home() {
               ✕
             </button>
 
-            <h2 className="modal-title">Welcome back</h2>
+            <h2 className="modal-title">
+              {mode === "login"
+                ? "Welcome back"
+                : "Reset your password"}
+            </h2>
+
             <p className="modal-subtitle">
-              Sign in to continue stewarding with clarity.
+              {mode === "login"
+                ? "Sign in to continue stewarding with clarity."
+                : "Enter your email and we’ll send you a reset link."}
             </p>
 
-            <form onSubmit={handleLogin} className="modal-form">
-              <div className="form-group">
-                <label htmlFor="email">Email</label>
-                <input
-                  id="email"
-                  type="email"
-                  placeholder="you@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  autoComplete="email"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="password">Password</label>
-
-                {/* 👁 PASSWORD WITH TOGGLE */}
-                <div style={{ position: "relative" }}>
+            {mode === "login" ? (
+              <form onSubmit={handleLogin} className="modal-form">
+                <div className="form-group">
+                  <label>Email</label>
                   <input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    type="email"
+                    placeholder="you@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     required
-                    autoComplete="current-password"
-                    style={{ paddingRight: "42px" }}
                   />
-
-              <button
-  type="button"
-  onClick={() => setShowPassword(!showPassword)}
-  style={{
-    position: "absolute",
-    right: "12px",
-    top: "50%",
-    transform: "translateY(-50%)",
-    background: "none",
-    border: "none",
-    cursor: "pointer",
-    padding: 0,
-    display: "flex",
-    alignItems: "center",
-    opacity: 0.8
-  }}
-  aria-label="Toggle password visibility"
->
-  {showPassword ? (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C7 20 2.73 16.11 1 12c.6-1.42 1.47-2.73 2.57-3.86M9.9 4.24A10.94 10.94 0 0 1 12 4c5 0 9.27 3.89 11 8a10.96 10.96 0 0 1-4.08 5.08M1 1l22 22" />
-    </svg>
-  ) : (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  )}
-</button>
-
                 </div>
-              </div>
 
-              {error && (
-                <div className="alert alert-danger">
-                  {error}
-                </div>
-              )}
+               <div className="form-group">
+  <label>Password</label>
 
-              <button
-                type="submit"
-                className="btn btn-primary btn-wide"
-                disabled={loading}
-              >
-                {loading ? "Signing in..." : "Sign in"}
-              </button>
+  <div style={{ position: "relative" }}>
+    <input
+      type={showPassword ? "text" : "password"}
+      placeholder="Enter your password"
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      required
+      autoComplete="current-password"
+      style={{ paddingRight: "42px" }}
+    />
 
-              <div className="modal-footer">
-                Don't have an account?{" "}
+    <button
+      type="button"
+      onClick={() => setShowPassword(!showPassword)}
+      style={{
+        position: "absolute",
+        right: "12px",
+        top: "50%",
+        transform: "translateY(-50%)",
+        background: "none",
+        border: "none",
+        cursor: "pointer",
+        padding: 0,
+        display: "flex",
+        alignItems: "center",
+        opacity: 0.8
+      }}
+      aria-label="Toggle password visibility"
+    >
+      {showPassword ? (
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C7 20 2.73 16.11 1 12c.6-1.42 1.47-2.73 2.57-3.86M9.9 4.24A10.94 10.94 0 0 1 12 4c5 0 9.27 3.89 11 8a10.96 10.96 0 0 1-4.08 5.08M1 1l22 22" />
+        </svg>
+      ) : (
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+          <circle cx="12" cy="12" r="3" />
+        </svg>
+      )}
+    </button>
+  </div>
+</div>
+
+
+                {error && (
+                  <div className="alert alert-danger">
+                    {error}
+                  </div>
+                )}
+
                 <button
-                  type="button"
-                  className="link-button"
-                  onClick={() => {
-                    setShowLogin(false);
-                    nav("/signup");
-                  }}
+                  type="submit"
+                  className="btn btn-primary btn-wide"
+                  disabled={loading}
                 >
-                  Sign up
+                  {loading ? "Signing in..." : "Sign in"}
                 </button>
-              </div>
-            </form>
+
+                <div style={{ marginTop: 14, textAlign: "center" }}>
+                  <button
+                    type="button"
+                    className="link-button"
+                    onClick={() => {
+                      setMode("reset");
+                      setResetEmail(email);
+                      setResetSent(false);
+                      setError("");
+                    }}
+                  >
+                    Forgot password?
+                  </button>
+                </div>
+
+                <div className="modal-footer">
+                  Don't have an account?{" "}
+                  <button
+                    type="button"
+                    className="link-button"
+                    onClick={() => {
+                      setShowLogin(false);
+                      nav("/signup");
+                    }}
+                  >
+                    Sign up
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <form onSubmit={handleReset} className="modal-form">
+                <div className="form-group">
+                  <label>Email</label>
+                  <input
+                    type="email"
+                    placeholder="you@email.com"
+                    value={resetEmail}
+                    onChange={(e) =>
+                      setResetEmail(e.target.value)
+                    }
+                    required
+                  />
+                </div>
+
+                {!resetSent ? (
+                  <button
+                    type="submit"
+                    className="btn btn-primary btn-wide"
+                    disabled={resetLoading}
+                  >
+                    {resetLoading
+                      ? "Sending..."
+                      : "Send reset link"}
+                  </button>
+                ) : (
+                  <div className="alert alert-success">
+                    Reset link sent. Check your email/spam.
+                  </div>
+                )}
+
+                <div style={{ marginTop: 14, textAlign: "center" }}>
+                  <button
+                    type="button"
+                    className="link-button"
+                    onClick={() => {
+                      setMode("login");
+                      setResetSent(false);
+                      setError("");
+                    }}
+                  >
+                    Back to sign in
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}
-
-      <footer className="footer">
-        <div className="footer-inner">
-          <div>© {new Date().getFullYear()} Stewarding Change</div>
-          <div className="row">
-            <span className="muted">Secure • Transparent • Simple</span>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

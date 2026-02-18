@@ -1,19 +1,52 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { getNextOnboardingPath } from "../utils/auth";
 
 export default function AuthCallback() {
   const navigate = useNavigate();
 
   useEffect(() => {
     async function handleAuth() {
-      // Let Supabase establish session from URL
-      await supabase.auth.getSession();
+      // Exchange PKCE code for session
+      const { error } = await supabase.auth.exchangeCodeForSession(
+        window.location.href
+      );
 
-      // Route based on onboarding state
-      const nextPath = await getNextOnboardingPath();
-      navigate(nextPath, { replace: true });
+      if (error) {
+        console.error("Code exchange failed:", error);
+        navigate("/signin", { replace: true });
+        return;
+      }
+
+      // Get authenticated user
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        navigate("/signin", { replace: true });
+        return;
+      }
+
+      // 🔥 Upsert profile safely (guarantees row exists)
+      const { error: upsertError } = await supabase
+        .from("users")
+        .upsert(
+          {
+            id: user.id,
+            email: user.email,
+            first_name: user.user_metadata?.first_name || null,
+            last_name: user.user_metadata?.last_name || null,
+            phone: user.user_metadata?.phone || null,
+          },
+          { onConflict: "id" }
+        );
+
+      if (upsertError) {
+        console.error("Profile upsert failed:", upsertError);
+      }
+
+      navigate("/verified", { replace: true });
     }
 
     handleAuth();
@@ -21,7 +54,7 @@ export default function AuthCallback() {
 
   return (
     <div style={{ padding: 40, textAlign: "center" }}>
-      Completing sign in...
+      Verifying your account...
     </div>
   );
 }
