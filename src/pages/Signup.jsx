@@ -186,11 +186,20 @@ export default function Signup() {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <h2 className="brand-header">Stewarding Change</h2>
-        <h1>Create your account</h1>
-        <p className="auth-subtitle">
-          Secure sign-in, simple onboarding, clear impact.
-        </p>
+        <div style={{ textAlign: "center", marginBottom: 24 }}>
+  <h2 className="brand-header" style={{ marginBottom: 8 }}>
+    Stewarding Change
+  </h2>
+
+  <h1 style={{ marginBottom: 8 }}>
+    Create your account
+  </h1>
+
+  <p className="auth-subtitle">
+    Secure sign-in, simple onboarding, clear impact.
+  </p>
+</div>
+
 
         <form onSubmit={handleSubmit}>
           <label>First Name</label>
@@ -315,26 +324,41 @@ export default function Signup() {
           )}
 
           {/* TERMS */}
-          <div style={{ marginTop: 16 }}>
-            <label style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-              <input
-                type="checkbox"
-                checked={acceptedTerms}
-                onChange={(e) => setAcceptedTerms(e.target.checked)}
-                style={{ marginTop: 4 }}
-              />
-              <span style={{ fontSize: 14 }}>
-                I agree to the{" "}
-                <Link to="/terms" target="_blank" className="link-button">
-                  Terms of Service
-                </Link>{" "}
-                and{" "}
-                <Link to="/privacy" target="_blank" className="link-button">
-                  Privacy Policy
-                </Link>.
-              </span>
-            </label>
-          </div>
+   {/* TERMS */}
+<div
+  style={{
+    marginTop: 16,
+    textAlign: "center"
+  }}
+>
+  <label
+    style={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      gap: 8,
+      cursor: "pointer"
+    }}
+  >
+    <input
+      type="checkbox"
+      checked={acceptedTerms}
+      onChange={(e) => setAcceptedTerms(e.target.checked)}
+    />
+
+    <span style={{ fontSize: 14, maxWidth: 300 }}>
+      I agree to the{" "}
+      <Link to="/terms" target="_blank" className="link-button">
+        Terms of Service
+      </Link>{" "}
+      and{" "}
+      <Link to="/privacy" target="_blank" className="link-button">
+        Privacy Policy
+      </Link>.
+    </span>
+  </label>
+</div>
+
 
           {error && <div className="auth-error">{error}</div>}
 
