@@ -11,31 +11,48 @@ export default function UpdatePassword() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [ready, setReady] = useState(false);
+  const [capsLock, setCapsLock] = useState(false);
 
- useEffect(() => {
-  const init = async () => {
-    const { data } = await supabase.auth.getSession();
+  // 🔥 Password strength logic
+  function getStrength(pw) {
+    let score = 0;
+    if (pw.length >= 8) score++;
+    if (/[A-Z]/.test(pw)) score++;
+    if (/[0-9]/.test(pw)) score++;
+    if (/[^A-Za-z0-9]/.test(pw)) score++;
 
-    if (data.session) {
-      setReady(true);
-      return;
-    }
+    if (score <= 1) return { label: "Weak", color: "#dc2626" };
+    if (score === 2) return { label: "Fair", color: "#f59e0b" };
+    if (score === 3) return { label: "Good", color: "#3b82f6" };
+    return { label: "Strong", color: "#16a34a" };
+  }
 
-    // Give Supabase a moment to process URL hash
-    setTimeout(async () => {
-      const { data: retry } = await supabase.auth.getSession();
+  const strength = getStrength(password);
 
-      if (retry.session) {
+  // 🔐 Ensure recovery session exists
+  useEffect(() => {
+    const init = async () => {
+      const { data } = await supabase.auth.getSession();
+
+      if (data.session) {
         setReady(true);
-      } else {
-        navigate("/", { replace: true });
+        return;
       }
-    }, 500);
-  };
 
-  init();
-}, [navigate]);
+      // Give Supabase time to process URL hash
+      setTimeout(async () => {
+        const { data: retry } = await supabase.auth.getSession();
 
+        if (retry.session) {
+          setReady(true);
+        } else {
+          navigate("/", { replace: true });
+        }
+      }, 500);
+    };
+
+    init();
+  }, [navigate]);
 
   async function handleUpdate(e) {
     e.preventDefault();
@@ -63,7 +80,7 @@ export default function UpdatePassword() {
       return;
     }
 
-    // Optional: mark onboarding as done if needed
+    // Preserve your onboarding update logic
     const { data } = await supabase.auth.getUser();
     if (data.user) {
       await supabase
@@ -92,84 +109,184 @@ export default function UpdatePassword() {
         </p>
 
         <form onSubmit={handleUpdate}>
-         <label>New Password</label>
-<div style={{ position: "relative" }}>
-  <input
-    type={showPassword ? "text" : "password"}
-    value={password}
-    onChange={(e) => setPassword(e.target.value)}
-    required
-    autoComplete="new-password"
-    style={{ paddingRight: "42px" }}
-  />
+          {/* NEW PASSWORD */}
+          <label>New Password</label>
+          <div style={{ position: "relative" }}>
+            <input
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyUp={(e) =>
+                setCapsLock(e.getModifierState("CapsLock"))
+              }
+              required
+              autoComplete="new-password"
+              autoFocus
+              style={{ paddingRight: "42px" }}
+            />
 
-  <button
-    type="button"
-    onClick={() => setShowPassword(!showPassword)}
-    style={{
-      position: "absolute",
-      right: "12px",
-      top: "50%",
-      transform: "translateY(-50%)",
-      background: "none",
-      border: "none",
-      cursor: "pointer",
-      padding: 0,
-      display: "flex",
-      alignItems: "center",
-      opacity: 0.8,
-    }}
-    aria-label="Toggle password visibility"
-  >
-    {showPassword ? (
-      <svg
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C7 20 2.73 16.11 1 12c.6-1.42 1.47-2.73 2.57-3.86M9.9 4.24A10.94 10.94 0 0 1 12 4c5 0 9.27 3.89 11 8a10.96 10.96 0 0 1-4.08 5.08M1 1l22 22" />
-      </svg>
-    ) : (
-      <svg
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-        <circle cx="12" cy="12" r="3" />
-      </svg>
-    )}
-  </button>
-</div>
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                position: "absolute",
+                right: "12px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: 0,
+                display: "flex",
+                alignItems: "center",
+                opacity: 0.8,
+              }}
+              aria-label="Toggle password visibility"
+            >
+              {showPassword ? "🙈" : "👁️"}
+            </button>
+          </div>
 
-<label>Confirm Password</label>
-<input
-  type={showPassword ? "text" : "password"}
-  value={confirm}
-  onChange={(e) => setConfirm(e.target.value)}
-  required
-  autoComplete="new-password"
-/>
+          {/* Caps lock warning */}
+          {capsLock && (
+            <div
+              style={{
+                color: "#f59e0b",
+                fontSize: 12,
+                marginTop: 4,
+              }}
+            >
+              Caps Lock is ON
+            </div>
+          )}
 
+          {/* Strength meter */}
+          <div style={{ marginTop: 8 }}>
+            <div
+              style={{
+                height: 6,
+                borderRadius: 6,
+                background: "#e5e7eb",
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  width: `${Math.min(
+                    (password.length / 12) * 100,
+                    100
+                  )}%`,
+                  height: "100%",
+                  background: strength.color,
+                  transition: "all 0.3s ease",
+                }}
+              />
+            </div>
 
-          {error && <div className="auth-error">{error}</div>}
+            <div
+              style={{
+                fontSize: 12,
+                marginTop: 4,
+                color: strength.color,
+                fontWeight: 500,
+              }}
+            >
+              Strength: {strength.label}
+            </div>
+          </div>
+
+          {/* Requirements checklist */}
+          <ul
+            style={{
+              fontSize: 12,
+              marginTop: 8,
+              paddingLeft: 16,
+            }}
+          >
+            <li
+              style={{
+                color:
+                  password.length >= 8
+                    ? "#16a34a"
+                    : "#9ca3af",
+              }}
+            >
+              At least 8 characters
+            </li>
+            <li
+              style={{
+                color:
+                  /[A-Z]/.test(password)
+                    ? "#16a34a"
+                    : "#9ca3af",
+              }}
+            >
+              Contains uppercase letter
+            </li>
+            <li
+              style={{
+                color:
+                  /[0-9]/.test(password)
+                    ? "#16a34a"
+                    : "#9ca3af",
+              }}
+            >
+              Contains a number
+            </li>
+            <li
+              style={{
+                color:
+                  /[^A-Za-z0-9]/.test(password)
+                    ? "#16a34a"
+                    : "#9ca3af",
+              }}
+            >
+              Contains special character
+            </li>
+          </ul>
+
+          {/* CONFIRM PASSWORD */}
+          <label style={{ marginTop: 16 }}>
+            Confirm Password
+          </label>
+          <input
+            type={showPassword ? "text" : "password"}
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            required
+            autoComplete="new-password"
+          />
+
+          {/* Match indicator */}
+          {confirm && (
+            <div
+              style={{
+                fontSize: 12,
+                marginTop: 4,
+                color:
+                  password === confirm
+                    ? "#16a34a"
+                    : "#dc2626",
+              }}
+            >
+              {password === confirm
+                ? "Passwords match"
+                : "Passwords do not match"}
+            </div>
+          )}
+
+          {error && (
+            <div className="auth-error">{error}</div>
+          )}
 
           <button
             type="submit"
             className="primary"
             disabled={loading}
           >
-            {loading ? "Updating..." : "Update Password"}
+            {loading
+              ? "Updating..."
+              : "Update Password"}
           </button>
         </form>
       </div>

@@ -16,9 +16,7 @@ export default function Signup() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
-
-
-  // NEW
+  const [capsLock, setCapsLock] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   useEffect(() => {
@@ -36,7 +34,6 @@ export default function Signup() {
       const user = data.session?.user;
 
       if (user && window.location.pathname !== "/verified") {
-
         const { data: existing } = await supabase
           .from("users")
           .select("id")
@@ -82,15 +79,18 @@ export default function Signup() {
       ? "Strong"
       : "Very strong";
 
+  // 🔒 Tightened but safe submit gating
   const canSubmit =
-  firstName &&
-  lastName &&
-  phone &&
-  email &&
-  password &&
-  confirm &&
-  acceptedTerms;
-
+    firstName &&
+    lastName &&
+    phone &&
+    email &&
+    password &&
+    confirm &&
+    acceptedTerms &&
+    passwordStrength >= 3 &&
+    password === confirm &&
+    isValidEmail(email);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -105,10 +105,11 @@ export default function Signup() {
       setError("Please enter a valid email address.");
       return;
     }
-if (!acceptedTerms) {
-  setError("You must agree to the Terms of Service and Privacy Policy.");
-  return;
-}
+
+    if (!acceptedTerms) {
+      setError("You must agree to the Terms of Service and Privacy Policy.");
+      return;
+    }
 
     if (passwordStrength < 3) {
       setError(
@@ -140,7 +141,6 @@ if (!acceptedTerms) {
 
       if (authError) throw authError;
 
-      // 🔥 Instead of clearing form, show modal
       setShowConfirmModal(true);
 
     } catch (err) {
@@ -187,7 +187,6 @@ if (!acceptedTerms) {
     <div className="auth-page">
       <div className="auth-card">
         <h2 className="brand-header">Stewarding Change</h2>
-
         <h1>Create your account</h1>
         <p className="auth-subtitle">
           Secure sign-in, simple onboarding, clear impact.
@@ -195,23 +194,45 @@ if (!acceptedTerms) {
 
         <form onSubmit={handleSubmit}>
           <label>First Name</label>
-          <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+          <input
+            type="text"
+            autoFocus
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+          />
 
           <label>Last Name</label>
-          <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+          <input
+            type="text"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+          />
 
           <label>Phone Number</label>
-          <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+          <input
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+          />
 
           <label>Email</label>
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+          />
 
+          {/* PASSWORD */}
           <label>Password</label>
           <div style={{ position: "relative" }}>
             <input
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              onKeyUp={(e) =>
+                setCapsLock(e.getModifierState("CapsLock"))
+              }
               autoComplete="new-password"
               style={{ paddingRight: "40px" }}
             />
@@ -229,10 +250,33 @@ if (!acceptedTerms) {
             </span>
           </div>
 
+          {capsLock && (
+            <div style={{ color: "#f59e0b", fontSize: 12 }}>
+              Caps Lock is ON
+            </div>
+          )}
+
           <div className={`password-strength s-${passwordStrength}`}>
             Strength: <strong>{strengthLabel}</strong>
           </div>
 
+          {/* Live password checklist */}
+          <ul style={{ fontSize: 12, paddingLeft: 16 }}>
+            <li style={{ color: password.length >= 8 ? "#16a34a" : "#9ca3af" }}>
+              At least 8 characters
+            </li>
+            <li style={{ color: /[A-Z]/.test(password) ? "#16a34a" : "#9ca3af" }}>
+              Contains uppercase letter
+            </li>
+            <li style={{ color: /[0-9]/.test(password) ? "#16a34a" : "#9ca3af" }}>
+              Contains a number
+            </li>
+            <li style={{ color: /[^A-Za-z0-9]/.test(password) ? "#16a34a" : "#9ca3af" }}>
+              Contains special character
+            </li>
+          </ul>
+
+          {/* CONFIRM PASSWORD */}
           <label>Verify password</label>
           <div style={{ position: "relative" }}>
             <input
@@ -255,27 +299,42 @@ if (!acceptedTerms) {
               <EyeIcon open={showConfirm} />
             </span>
           </div>
-          <div style={{ marginTop: 16 }}>
-  <label style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-    <input
-      type="checkbox"
-      checked={acceptedTerms}
-      onChange={(e) => setAcceptedTerms(e.target.checked)}
-      style={{ marginTop: 4 }}
-    />
-    <span style={{ fontSize: 14 }}>
-      I agree to the{" "}
-      <Link to="/terms" target="_blank" className="link-button">
-        Terms of Service
-      </Link>{" "}
-      and{" "}
-      <Link to="/privacy" target="_blank" className="link-button">
-        Privacy Policy
-      </Link>.
-    </span>
-  </label>
-</div>
 
+          {confirm && (
+            <div
+              style={{
+                fontSize: 12,
+                marginTop: 4,
+                color: password === confirm ? "#16a34a" : "#dc2626",
+              }}
+            >
+              {password === confirm
+                ? "Passwords match"
+                : "Passwords do not match"}
+            </div>
+          )}
+
+          {/* TERMS */}
+          <div style={{ marginTop: 16 }}>
+            <label style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+              <input
+                type="checkbox"
+                checked={acceptedTerms}
+                onChange={(e) => setAcceptedTerms(e.target.checked)}
+                style={{ marginTop: 4 }}
+              />
+              <span style={{ fontSize: 14 }}>
+                I agree to the{" "}
+                <Link to="/terms" target="_blank" className="link-button">
+                  Terms of Service
+                </Link>{" "}
+                and{" "}
+                <Link to="/privacy" target="_blank" className="link-button">
+                  Privacy Policy
+                </Link>.
+              </span>
+            </label>
+          </div>
 
           {error && <div className="auth-error">{error}</div>}
 
@@ -289,7 +348,6 @@ if (!acceptedTerms) {
         </div>
       </div>
 
-      {/* 🔥 Confirmation Modal */}
       {showConfirmModal && (
         <div className="modal-overlay">
           <div className="modal-card">
