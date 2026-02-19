@@ -6,29 +6,37 @@ export default function AuthCallback() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    async function handleAuth() {
-      // Exchange PKCE code for session
-      const { error } = await supabase.auth.exchangeCodeForSession(
-        window.location.href
-      );
+    let cancelled = false;
 
-      if (error) {
-        console.error("Code exchange failed:", error);
+    async function run() {
+      // Give Supabase a moment to hydrate session from the URL (confirm/recovery/magic links)
+      const waitForSession = async () => {
+        // try immediately
+        let { data } = await supabase.auth.getSession();
+        if (data.session) return data.session;
+
+        // small retries (handles race conditions on first load)
+        for (let i = 0; i < 6; i++) {
+          await new Promise((r) => setTimeout(r, 250));
+          ({ data } = await supabase.auth.getSession());
+          if (data.session) return data.session;
+        }
+
+        return null;
+      };
+
+      const session = await waitForSession();
+      if (cancelled) return;
+
+      if (!session?.user) {
+        // If no session, user likely needs to sign in manually
         navigate("/signin", { replace: true });
         return;
       }
 
-      // Get authenticated user
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const user = session.user;
 
-      if (!user) {
-        navigate("/signin", { replace: true });
-        return;
-      }
-
-      // 🔥 Upsert profile safely (guarantees row exists)
+      // Ensure profile row exists (same intention as your previous upsert)
       const { error: upsertError } = await supabase
         .from("users")
         .upsert(
@@ -44,12 +52,18 @@ export default function AuthCallback() {
 
       if (upsertError) {
         console.error("Profile upsert failed:", upsertError);
+        // Don't block the user if upsert fails—RequireAuth can still handle routing
       }
 
+      // Important: don't wipe URL here. Let Home/other pages handle cleanup safely.
       navigate("/verified", { replace: true });
     }
 
-    handleAuth();
+    run();
+
+    return () => {
+      cancelled = true;
+    };
   }, [navigate]);
 
   return (
