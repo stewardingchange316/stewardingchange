@@ -37,18 +37,28 @@ export default function AuthCallback() {
       const user = session.user;
 
       // Ensure profile row exists (same intention as your previous upsert)
-      const { error: upsertError } = await supabase
-        .from("users")
-        .upsert(
-          {
-            id: user.id,
-            email: user.email,
-            first_name: user.user_metadata?.first_name || null,
-            last_name: user.user_metadata?.last_name || null,
-            phone: user.user_metadata?.phone || null,
-          },
-          { onConflict: "id" }
-        );
+     const { data: existingProfile } = await supabase
+  .from("users")
+  .select("onboarding_step")
+  .eq("id", user.id)
+  .maybeSingle();
+
+if (!existingProfile) {
+  const { error: upsertError } = await supabase
+    .from("users")
+    .insert({
+      id: user.id,
+      email: user.email,
+      first_name: user.user_metadata?.first_name || null,
+      last_name: user.user_metadata?.last_name || null,
+      phone: user.user_metadata?.phone || null,
+      onboarding_step: "church",
+    });
+
+  if (upsertError) {
+    console.error("Profile insert failed:", upsertError);
+  }
+}
 
       if (upsertError) {
         console.error("Profile upsert failed:", upsertError);
