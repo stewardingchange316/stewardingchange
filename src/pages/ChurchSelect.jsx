@@ -90,10 +90,6 @@ export default function ChurchSelect() {
       if (!data || data.length === 0) throw new Error("Update did not persist");
 
       navigate("/giving-cap", { replace: true });
-```
-
-The `.select()` forces Supabase to confirm the write completed before the navigate fires. Push it:
-```
 
     } catch (err) {
       console.error("Church save error:", err);
