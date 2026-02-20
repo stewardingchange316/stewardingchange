@@ -44,7 +44,7 @@ export default function AuthCallback() {
   .maybeSingle();
 
 if (!existingProfile) {
-  const { error: upsertError } = await supabase
+  const { error: insertError } = await supabase
     .from("users")
     .insert({
       id: user.id,
@@ -55,8 +55,8 @@ if (!existingProfile) {
       onboarding_step: "church",
     });
 
-  if (upsertError) {
-    console.error("Profile insert failed:", upsertError);
+  if (insertError) {
+    console.error("Profile insert failed:", insertError);
   }
 }
 
