@@ -105,12 +105,18 @@ const churchName = churchMap[profile.church_id] || "Not selected";
         <div className="glass card stack-6">
           <h3>Your Stewarding Profile</h3>
 
-          <div className="row-between">
-            <div>
-              <div className="muted small">Church</div>
-              <div>{churchName}</div>
-            </div>
-          </div>
+         <div className="row-between">
+  <div>
+    <div className="muted small">Church</div>
+    <div>{churchName}</div>
+  </div>
+  <button
+    className="btn btn-secondary btn-sm"
+    onClick={() => nav("/church-select")}
+  >
+    Edit
+  </button>
+</div>
 
           <div className="row-between">
             <div>

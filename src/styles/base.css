@@ -983,6 +983,49 @@ button.primary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
+.church-continue-btn {
+  display: block;
+  width: 100%;
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-0);
+  font-weight: 650;
+  font-size: var(--fs-2);
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: background var(--dur-2) var(--ease-out),
+              border-color var(--dur-2) var(--ease-out),
+              transform var(--dur-2) var(--ease-out);
+}
+
+.church-continue-btn:hover {
+  background: rgba(0, 0, 0, 0.50);
+  border-color: rgba(255, 255, 255, 0.20);
+  transform: translateY(-1px);
+}
+
+.church-continue-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+.cap-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cap-presets {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
 .brand-header {
   text-align: center;
   font-size: 1.2rem;
@@ -1172,7 +1215,7 @@ button.primary:disabled {
 @media (max-width: 768px) {
   /* Much more breathing room on mobile */
   .container {
-    width: calc(100% - 48px);
+    width: calc(100% - 24px);
     padding: 0 24px;
   }
 

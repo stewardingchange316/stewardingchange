@@ -1,7 +1,6 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { getNextOnboardingPath } from "../utils/auth";
 
 export default function ChurchSelect() {
   const navigate = useNavigate();
@@ -31,7 +30,6 @@ export default function ChurchSelect() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  // 🔥 Load user + guarantee profile exists
   useEffect(() => {
     async function init() {
       const { data: { user } } = await supabase.auth.getUser();
@@ -89,11 +87,7 @@ export default function ChurchSelect() {
 
       if (error) throw error;
 
-      // 🔥 THIS IS THE FIX
-      // Instead of hardcoding /giving-cap,
-      // re-evaluate onboarding state and route accordingly
-      const nextPath = await getNextOnboardingPath();
-      navigate(nextPath, { replace: true });
+      navigate("/giving-cap", { replace: true });
 
     } catch (err) {
       console.error("Church save error:", err);
@@ -154,28 +148,22 @@ export default function ChurchSelect() {
                   <strong>{church.cadence}</strong>
                 </div>
               </div>
+
+              {isSelected && (
+                <button
+                  className="church-continue-btn"
+                  disabled={saving}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    continueNext();
+                  }}
+                >
+                  {saving ? "Saving..." : "Continue →"}
+                </button>
+              )}
             </div>
           );
         })}
-      </div>
-
-      <div className="onboarding-footer">
-        <div className="onboarding-next">
-          <div>
-            <strong>Next:</strong> set your weekly giving cap
-            <div className="muted">
-              You stay in control. This can be changed anytime.
-            </div>
-          </div>
-
-          <button
-            className="primary"
-            disabled={!selected || saving}
-            onClick={continueNext}
-          >
-            {saving ? "Saving..." : "Continue"}
-          </button>
-        </div>
       </div>
     </div>
   );

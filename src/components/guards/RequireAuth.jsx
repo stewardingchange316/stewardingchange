@@ -76,7 +76,7 @@ export default function RequireAuth() {
     return () => {
       mounted = false;
     };
-  }, [location.pathname]);
+  }, []);
 
   if (loading) {
     return (

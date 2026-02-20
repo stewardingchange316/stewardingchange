@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { getNextOnboardingPath } from "../utils/auth";
 
 const PRESETS = [10, 25, 50];
 
@@ -12,12 +11,11 @@ export default function GivingCap() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  // Load existing weekly cap from Supabase
   useEffect(() => {
     async function loadUserData() {
       try {
         const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
-        
+
         if (authError || !authUser) {
           navigate("/", { replace: true });
           return;
@@ -54,7 +52,7 @@ export default function GivingCap() {
 
     try {
       const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
-      
+
       if (authError || !authUser) {
         throw new Error("Not authenticated");
       }
@@ -71,9 +69,18 @@ export default function GivingCap() {
         throw updateError;
       }
 
-      // 🔥 FIX: Ask auth util where to go next
-      const nextPath = await getNextOnboardingPath();
-      navigate(nextPath, { replace: true });
+      const { data: { user: freshUser } } = await supabase.auth.getUser();
+      const { data: freshProfile } = await supabase
+        .from("users")
+        .select("onboarding_step")
+        .eq("id", freshUser.id)
+        .single();
+
+      if (freshProfile?.onboarding_step === "done") {
+        navigate("/dashboard", { replace: true });
+      } else {
+        navigate("/bank", { replace: true });
+      }
 
     } catch (err) {
       console.error("Error saving weekly cap:", err);
@@ -105,7 +112,6 @@ export default function GivingCap() {
           <h1 className="page-title">
             Set your weekly giving cap
           </h1>
-
           <p className="page-subtitle">
             Choose the maximum amount you'd like your spare change to
             support your church each week. You remain in control at all times.
@@ -119,6 +125,23 @@ export default function GivingCap() {
         )}
 
         <div className="glass card stack-6">
+
+          {/* Back and Continue at top of card */}
+          <div className="cap-nav">
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={() => navigate("/church-select", { replace: true })}
+            >
+              ← Back
+            </button>
+            <button
+              className="btn btn-primary btn-sm"
+              onClick={handleContinue}
+              disabled={saving}
+            >
+              {saving ? "Saving..." : "Continue →"}
+            </button>
+          </div>
 
           <div className="text-center">
             {weeklyCap === null ? (
@@ -142,28 +165,25 @@ export default function GivingCap() {
             className="sc-giving-slider"
           />
 
-          <div className="row center">
+          {/* Preset buttons in a row */}
+          <div className="cap-presets">
             {PRESETS.map((amount) => (
               <button
                 key={amount}
-                className={`btn btn-secondary btn-sm ${
-                  weeklyCap === amount ? "btn-primary" : ""
-                }`}
+                className={`btn btn-secondary btn-sm ${weeklyCap === amount ? "btn-primary" : ""}`}
                 onClick={() => setWeeklyCap(amount)}
               >
                 ${amount}
               </button>
             ))}
-
             <button
-              className={`btn btn-secondary btn-sm ${
-                weeklyCap === null ? "btn-primary" : ""
-              }`}
+              className={`btn btn-secondary btn-sm ${weeklyCap === null ? "btn-primary" : ""}`}
               onClick={setNoLimit}
             >
               No limit
             </button>
           </div>
+
         </div>
 
         <div className="glass card-tight stack-3">
@@ -174,20 +194,6 @@ export default function GivingCap() {
             are delivered weekly, with a consolidated annual statement
             provided at year end.
           </div>
-        </div>
-
-        <div className="row-between mt-6">
-          <div className="muted small">
-            Next: Securely connect your bank account
-          </div>
-
-          <button
-            className="btn btn-primary btn-lg"
-            onClick={handleContinue}
-            disabled={saving}
-          >
-            {saving ? "Saving..." : "Continue"}
-          </button>
         </div>
 
       </div>

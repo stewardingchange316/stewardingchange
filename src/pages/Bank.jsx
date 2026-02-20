@@ -1,58 +1,25 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 
 export default function Bank() {
   const navigate = useNavigate();
-  const [isFinishing, setIsFinishing] = useState(false); // ✅ Added
-
-  useEffect(() => {
-    async function validateStep() {
-      if (isFinishing) return; // ✅ Prevent redirect race
-
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (!user) {
-        navigate("/", { replace: true });
-        return;
-      }
-
-      const { data } = await supabase
-        .from("users")
-        .select("onboarding_step")
-        .eq("id", user.id)
-        .maybeSingle();
-
-      if (!data) {
-        navigate("/church-select", { replace: true });
-        return;
-      }
-
-      if (
-        data.onboarding_step !== "bank" &&
-        data.onboarding_step !== "done"
-      ) {
-        navigate("/dashboard", { replace: true });
-      }
-    }
-
-    validateStep();
-  }, [navigate, isFinishing]); // ✅ Added dependency
+  const [isFinishing, setIsFinishing] = useState(false);
 
   async function finishOnboarding(bankConnected) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    setIsFinishing(true); // ✅ lock redirects
+    setIsFinishing(true);
 
     const { error } = await supabase
       .from("users")
       .update({
         onboarding_step: "done",
-        bank_connected: bankConnected
+        bank_connected: bankConnected,
       })
       .eq("id", user.id)
-      .select() // ✅ Force DB commit to return updated row
+      .select();
 
     if (!error) {
       navigate("/dashboard", { replace: true });
@@ -90,11 +57,29 @@ export default function Bank() {
 
         <div className="glass card stack-6 mt-8">
 
+          {/* Top nav — Back and Skip */}
+          <div className="cap-nav">
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={() => navigate("/giving-cap", { replace: true })}
+              disabled={isFinishing}
+            >
+              ← Back
+            </button>
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={handleSkipForNow}
+              disabled={isFinishing}
+            >
+              {isFinishing ? "Saving..." : "Skip for now →"}
+            </button>
+          </div>
+
           <div>
             <h3 className="mb-2">Bank connection coming soon</h3>
             <p className="muted">
               For this pilot, you can continue without linking a bank.
-              When connections go live, you’ll be able to securely add one here.
+              When connections go live, you'll be able to securely add one here.
             </p>
           </div>
 
@@ -105,21 +90,13 @@ export default function Bank() {
               You can add a bank at any time from your dashboard.
             </span>
 
-            <div className="row">
-              <button
-                className="btn btn-secondary"
-                onClick={handleSkipForNow}
-              >
-                Skip for now
-              </button>
-
-              <button
-                className="btn btn-primary"
-                onClick={handleConnectBank}
-              >
-                Connect bank
-              </button>
-            </div>
+            <button
+              className="btn btn-primary"
+              onClick={handleConnectBank}
+              disabled={isFinishing}
+            >
+              {isFinishing ? "Saving..." : "Connect bank"}
+            </button>
           </div>
 
         </div>
