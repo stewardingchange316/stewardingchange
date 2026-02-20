@@ -60,10 +60,7 @@ if (!existingProfile) {
   }
 }
 
-      if (upsertError) {
-        console.error("Profile upsert failed:", upsertError);
-        // Don't block the user if upsert fails—RequireAuth can still handle routing
-      }
+  
 
       // Important: don't wipe URL here. Let Home/other pages handle cleanup safely.
       navigate("/verified", { replace: true });
