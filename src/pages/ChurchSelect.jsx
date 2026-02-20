@@ -77,17 +77,23 @@ export default function ChurchSelect() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      const { error } = await supabase
+      const { error, data } = await supabase
         .from("users")
         .update({
           church_id: selected,
           onboarding_step: "cap",
         })
-        .eq("id", user.id);
+        .eq("id", user.id)
+        .select();
 
       if (error) throw error;
+      if (!data || data.length === 0) throw new Error("Update did not persist");
 
       navigate("/giving-cap", { replace: true });
+```
+
+The `.select()` forces Supabase to confirm the write completed before the navigate fires. Push it:
+```
 
     } catch (err) {
       console.error("Church save error:", err);
