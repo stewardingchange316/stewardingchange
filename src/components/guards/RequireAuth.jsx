@@ -4,77 +4,92 @@ import { supabase } from "../../lib/supabase";
 
 export default function RequireAuth() {
   const location = useLocation();
-
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
 
+  async function loadProfile(authUser) {
+    const { data: existing } = await supabase
+      .from("users")
+      .select("id, onboarding_step")
+      .eq("id", authUser.id)
+      .maybeSingle();
+
+    if (!existing) {
+      const { error: insertError } = await supabase
+        .from("users")
+        .upsert(
+          {
+            id: authUser.id,
+            email: authUser.email,
+            first_name: authUser.user_metadata?.first_name || null,
+            last_name: authUser.user_metadata?.last_name || null,
+            phone: authUser.user_metadata?.phone || null,
+            onboarding_step: "church",
+            church_id: null,
+            weekly_cap: null,
+            bank_connected: false,
+          },
+          { onConflict: "id" }
+        );
+
+      if (insertError) {
+        console.error("Profile creation failed:", insertError);
+      }
+
+      return { onboarding_step: "church" };
+    }
+
+    return existing;
+  }
+
   useEffect(() => {
     let mounted = true;
 
+    // Initial load
     async function init() {
-      setLoading(true);
-
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user: authUser } } = await supabase.auth.getUser();
 
       if (!mounted) return;
 
-      if (!user) {
+      if (!authUser) {
         setUser(null);
         setProfile(null);
         setLoading(false);
         return;
       }
 
-      setUser(user);
-
-      const { data: existing, error } = await supabase
-        .from("users")
-        .select("id, onboarding_step")
-        .eq("id", user.id)
-        .maybeSingle();
-
-      if (error) {
-        console.error("Profile load error:", error);
-      }
-
-      if (!existing) {
-        const { error: insertError } = await supabase
-          .from("users")
-          .upsert(
-            {
-              id: user.id,
-              email: user.email,
-              first_name: user.user_metadata?.first_name || null,
-              last_name: user.user_metadata?.last_name || null,
-              phone: user.user_metadata?.phone || null,
-              onboarding_step: "church",
-              church_id: null,
-              weekly_cap: null,
-              bank_connected: false,
-            },
-            { onConflict: "id" }
-          );
-
-        if (insertError) {
-          console.error("Profile creation failed:", insertError);
-        }
-
-        if (!mounted) return;
-
-        setProfile({ onboarding_step: "church" });
-        setLoading(false);
-        return;
-      }
-
-      setProfile(existing);
+      setUser(authUser);
+      const p = await loadProfile(authUser);
+      if (!mounted) return;
+      setProfile(p);
       setLoading(false);
     }
 
     init();
 
+    // Re-read profile whenever Supabase auth state changes
+    // This fires after magic link verification AND after page navigations
+    const { data: listener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!mounted) return;
+
+      if (!session?.user) {
+        setUser(null);
+        setProfile(null);
+        setLoading(false);
+        return;
+      }
+
+      setUser(session.user);
+      const p = await loadProfile(session.user);
+      if (!mounted) return;
+      setProfile(p);
+      setLoading(false);
+    });
+
     return () => {
       mounted = false;
+      listener.subscription.unsubscribe();
     };
   }, []);
 
@@ -98,33 +113,25 @@ export default function RequireAuth() {
 
   const currentStep = profile?.onboarding_step;
 
- // Allow verified screen before enforcing onboarding
-if (location.pathname === "/verified") {
-  return <Outlet />;
-}
+  // Allow verified screen before enforcing onboarding
+  if (location.pathname === "/verified") {
+    return <Outlet />;
+  }
 
-if (!currentStep) {
-  return <Navigate to="/church-select" replace />;
-}
+  if (!currentStep) {
+    return <Navigate to="/church-select" replace />;
+  }
 
-
-  // ✅ CRITICAL FIX
   // If onboarding is complete, allow free navigation inside app
   if (currentStep === "done") {
     return <Outlet />;
   }
 
- // Allow verified screen even if onboarding not complete
-if (location.pathname === "/verified") {
-  return <Outlet />;
-}
-
-// 🔒 Otherwise enforce onboarding flow
-const target = stepRouteMap[currentStep];
-if (target && location.pathname !== target) {
-  return <Navigate to={target} replace />;
-}
-
+  // Enforce onboarding flow
+  const target = stepRouteMap[currentStep];
+  if (target && location.pathname !== target) {
+    return <Navigate to={target} replace />;
+  }
 
   return <Outlet />;
 }
