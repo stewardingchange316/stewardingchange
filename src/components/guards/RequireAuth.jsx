@@ -128,7 +128,7 @@ export default function RequireAuth() {
   }
 
 // If user is on any onboarding page, let them through
-  const onboardingPaths = ["/church-select", "/giving-cap", "/bank"];
+  const onboardingPaths = ["/church-select", "/giving-cap", "/bank", "/dashboard"];
   if (onboardingPaths.includes(location.pathname)) {
     return <Outlet />;
   }
@@ -140,6 +140,5 @@ export default function RequireAuth() {
   }
 
   // No target means onboarding_step is unrecognized — send to dashboard
-  return <Outlet />;
   return <Outlet />;
 }
