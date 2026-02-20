@@ -127,7 +127,7 @@ export default function RequireAuth() {
     return <Outlet />;
   }
 
- // If user is on any onboarding page, let them through
+// If user is on any onboarding page, let them through
   const onboardingPaths = ["/church-select", "/giving-cap", "/bank"];
   if (onboardingPaths.includes(location.pathname)) {
     return <Outlet />;
@@ -135,9 +135,11 @@ export default function RequireAuth() {
 
   // If somehow off-flow, redirect to correct step
   const target = stepRouteMap[currentStep];
-  if (target && location.pathname !== target) {
+  if (target) {
     return <Navigate to={target} replace />;
   }
 
+  // No target means onboarding_step is unrecognized — send to dashboard
+  return <Outlet />;
   return <Outlet />;
 }
