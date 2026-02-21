@@ -15,7 +15,10 @@ export default function RequireAuth() {
       .eq("id", authUser.id)
       .maybeSingle();
 
-    if (!existing) {
+ if (!existing) {
+      const { data: { user: verifiedUser } } = await supabase.auth.getUser();
+      if (!verifiedUser) return null;
+
       const { error: insertError } = await supabase
         .from("users")
         .upsert(
@@ -53,6 +56,7 @@ export default function RequireAuth() {
       if (!mounted) return;
 
       if (!authUser) {
+        await supabase.auth.signOut();
         setUser(null);
         setProfile(null);
         setLoading(false);
