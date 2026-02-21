@@ -17,6 +17,7 @@ export default function Bank() {
     if (!user) return;
 
     setIsFinishing(true);
+    const finishTimeout = setTimeout(() => setIsFinishing(false), 8000);
 
     const { error } = await supabase
       .from("users")
@@ -28,9 +29,11 @@ export default function Bank() {
       .select();
 
     if (!error) {
+      clearTimeout(finishTimeout);
       navigate("/dashboard", { replace: true });
     } else {
       console.error("Failed to finish onboarding:", error);
+      clearTimeout(finishTimeout);
       setIsFinishing(false);
     }
   }

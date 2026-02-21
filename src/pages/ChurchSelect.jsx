@@ -77,7 +77,8 @@ export default function ChurchSelect() {
     if (!selected) return;
 
     setError("");
-    setSaving(true);
+   setSaving(true);
+    const saveTimeout = setTimeout(() => setSaving(false), 8000);
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -95,10 +96,12 @@ export default function ChurchSelect() {
       if (error) throw error;
       if (!data || data.length === 0) throw new Error("Update did not persist");
 
+      clearTimeout(saveTimeout);
       navigate("/giving-cap", { replace: true });
 
     } catch (err) {
       console.error("Church save error:", err);
+      clearTimeout(saveTimeout);
       setError("Unable to save your selection. Please try again.");
       setSaving(false);
     }

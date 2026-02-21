@@ -55,7 +55,9 @@ export default function GivingCap() {
 
   async function handleContinue() {
     setError("");
+  
     setSaving(true);
+    const saveTimeout = setTimeout(() => setSaving(false), 8000);
 
     try {
       const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
@@ -82,15 +84,18 @@ export default function GivingCap() {
         .select("onboarding_step")
         .eq("id", freshUser.id)
         .single();
-
+        clearTimeout(saveTimeout);
       if (freshProfile?.onboarding_step === "done") {
         navigate("/dashboard", { replace: true });
       } else {
         navigate("/bank", { replace: true });
       }
 
-    } catch (err) {
+    
+
+     } catch (err) {
       console.error("Error saving weekly cap:", err);
+      clearTimeout(saveTimeout);
       setError("Unable to save your selection. Please try again.");
       setSaving(false);
     }
