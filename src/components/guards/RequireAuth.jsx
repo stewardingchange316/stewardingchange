@@ -75,20 +75,23 @@ export default function RequireAuth() {
     // Re-read profile whenever Supabase auth state changes
     // This fires after magic link verification AND after page navigations
     const { data: listener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (!mounted) return;
+     // Only handle actual auth events, not token refreshes
+      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT") return;
 
-      if (!session?.user) {
+      if (event === "SIGNED_OUT" || !session?.user) {
         setUser(null);
         setProfile(null);
         setLoading(false);
         return;
       }
 
-      setUser(session.user);
-      const p = await loadProfile(session.user);
-      if (!mounted) return;
-      setProfile(p);
-      setLoading(false);
+      if (event === "SIGNED_IN") {
+        setUser(session.user);
+        const p = await loadProfile(session.user);
+        if (!mounted) return;
+        setProfile(p);
+        setLoading(false);
+      }
     });
 
     return () => {
