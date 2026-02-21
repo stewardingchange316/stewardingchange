@@ -29,6 +29,12 @@ export default function ChurchSelect() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  // Reset saving state if user leaves mid-save and comes back
+  useEffect(() => {
+    return () => {
+      setSaving(false);
+    };
+  }, []);
 
   useEffect(() => {
     async function init() {

@@ -1,10 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 
 export default function Bank() {
   const navigate = useNavigate();
   const [isFinishing, setIsFinishing] = useState(false);
+  // Reset finishing state if user leaves mid-save and comes back
+  useEffect(() => {
+    return () => {
+      setIsFinishing(false);
+    };
+  }, []);
 
   async function finishOnboarding(bankConnected) {
     const { data: { user } } = await supabase.auth.getUser();

@@ -11,6 +11,13 @@ export default function GivingCap() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  // Reset saving state if user leaves mid-save and comes back
+  useEffect(() => {
+    return () => {
+      setSaving(false);
+    };
+  }, []);
+
   useEffect(() => {
     async function loadUserData() {
       try {
