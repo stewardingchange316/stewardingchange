@@ -29,10 +29,16 @@ export default function ChurchSelect() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  // Reset saving state if user leaves mid-save and comes back
+  // Reset saving state when user comes back to the page
   useEffect(() => {
+    function handleVisibilityChange() {
+      if (document.visibilityState === "visible") {
+        setSaving(false);
+      }
+    }
+    document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => {
-      setSaving(false);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, []);
 

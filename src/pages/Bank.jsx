@@ -5,12 +5,20 @@ import { supabase } from "../lib/supabase";
 export default function Bank() {
   const navigate = useNavigate();
   const [isFinishing, setIsFinishing] = useState(false);
-  // Reset finishing state if user leaves mid-save and comes back
+ // Reset finishing state when user comes back to the page
   useEffect(() => {
+    function handleVisibilityChange() {
+      if (document.visibilityState === "visible") {
+        setIsFinishing(false);
+      }
+    }
+    document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => {
-      setIsFinishing(false);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, []);
+
+
 
   async function finishOnboarding(bankConnected) {
     const { data: { user } } = await supabase.auth.getUser();
