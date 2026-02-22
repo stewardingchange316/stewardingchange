@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 
@@ -29,22 +29,18 @@ export default function ChurchSelect() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  // Reset saving state when user returns from switching apps (iOS needs all three)
+  const abortRef = useRef(null);
+
+  // Abort in-flight save when user switches apps — fixes iOS frozen "Saving..." state.
   useEffect(() => {
-    function resetSaving() {
-      setSaving(false);
-    }
     function handleVisibilityChange() {
-      if (document.visibilityState === "visible") resetSaving();
+      if (document.visibilityState === "hidden") {
+        abortRef.current?.abort();
+        setSaving(false);
+      }
     }
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("pageshow", resetSaving);
-    window.addEventListener("focus", resetSaving);
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("pageshow", resetSaving);
-      window.removeEventListener("focus", resetSaving);
-    };
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, []);
 
   useEffect(() => {
@@ -88,33 +84,40 @@ export default function ChurchSelect() {
     if (!selected) return;
 
     setError("");
-   setSaving(true);
-    const saveTimeout = setTimeout(() => setSaving(false), 8000);
+    setSaving(true);
+
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const safetyTimer = setTimeout(() => {
+      controller.abort();
+      setSaving(false);
+    }, 8000);
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
+      if (controller.signal.aborted) return;
       if (!user) throw new Error("Not authenticated");
 
       const { error, data } = await supabase
         .from("users")
-        .update({
-          church_id: selected,
-          onboarding_step: "cap",
-        })
+        .update({ church_id: selected, onboarding_step: "cap" })
         .eq("id", user.id)
-        .select();
+        .select()
+        .abortSignal(controller.signal);
 
+      if (controller.signal.aborted) return;
       if (error) throw error;
       if (!data || data.length === 0) throw new Error("Update did not persist");
 
-      clearTimeout(saveTimeout);
       navigate("/giving-cap", { replace: true });
-
     } catch (err) {
+      if (controller.signal.aborted || err.name === "AbortError") return;
       console.error("Church save error:", err);
-      clearTimeout(saveTimeout);
       setError("Unable to save your selection. Please try again.");
       setSaving(false);
+    } finally {
+      clearTimeout(safetyTimer);
+      abortRef.current = null;
     }
   }
 

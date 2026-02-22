@@ -1,53 +1,62 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 
 export default function Bank() {
   const navigate = useNavigate();
   const [isFinishing, setIsFinishing] = useState(false);
-  // Reset finishing state when user returns from switching apps (iOS needs all three)
+  const abortRef = useRef(null);
+
+  // Abort in-flight save when user switches apps — fixes iOS frozen "Saving..." state.
   useEffect(() => {
-    function resetFinishing() {
-      setIsFinishing(false);
-    }
     function handleVisibilityChange() {
-      if (document.visibilityState === "visible") resetFinishing();
+      if (document.visibilityState === "hidden") {
+        abortRef.current?.abort();
+        setIsFinishing(false);
+      }
     }
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("pageshow", resetFinishing);
-    window.addEventListener("focus", resetFinishing);
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("pageshow", resetFinishing);
-      window.removeEventListener("focus", resetFinishing);
-    };
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, []);
 
 
 
   async function finishOnboarding(bankConnected) {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
     setIsFinishing(true);
-    const finishTimeout = setTimeout(() => setIsFinishing(false), 8000);
 
-    const { error } = await supabase
-      .from("users")
-      .update({
-        onboarding_step: "done",
-        bank_connected: bankConnected,
-      })
-      .eq("id", user.id)
-      .select();
-
-    if (!error) {
-      clearTimeout(finishTimeout);
-      navigate("/dashboard", { replace: true });
-    } else {
-      console.error("Failed to finish onboarding:", error);
-      clearTimeout(finishTimeout);
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const safetyTimer = setTimeout(() => {
+      controller.abort();
       setIsFinishing(false);
+    }, 8000);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (controller.signal.aborted) return;
+      if (!user) {
+        setIsFinishing(false);
+        return;
+      }
+
+      const { error } = await supabase
+        .from("users")
+        .update({ onboarding_step: "done", bank_connected: bankConnected })
+        .eq("id", user.id)
+        .select()
+        .abortSignal(controller.signal);
+
+      if (controller.signal.aborted) return;
+      if (error) throw error;
+
+      navigate("/dashboard", { replace: true });
+    } catch (err) {
+      if (controller.signal.aborted || err.name === "AbortError") return;
+      console.error("Failed to finish onboarding:", err);
+      setIsFinishing(false);
+    } finally {
+      clearTimeout(safetyTimer);
+      abortRef.current = null;
     }
   }
 
