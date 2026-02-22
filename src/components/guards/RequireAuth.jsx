@@ -11,7 +11,6 @@ const STEP_TO_ROUTE = {
 };
 
 const ONBOARDING_ROUTES = new Set(Object.values(STEP_TO_ROUTE));
-const BYPASS_ROUTES     = new Set(["/verified"]);
 
 // ─── Profile cache ────────────────────────────────────────────────────────────
 
@@ -333,11 +332,6 @@ export default function RequireAuth() {
   // ── Unauthenticated ───────────────────────────────────────────────────────────
   if (!user) {
     return <Navigate to="/" replace />;
-  }
-
-  // ── Bypass routes ─────────────────────────────────────────────────────────────
-  if (BYPASS_ROUTES.has(location.pathname)) {
-    return <Outlet />;
   }
 
   // ── Profile unresolvable ──────────────────────────────────────────────────────
