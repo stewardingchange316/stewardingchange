@@ -134,8 +134,8 @@ export default function RequireAuth() {
     return <Outlet />;
   }
 
-// If user is on any onboarding page, let them through
-  const onboardingPaths = ["/church-select", "/giving-cap", "/bank", "/dashboard"];
+  // Let users through any onboarding step page — but NOT /dashboard until done
+  const onboardingPaths = ["/church-select", "/giving-cap", "/bank"];
   if (onboardingPaths.includes(location.pathname)) {
     return <Outlet />;
   }

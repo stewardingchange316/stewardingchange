@@ -130,7 +130,7 @@ export default function Signup() {
         email,
         password,
         options: {
-          emailRedirectTo: "https://stewardingchange.org/auth/callback",
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
           data: {
             first_name: firstName,
             last_name: lastName,
