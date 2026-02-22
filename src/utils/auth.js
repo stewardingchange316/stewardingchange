@@ -232,20 +232,29 @@ export async function isOnboardingComplete() {
   return flow?.step === "done";
 }
 
+/**
+ * Returns the canonical route for the user's current onboarding step.
+ *
+ * Always reads fresh data from the DB — never relies on cached state —
+ * so the result is deterministic and safe to use for programmatic redirects
+ * immediately after a DB write.
+ *
+ * Returns "/church-select" as a safe fallback for any unresolvable state.
+ */
 export async function getNextOnboardingPath() {
-  const flow = await getOnboarding();
-  if (!flow) return "/signup";
+  // Canonical map kept in sync with RequireAuth.jsx's STEP_TO_ROUTE.
+  const STEP_ROUTE = {
+    church: "/church-select",
+    cap:    "/giving-cap",
+    bank:   "/bank",
+    done:   "/dashboard",
+  };
 
-  switch (flow.step) {
-    case "church":
-      return "/church-select";
-    case "cap":
-      return "/giving-cap";
-    case "bank":
-      return "/bank";
-    case "done":
-      return "/dashboard";
-    default:
-      return "/church-select";
+  try {
+    const flow = await getOnboarding();
+    if (!flow?.step) return "/church-select";
+    return STEP_ROUTE[flow.step] ?? "/church-select";
+  } catch {
+    return "/church-select";
   }
 }
