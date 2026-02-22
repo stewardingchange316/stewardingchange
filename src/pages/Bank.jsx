@@ -5,16 +5,21 @@ import { supabase } from "../lib/supabase";
 export default function Bank() {
   const navigate = useNavigate();
   const [isFinishing, setIsFinishing] = useState(false);
- // Reset finishing state when user comes back to the page
+  // Reset finishing state when user returns from switching apps (iOS needs all three)
   useEffect(() => {
+    function resetFinishing() {
+      setIsFinishing(false);
+    }
     function handleVisibilityChange() {
-      if (document.visibilityState === "visible") {
-        setIsFinishing(false);
-      }
+      if (document.visibilityState === "visible") resetFinishing();
     }
     document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("pageshow", resetFinishing);
+    window.addEventListener("focus", resetFinishing);
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("pageshow", resetFinishing);
+      window.removeEventListener("focus", resetFinishing);
     };
   }, []);
 

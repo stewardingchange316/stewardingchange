@@ -29,16 +29,21 @@ export default function ChurchSelect() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  // Reset saving state when user comes back to the page
+  // Reset saving state when user returns from switching apps (iOS needs all three)
   useEffect(() => {
+    function resetSaving() {
+      setSaving(false);
+    }
     function handleVisibilityChange() {
-      if (document.visibilityState === "visible") {
-        setSaving(false);
-      }
+      if (document.visibilityState === "visible") resetSaving();
     }
     document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("pageshow", resetSaving);
+    window.addEventListener("focus", resetSaving);
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("pageshow", resetSaving);
+      window.removeEventListener("focus", resetSaving);
     };
   }, []);
 
