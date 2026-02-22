@@ -1,62 +1,23 @@
-import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 
 export default function Bank() {
   const navigate = useNavigate();
-  const [isFinishing, setIsFinishing] = useState(false);
-  const abortRef = useRef(null);
-
-  // Abort in-flight save when user switches apps — fixes iOS frozen "Saving..." state.
-  useEffect(() => {
-    function handleVisibilityChange() {
-      if (document.visibilityState === "hidden") {
-        abortRef.current?.abort();
-        setIsFinishing(false);
-      }
-    }
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, []);
-
-
 
   async function finishOnboarding(bankConnected) {
-    setIsFinishing(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
 
-    const controller = new AbortController();
-    abortRef.current = controller;
-    const safetyTimer = setTimeout(() => {
-      controller.abort();
-      setIsFinishing(false);
-    }, 8000);
+    const { error } = await supabase
+      .from("users")
+      .update({ onboarding_step: "done", bank_connected: bankConnected })
+      .eq("id", user.id)
+      .select();
 
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (controller.signal.aborted) return;
-      if (!user) {
-        setIsFinishing(false);
-        return;
-      }
-
-      const { error } = await supabase
-        .from("users")
-        .update({ onboarding_step: "done", bank_connected: bankConnected })
-        .eq("id", user.id)
-        .select()
-        .abortSignal(controller.signal);
-
-      if (controller.signal.aborted) return;
-      if (error) throw error;
-
+    if (!error) {
       navigate("/dashboard", { replace: true });
-    } catch (err) {
-      if (controller.signal.aborted || err.name === "AbortError") return;
-      console.error("Failed to finish onboarding:", err);
-      setIsFinishing(false);
-    } finally {
-      clearTimeout(safetyTimer);
-      abortRef.current = null;
+    } else {
+      console.error("Failed to finish onboarding:", error);
     }
   }
 
@@ -93,16 +54,14 @@ export default function Bank() {
             <button
               className="btn btn-secondary btn-sm"
               onClick={() => navigate("/giving-cap", { replace: true })}
-              disabled={isFinishing}
             >
               ← Back
             </button>
             <button
               className="btn btn-secondary btn-sm"
               onClick={handleSkipForNow}
-              disabled={isFinishing}
             >
-              {isFinishing ? "Saving..." : "Skip for now →"}
+              Skip for now →
             </button>
           </div>
 
@@ -124,9 +83,8 @@ export default function Bank() {
             <button
               className="btn btn-primary"
               onClick={handleConnectBank}
-              disabled={isFinishing}
             >
-              {isFinishing ? "Saving..." : "Connect bank"}
+              Connect bank
             </button>
           </div>
 

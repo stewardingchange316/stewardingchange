@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect, useRef } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 
@@ -27,21 +27,7 @@ export default function ChurchSelect() {
 
   const [selected, setSelected] = useState("");
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const abortRef = useRef(null);
-
-  // Abort in-flight save when user switches apps — fixes iOS frozen "Saving..." state.
-  useEffect(() => {
-    function handleVisibilityChange() {
-      if (document.visibilityState === "hidden") {
-        abortRef.current?.abort();
-        setSaving(false);
-      }
-    }
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, []);
 
   useEffect(() => {
     async function init() {
@@ -84,40 +70,24 @@ export default function ChurchSelect() {
     if (!selected) return;
 
     setError("");
-    setSaving(true);
-
-    const controller = new AbortController();
-    abortRef.current = controller;
-    const safetyTimer = setTimeout(() => {
-      controller.abort();
-      setSaving(false);
-    }, 8000);
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (controller.signal.aborted) return;
       if (!user) throw new Error("Not authenticated");
 
       const { error, data } = await supabase
         .from("users")
         .update({ church_id: selected, onboarding_step: "cap" })
         .eq("id", user.id)
-        .select()
-        .abortSignal(controller.signal);
+        .select();
 
-      if (controller.signal.aborted) return;
       if (error) throw error;
       if (!data || data.length === 0) throw new Error("Update did not persist");
 
       navigate("/giving-cap", { replace: true });
     } catch (err) {
-      if (controller.signal.aborted || err.name === "AbortError") return;
       console.error("Church save error:", err);
       setError("Unable to save your selection. Please try again.");
-      setSaving(false);
-    } finally {
-      clearTimeout(safetyTimer);
-      abortRef.current = null;
     }
   }
 
@@ -177,13 +147,12 @@ export default function ChurchSelect() {
               {isSelected && (
                 <button
                   className="church-continue-btn"
-                  disabled={saving}
                   onClick={(e) => {
                     e.stopPropagation();
                     continueNext();
                   }}
                 >
-                  {saving ? "Saving..." : "Continue →"}
+                  Continue →
                 </button>
               )}
             </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 
@@ -8,23 +8,7 @@ export default function GivingCap() {
   const navigate = useNavigate();
   const [weeklyCap, setWeeklyCap] = useState(25);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const abortRef = useRef(null);
-
-  // Abort in-flight save when user switches apps — fixes iOS frozen "Saving..." state.
-  // Resetting on "visible" is too late; the fetch may already be suspended indefinitely.
-  // Aborting on "hidden" collapses the Promise chain immediately via AbortError.
-  useEffect(() => {
-    function handleVisibilityChange() {
-      if (document.visibilityState === "hidden") {
-        abortRef.current?.abort();
-        setSaving(false);
-      }
-    }
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, []);
 
   useEffect(() => {
     async function loadUserData() {
@@ -63,41 +47,24 @@ export default function GivingCap() {
 
   async function handleContinue() {
     setError("");
-    setSaving(true);
-
-    const controller = new AbortController();
-    abortRef.current = controller;
-    // Safety net for genuinely slow networks (not for app-switching — abort handles that)
-    const safetyTimer = setTimeout(() => {
-      controller.abort();
-      setSaving(false);
-    }, 8000);
 
     try {
       const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
-      if (controller.signal.aborted) return;
       if (authError || !authUser) throw new Error("Not authenticated");
 
       const { error: updateError } = await supabase
         .from("users")
         .update({ weekly_cap: weeklyCap, onboarding_step: "bank" })
-        .eq("id", authUser.id)
-        .abortSignal(controller.signal);
+        .eq("id", authUser.id);
 
-      if (controller.signal.aborted) return;
       if (updateError) throw updateError;
 
       const { data: { user: freshUser } } = await supabase.auth.getUser();
-      if (controller.signal.aborted) return;
-
       const { data: freshProfile } = await supabase
         .from("users")
         .select("onboarding_step")
         .eq("id", freshUser.id)
-        .single()
-        .abortSignal(controller.signal);
-
-      if (controller.signal.aborted) return;
+        .single();
 
       if (freshProfile?.onboarding_step === "done") {
         navigate("/dashboard", { replace: true });
@@ -105,13 +72,8 @@ export default function GivingCap() {
         navigate("/bank", { replace: true });
       }
     } catch (err) {
-      if (controller.signal.aborted || err.name === "AbortError") return;
       console.error("Error saving weekly cap:", err);
       setError("Unable to save your selection. Please try again.");
-      setSaving(false);
-    } finally {
-      clearTimeout(safetyTimer);
-      abortRef.current = null;
     }
   }
 
@@ -163,9 +125,8 @@ export default function GivingCap() {
             <button
               className="btn btn-primary btn-sm"
               onClick={handleContinue}
-              disabled={saving}
             >
-              {saving ? "Saving..." : "Continue →"}
+              Continue →
             </button>
           </div>
 
