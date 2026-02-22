@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 
@@ -106,7 +106,7 @@ useEffect(() => {
     <div className="bg-wrap">
       <header className="header">
         <div className="header-inner">
-          <div className="brand">
+          <Link to="/" className="brand">
             <img
               src="/logo.png"
               alt="Stewarding Change Logo"
@@ -114,7 +114,7 @@ useEffect(() => {
               style={{ height: "170px", width: "170px", objectFit: "contain" }}
             />
             <div className="brand-name">Stewarding Change</div>
-          </div>
+          </Link>
         </div>
       </header>
 
