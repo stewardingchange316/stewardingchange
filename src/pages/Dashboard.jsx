@@ -13,13 +13,18 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser();
+      // getSession() reads from localStorage — no network call.
+      // RequireAuth has already verified this session, so re-calling
+      // getUser() (which hits the network) is redundant and causes the
+      // Loading flash on mobile.
+      const { data: { session } } = await supabase.auth.getSession();
 
-      if (!user) {
+      if (!session?.user) {
         nav("/", { replace: true });
         return;
       }
 
+      const user = session.user;
       setAuthUser(user);
 
       const { data, error } = await supabase
@@ -72,7 +77,8 @@ const churchName = churchMap[profile.church_id] || "Not selected";
 
   const firstName =
     profile.first_name ||
-    authUser?.email?.split("@")[0]?.replace(/[0-9]/g, "") ||
+    authUser?.user_metadata?.first_name ||
+    authUser?.email?.split("@")[0] ||
     "Friend";
 
   /* ================= UI ================= */
