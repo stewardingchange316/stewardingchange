@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
+import { writeProfileCache } from "../lib/profileCache";
 
 export default function Bank() {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ export default function Bank() {
       .select();
 
     if (!error) {
+      writeProfileCache(user.id, "done");
       navigate("/dashboard", { replace: true });
     } else {
       console.error("Failed to finish onboarding:", error);

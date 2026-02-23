@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
+import {
+  readProfileCache,
+  writeProfileCache,
+  clearProfileCache,
+} from "../../lib/profileCache";
 
 // ─── Static route tables ─────────────────────────────────────────────────────
 
@@ -12,55 +17,17 @@ const STEP_TO_ROUTE = {
 
 const ONBOARDING_ROUTES = new Set(Object.values(STEP_TO_ROUTE));
 
-// ─── Profile cache ────────────────────────────────────────────────────────────
-
-const CACHE_KEY = "sc_profile_v1";
-
-function readProfileCache(userId) {
-  try {
-    const raw = localStorage.getItem(CACHE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    if (parsed?.userId !== userId) return null;
-    return parsed.step ?? null;
-  } catch {
-    return null;
-  }
-}
-
-function writeProfileCache(userId, step) {
-  try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify({ userId, step }));
-  } catch {}
-}
-
-function clearProfileCache() {
-  try {
-    localStorage.removeItem(CACHE_KEY);
-  } catch {}
-}
-
 // ─── Synchronous initial state ────────────────────────────────────────────────
 //
-// These two functions are used as React lazy useState initializers.
-// They run synchronously — before the first render — so state is populated
-// from localStorage with zero async delay.
-//
-// For returning "done" users both functions return real values, not undefined.
-// That means the loading gate (`user === undefined || profile === undefined`)
-// is never true on the first render, and the dashboard appears instantly.
-//
-// RequireAuth only needs user.id for its routing logic. The full verified
-// user object is fetched in the background and replaces the minimal one.
-// Child components (Dashboard etc.) source their own user data independently.
+// Lazy useState initializers — run synchronously before the first render.
+// For returning "done" users both return real values so the loading gate
+// is never entered and the dashboard appears on frame 0.
 //
 function readInitialUser() {
   try {
-    const raw = localStorage.getItem(CACHE_KEY);
-    if (!raw) return undefined;
-    const { userId, step } = JSON.parse(raw);
-    if (!userId || step !== "done") return undefined;
-    return { id: userId };                    // minimal — only .id is needed here
+    const cached = JSON.parse(localStorage.getItem("sc_profile_v1") ?? "null");
+    if (!cached?.userId || cached.step !== "done") return undefined;
+    return { id: cached.userId };
   } catch {
     return undefined;
   }
@@ -68,11 +35,9 @@ function readInitialUser() {
 
 function readInitialProfile() {
   try {
-    const raw = localStorage.getItem(CACHE_KEY);
-    if (!raw) return undefined;
-    const { userId, step } = JSON.parse(raw);
-    if (!userId || step !== "done") return undefined;
-    return { id: userId, onboarding_step: "done" };
+    const cached = JSON.parse(localStorage.getItem("sc_profile_v1") ?? "null");
+    if (!cached?.userId || cached.step !== "done") return undefined;
+    return { id: cached.userId, onboarding_step: "done" };
   } catch {
     return undefined;
   }
@@ -80,20 +45,12 @@ function readInitialProfile() {
 
 // ─── Async helpers ────────────────────────────────────────────────────────────
 
-/**
- * Server-verified user. Always makes a network call.
- * Safe to use after getLocalSessionUser() has ensured a valid/refreshed token.
- */
 async function getVerifiedUser() {
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) return null;
   return user;
 }
 
-/**
- * Fast local session read. No network call if the access token is still valid.
- * If expired, Supabase refreshes it automatically before returning.
- */
 async function getLocalSessionUser() {
   const { data: { session } } = await supabase.auth.getSession();
   return session?.user ?? null;
@@ -148,15 +105,6 @@ async function resolveProfile(authUser) {
 export default function RequireAuth() {
   const location = useLocation();
 
-  /**
-   * State is initialized synchronously by the lazy initializers above.
-   *
-   * Returning "done" users:  user = { id }, profile = { onboarding_step: "done" }
-   *   → render gate never triggers, dashboard appears on frame 0.
-   *
-   * Everyone else:           user = undefined, profile = undefined
-   *   → render gate shows "Loading..." while the async bootstrap runs.
-   */
   const [user,    setUser]    = useState(readInitialUser);
   const [profile, setProfile] = useState(readInitialProfile);
 
@@ -164,56 +112,33 @@ export default function RequireAuth() {
   const mountedRef   = useRef(true);
 
   // ── Phase 1: Bootstrap ───────────────────────────────────────────────────────
-  //
-  // Two paths:
-  //
-  // OPTIMISTIC (cache hit, step === "done")
-  //   State is already populated → dashboard is on screen.
-  //   We only need to validate the session server-side in the background.
-  //   If valid   → upgrade minimal { id } user to the full verified object.
-  //   If invalid → clear cache, set null, redirect to sign-in.
-  //
-  // FULL LOAD (no cache, or step !== "done")
-  //   1. getLocalSessionUser()  — fast local read; auto-refreshes expired tokens.
-  //   2. getVerifiedUser()      — server-side JWT validation.
-  //   3. resolveProfile()       — DB fetch (or create for new users).
-  //   4. writeProfileCache()    — so the NEXT visit uses the optimistic path.
-  //
   useEffect(() => {
     mountedRef.current = true;
 
-    // Capture initial state values from the lazy initializers.
-    // These are the values as of the first render (what bootstrap should act on).
-    const initialUserId        = user?.id;
-    const initialStepIsDone    = profile?.onboarding_step === "done";
+    const initialUserId     = user?.id;
+    const initialStepIsDone = profile?.onboarding_step === "done";
 
     async function bootstrap() {
 
-      // ── Optimistic path ──────────────────────────────────────────────────────
+      // ── Optimistic path (returning "done" user, cache hit) ───────────────────
       if (initialUserId && initialStepIsDone) {
         lastFetchRef.current = { userId: initialUserId, pathname: location.pathname };
 
-        // IMPORTANT: use getLocalSessionUser() (= getSession()), NOT getVerifiedUser()
-        // (= getUser()) here. getUser() does not auto-refresh an expired access token
-        // and would incorrectly kick out a returning user whose access token has expired
-        // but whose refresh token is still valid. getSession() handles the refresh
-        // transparently, so the user is only evicted if their refresh token is also gone.
+        // getSession() auto-refreshes expired access tokens; getUser() does not.
         const sessionUser = await getLocalSessionUser();
         if (!mountedRef.current) return;
 
         if (!sessionUser || sessionUser.id !== initialUserId) {
-          // No valid session (both tokens gone) — redirect to sign-in.
           clearProfileCache();
           setUser(null);
           setProfile(null);
         } else {
-          // Session valid — upgrade the minimal { id } object to the full session user.
           setUser(sessionUser);
         }
         return;
       }
 
-      // ── Full load path ───────────────────────────────────────────────────────
+      // ── Full load path (new user / mid-onboarding) ───────────────────────────
       const sessionUser = await getLocalSessionUser();
       if (!mountedRef.current) return;
 
@@ -223,8 +148,6 @@ export default function RequireAuth() {
         return;
       }
 
-      // getLocalSessionUser() may have refreshed an expired token.
-      // getVerifiedUser() now validates that refreshed token server-side.
       const authUser = await getVerifiedUser();
       if (!mountedRef.current) return;
 
@@ -249,7 +172,6 @@ export default function RequireAuth() {
 
     bootstrap();
 
-    // Handle auth events that fire after bootstrap (magic link, sign-out, etc.)
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (event !== "SIGNED_IN" && event !== "SIGNED_OUT") return;
@@ -287,8 +209,17 @@ export default function RequireAuth() {
 
   // ── Phase 2: Re-fetch profile on navigation ───────────────────────────────────
   //
-  // Ensures onboarding_step is always fresh when making routing decisions.
-  // Skipped entirely for "done" users — the step is permanent, no re-fetch needed.
+  // Prevents routing decisions based on stale onboarding_step values.
+  //
+  // Cache-first: before making a DB round-trip, check whether the onboarding
+  // page that just navigated here already wrote "done" to the local cache.
+  // This eliminates the race where Phase 2's DB read returns a stale value
+  // (e.g. "bank") that would trigger a redirect back to /bank right after
+  // Bank.jsx wrote "done" and navigated to /dashboard.
+  //
+  // Onboarding pages that complete the final step MUST call writeProfileCache
+  // (from src/lib/profileCache.js) before calling navigate(). This guarantees
+  // Phase 2 always sees the correct step on the first render after navigation.
   //
   useEffect(() => {
     if (user    === undefined) return;
@@ -302,6 +233,17 @@ export default function RequireAuth() {
       return;
     }
 
+    // ── Cache-first check ─────────────────────────────────────────────────────
+    // If the cache already says "done" (written by the page before navigating),
+    // trust it and skip the DB fetch entirely. No loading flash, no stale read.
+    const cachedStep = readProfileCache(user.id);
+    if (cachedStep === "done") {
+      setProfile({ id: user.id, onboarding_step: "done" });
+      lastFetchRef.current = { userId: user.id, pathname: location.pathname };
+      return;
+    }
+
+    // ── Fresh DB fetch ────────────────────────────────────────────────────────
     let cancelled = false;
     setProfile(undefined);
 
@@ -317,10 +259,6 @@ export default function RequireAuth() {
   }, [location.pathname, user]); // profile intentionally excluded
 
   // ── Render gate ───────────────────────────────────────────────────────────────
-  //
-  // For returning "done" users, both values are non-undefined from frame 0
-  // (set by the lazy initializers), so this block is never entered.
-  //
   if (user === undefined || profile === undefined) {
     return (
       <div style={{ padding: 40, textAlign: "center" }}>
@@ -329,24 +267,20 @@ export default function RequireAuth() {
     );
   }
 
-  // ── Unauthenticated ───────────────────────────────────────────────────────────
   if (!user) {
     return <Navigate to="/" replace />;
   }
 
-  // ── Profile unresolvable ──────────────────────────────────────────────────────
   if (!profile) {
     return <Navigate to="/church-select" replace />;
   }
 
   const step = profile.onboarding_step;
 
-  // ── Onboarding complete ───────────────────────────────────────────────────────
   if (step === "done") {
     return <Outlet />;
   }
 
-  // ── Active onboarding step ────────────────────────────────────────────────────
   const expectedPath = STEP_TO_ROUTE[step];
 
   if (!expectedPath) {
