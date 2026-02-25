@@ -26,27 +26,29 @@ Deno.serve(async (req) => {
     return json({ error: "Missing Authorization header" }, 401);
   }
 
-  // SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY are
-  // auto-injected by Supabase into every Edge Function — no custom secret needed.
+  // Debug: log which env vars are present
+  console.log("[stripe-setup-intent] env check:", {
+    SUPABASE_URL:              !!Deno.env.get("SUPABASE_URL"),
+    SUPABASE_ANON_KEY:         !!Deno.env.get("SUPABASE_ANON_KEY"),
+    SUPABASE_SERVICE_ROLE_KEY: !!Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"),
+    STRIPE_SECRET_KEY:         !!Deno.env.get("STRIPE_SECRET_KEY"),
+    auth_header_present:       !!authHeader,
+  });
 
-  // User client: verifies the caller's JWT via the standard Supabase pattern
-  const userClient = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_ANON_KEY")!,
-    { global: { headers: { Authorization: authHeader } } }
-  );
-
-  const { data: { user }, error: authError } = await userClient.auth.getUser();
-  if (authError || !user) {
-    console.error("[stripe-setup-intent] JWT verification failed:", authError?.message);
-    return json({ error: "Unauthorized" }, 401);
-  }
-
-  // Admin client: bypasses RLS for DB reads/writes
+  // Admin client: used for JWT verification and DB operations
   const adminClient = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
+
+  const token = authHeader.replace("Bearer ", "");
+  const { data: { user }, error: authError } = await adminClient.auth.getUser(token);
+  if (authError || !user) {
+    console.error("[stripe-setup-intent] JWT verification failed:", authError?.message, authError?.status);
+    return json({ error: "Unauthorized" }, 401);
+  }
+
+  console.log("[stripe-setup-intent] user verified:", user.id);
 
   // ── Fetch existing profile ──────────────────────────────────────────────────
   const { data: profile, error: profileError } = await adminClient
