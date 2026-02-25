@@ -7,11 +7,11 @@ const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
   httpClient: Stripe.createFetchHttpClient(),
 });
 
-// Service-role client — used for all DB writes so RLS is bypassed correctly.
-// Never exposed to the frontend; only runs inside this server-side function.
+// SUPABASE_SERVICE_ROLE_KEY is auto-injected by Supabase — no custom secret needed.
+// Service-role client: bypasses RLS for all DB writes.
 const adminClient = createClient(
   Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("DB_SERVICE_ROLE_KEY")!
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
 );
 
 Deno.serve(async (req) => {
