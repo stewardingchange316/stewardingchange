@@ -8,6 +8,7 @@ import { writeProfileCache } from "../lib/profileCache";
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const SUPABASE_FUNCTIONS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Polling config: check every 2 s for up to 30 s
 const POLL_INTERVAL_MS  = 2_000;
@@ -40,6 +41,7 @@ export default function Bank() {
         method: "POST",
         headers: {
           Authorization: `Bearer ${session.access_token}`,
+          apikey: SUPABASE_ANON_KEY,
           "Content-Type": "application/json",
         },
       });
