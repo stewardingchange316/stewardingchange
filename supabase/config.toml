@@ -1,0 +1,10 @@
+[project]
+id = "rhghtegxlamvhxytwomx"
+
+# stripe-setup-intent handles its own JWT verification via adminClient.auth.getUser()
+[functions.stripe-setup-intent]
+verify_jwt = false
+
+# stripe-webhook is called by Stripe — no Supabase JWT exists
+[functions.stripe-webhook]
+verify_jwt = false
