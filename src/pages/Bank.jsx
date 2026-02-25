@@ -7,8 +7,6 @@ import { writeProfileCache } from "../lib/profileCache";
 // Stripe.js is loaded once at module level — avoids reloading on re-render
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
-const SUPABASE_FUNCTIONS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Polling config: check every 2 s for up to 30 s
 const POLL_INTERVAL_MS  = 2_000;
@@ -36,22 +34,16 @@ export default function Bank() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Session expired. Please sign in again.");
 
-      // Call the Edge Function to create/retrieve Stripe customer + SetupIntent
-      const res = await fetch(`${SUPABASE_FUNCTIONS_URL}/stripe-setup-intent`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-          apikey: SUPABASE_ANON_KEY,
-          "Content-Type": "application/json",
-        },
-      });
+      // supabase.functions.invoke() automatically attaches the correct
+      // Authorization and apikey headers from the initialized client.
+      const { data: fnData, error: fnError } = await supabase.functions.invoke(
+        "stripe-setup-intent",
+        { method: "POST" }
+      );
 
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.error ?? `Server error (${res.status})`);
-      }
+      if (fnError) throw new Error(fnError.message ?? "Failed to reach server");
 
-      const { client_secret } = await res.json();
+      const { client_secret } = fnData;
 
       const stripe = await stripePromise;
       if (!stripe) throw new Error("Stripe.js failed to load.");
