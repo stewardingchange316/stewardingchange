@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
   // ── Service-role client for DB reads/writes (bypasses RLS where needed) ─────
   const adminClient = createClient(
     Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    Deno.env.get("DB_SERVICE_ROLE_KEY")!
   );
 
   // ── Fetch existing profile ──────────────────────────────────────────────────

@@ -11,7 +11,7 @@ const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
 // Never exposed to the frontend; only runs inside this server-side function.
 const adminClient = createClient(
   Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+  Deno.env.get("DB_SERVICE_ROLE_KEY")!
 );
 
 Deno.serve(async (req) => {
