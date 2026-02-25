@@ -57,6 +57,7 @@ export default function Bank() {
         await stripe.collectBankAccountForSetup({
           clientSecret: client_secret,
           params: {
+            payment_method_type: "us_bank_account",
             payment_method_data: {
               billing_details: {
                 name:  billingName,
