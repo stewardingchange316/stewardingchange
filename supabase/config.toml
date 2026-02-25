@@ -1,5 +1,4 @@
-[project]
-id = "rhghtegxlamvhxytwomx"
+project_id = "rhghtegxlamvhxytwomx"
 
 # stripe-setup-intent handles its own JWT verification via adminClient.auth.getUser()
 [functions.stripe-setup-intent]
