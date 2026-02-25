@@ -22,26 +22,22 @@ Deno.serve(async (req) => {
 
   // ── Auth: verify caller via their Supabase JWT ──────────────────────────────
   const authHeader = req.headers.get("Authorization");
-  if (!authHeader) {
+  if (!authHeader?.startsWith("Bearer ")) {
     return json({ error: "Missing Authorization header" }, 401);
   }
 
-  const userClient = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_ANON_KEY")!,
-    { global: { headers: { Authorization: authHeader } } }
-  );
-
-  const { data: { user }, error: authError } = await userClient.auth.getUser();
-  if (authError || !user) {
-    return json({ error: "Unauthorized" }, 401);
-  }
-
-  // ── Service-role client for DB reads/writes (bypasses RLS where needed) ─────
+  // Use admin client to verify the user's JWT — avoids needing SUPABASE_ANON_KEY
   const adminClient = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("DB_SERVICE_ROLE_KEY")!
   );
+
+  const token = authHeader.replace("Bearer ", "");
+  const { data: { user }, error: authError } = await adminClient.auth.getUser(token);
+  if (authError || !user) {
+    console.error("[stripe-setup-intent] JWT verification failed:", authError);
+    return json({ error: "Unauthorized" }, 401);
+  }
 
   // ── Fetch existing profile ──────────────────────────────────────────────────
   const { data: profile, error: profileError } = await adminClient
