@@ -10,6 +10,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [authUser, setAuthUser] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -156,11 +157,41 @@ const churchName = churchMap[profile.church_id] || "Not selected";
             )}
           </div>
 
+          {bankConnected && (
+            <div className="row-between">
+              <div>
+                <div className="muted small">Giving Status</div>
+                <div>{paused ? "Paused" : "Active"}</div>
+              </div>
+              <button
+                className={`btn btn-sm ${paused ? "btn-primary" : "btn-secondary"}`}
+                onClick={() => setPaused(!paused)}
+              >
+                {paused ? "Resume Giving" : "Pause Giving"}
+              </button>
+            </div>
+          )}
+
           <div className="small muted">
             Every cent given is a tax-deductible donation.
             Weekly statements and an annual giving summary
             are automatically provided.
           </div>
+
+          {bankConnected && (
+            <div style={{ borderTop: "1px solid var(--color-border)", paddingTop: "var(--s-5)" }}>
+              <button
+                className="btn btn-danger btn-sm"
+                onClick={() => {
+                  if (confirm("Disconnect your bank account? You can reconnect at any time.")) {
+                    nav("/bank");
+                  }
+                }}
+              >
+                Disconnect Bank
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Mission Card (UNCHANGED UI) */}
