@@ -206,7 +206,7 @@ export default function Bank() {
     return (
       <div className="page">
         <div className="container-narrow">
-          <div className="glass card stack-6 mt-8" style={{ textAlign: "center" }}>
+          <div className="card stack-6 mt-8" style={{ textAlign: "center" }}>
             <h2>Verifying your bank connection&hellip;</h2>
             <p className="muted">
               This usually takes just a few seconds. Please don&rsquo;t close
@@ -223,7 +223,7 @@ export default function Bank() {
     return (
       <div className="page">
         <div className="container-narrow">
-          <div className="glass card stack-6 mt-8">
+          <div className="card stack-6 mt-8">
             <h2>Almost there</h2>
             <p className="muted">
               Your bank account is linked and pending final verification. This
@@ -246,17 +246,18 @@ export default function Bank() {
     return (
       <div className="page">
         <div className="container-narrow">
-          <div className="kicker mb-6">
-            <span className="dot" />
-            Step 3 of 3
+          <div className="progress-indicator">
+            <div className="progress-dot" />
+            <div className="progress-dot" />
+            <div className="progress-dot is-active" />
           </div>
 
           <h1 className="page-title">Authorize bank debits</h1>
 
-          <div className="glass card stack-6 mt-8">
+          <div className="card stack-6 mt-8">
             <div>
               <h3 className="mb-2">ACH Direct Debit Authorization</h3>
-              <p className="muted" style={{ fontSize: "0.875rem" }}>
+              <p className="muted small">
                 By authorizing, you allow Stewarding Change to electronically
                 debit your bank account for your configured roundup amounts, up
                 to your weekly cap. Debits are subject to{" "}
@@ -264,6 +265,7 @@ export default function Bank() {
                   href="https://stripe.com/legal/ach"
                   target="_blank"
                   rel="noopener noreferrer"
+                  className="text-link"
                 >
                   Stripe&rsquo;s ACH Direct Debit Terms
                 </a>
@@ -272,21 +274,13 @@ export default function Bank() {
               </p>
             </div>
 
-            <label
-              style={{
-                display: "flex",
-                gap: 10,
-                alignItems: "flex-start",
-                cursor: "pointer",
-              }}
-            >
+            <label className="mandate-row">
               <input
                 type="checkbox"
                 checked={mandateAccepted}
                 onChange={(e) => setMandateAccepted(e.target.checked)}
-                style={{ marginTop: 3, flexShrink: 0 }}
               />
-              <span style={{ fontSize: "0.875rem" }}>
+              <span className="small" style={{ color: "var(--color-text-body)" }}>
                 I authorize Stewarding Change to debit my bank account as
                 described above.
               </span>
@@ -326,9 +320,10 @@ export default function Bank() {
   return (
     <div className="page">
       <div className="container-narrow">
-        <div className="kicker mb-6">
-          <span className="dot" />
-          Step 3 of 3
+        <div className="progress-indicator">
+          <div className="progress-dot" />
+          <div className="progress-dot" />
+          <div className="progress-dot is-active" />
         </div>
 
         <h1 className="page-title">Connect your bank</h1>
@@ -338,7 +333,7 @@ export default function Bank() {
           donations. You remain fully in control at all times.
         </p>
 
-        <div className="glass card stack-6 mt-8">
+        <div className="card stack-6 mt-8">
           <div className="cap-nav">
             <button
               className="btn btn-secondary btn-sm"

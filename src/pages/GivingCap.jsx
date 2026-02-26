@@ -81,7 +81,7 @@ export default function GivingCap() {
     return (
       <div className="page">
         <div className="container-narrow center" style={{ minHeight: "60vh" }}>
-          <p>Loading...</p>
+          <div className="spinner" />
         </div>
       </div>
     );
@@ -91,9 +91,10 @@ export default function GivingCap() {
     <div className="page">
       <div className="container-narrow stack-8">
 
-        <div className="kicker">
-          <span className="dot" />
-          Step 2 of 3
+        <div className="progress-indicator">
+          <div className="progress-dot" />
+          <div className="progress-dot is-active" />
+          <div className="progress-dot" />
         </div>
 
         <div className="stack-3">
@@ -112,7 +113,7 @@ export default function GivingCap() {
           </div>
         )}
 
-        <div className="glass card stack-6">
+        <div className="card stack-6">
 
           {/* Back and Continue at top of card */}
           <div className="cap-nav">
@@ -173,7 +174,7 @@ export default function GivingCap() {
 
         </div>
 
-        <div className="glass card-tight stack-3">
+        <div className="card card-tight stack-3">
           <strong>100% Tax-Deductible Donations</strong>
           <div className="small">
             Every cent given through Stewarding Change is a tax-deductible

@@ -95,7 +95,7 @@ export default function ChurchSelect() {
     return (
       <div className="onboarding-page">
         <div className="center" style={{ minHeight: "60vh" }}>
-          <p>Loading...</p>
+          <div className="spinner" />
         </div>
       </div>
     );
@@ -103,7 +103,11 @@ export default function ChurchSelect() {
 
   return (
     <div className="onboarding-page">
-      <div className="onboarding-step">Step 1 of 3</div>
+      <div className="progress-indicator">
+        <div className="progress-dot is-active" />
+        <div className="progress-dot" />
+        <div className="progress-dot" />
+      </div>
 
       <h1>Select your church</h1>
       <p className="onboarding-subtext">

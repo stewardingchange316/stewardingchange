@@ -260,9 +260,7 @@ export default function Signup() {
           </div>
 
           {capsLock && (
-            <div style={{ color: "#f59e0b", fontSize: 12 }}>
-              Caps Lock is ON
-            </div>
+            <div className="hint warn">Caps Lock is ON</div>
           )}
 
           <div className={`password-strength s-${passwordStrength}`}>
@@ -270,19 +268,11 @@ export default function Signup() {
           </div>
 
           {/* Live password checklist */}
-          <ul style={{ fontSize: 12, paddingLeft: 16 }}>
-            <li style={{ color: password.length >= 8 ? "#16a34a" : "#9ca3af" }}>
-              At least 8 characters
-            </li>
-            <li style={{ color: /[A-Z]/.test(password) ? "#16a34a" : "#9ca3af" }}>
-              Contains uppercase letter
-            </li>
-            <li style={{ color: /[0-9]/.test(password) ? "#16a34a" : "#9ca3af" }}>
-              Contains a number
-            </li>
-            <li style={{ color: /[^A-Za-z0-9]/.test(password) ? "#16a34a" : "#9ca3af" }}>
-              Contains special character
-            </li>
+          <ul style={{ fontSize: 12, paddingLeft: 16, margin: "4px 0 0" }}>
+            <li className={`check-item ${password.length >= 8 ? "pass" : ""}`}>At least 8 characters</li>
+            <li className={`check-item ${/[A-Z]/.test(password) ? "pass" : ""}`}>Contains uppercase letter</li>
+            <li className={`check-item ${/[0-9]/.test(password) ? "pass" : ""}`}>Contains a number</li>
+            <li className={`check-item ${/[^A-Za-z0-9]/.test(password) ? "pass" : ""}`}>Contains special character</li>
           </ul>
 
           {/* CONFIRM PASSWORD */}
@@ -310,59 +300,31 @@ export default function Signup() {
           </div>
 
           {confirm && (
-            <div
-              style={{
-                fontSize: 12,
-                marginTop: 4,
-                color: password === confirm ? "#16a34a" : "#dc2626",
-              }}
-            >
-              {password === confirm
-                ? "Passwords match"
-                : "Passwords do not match"}
+            <div className={`hint ${password === confirm ? "good" : "bad"}`}>
+              {password === confirm ? "Passwords match" : "Passwords do not match"}
             </div>
           )}
 
           {/* TERMS */}
-   {/* TERMS */}
-<div
-  style={{
-    marginTop: 16,
-    textAlign: "center"
-  }}
->
-  <label
-    style={{
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      gap: 8,
-      cursor: "pointer"
-    }}
-  >
-    <input
-      type="checkbox"
-      checked={acceptedTerms}
-      onChange={(e) => setAcceptedTerms(e.target.checked)}
-    />
-
-    <span style={{ fontSize: 14, maxWidth: 300 }}>
-      I agree to the{" "}
-      <Link to="/terms" target="_blank" className="link-button">
-        Terms of Service
-      </Link>{" "}
-      and{" "}
-      <Link to="/privacy" target="_blank" className="link-button">
-        Privacy Policy
-      </Link>.
-    </span>
-  </label>
-</div>
+          <div className="terms-row">
+            <input
+              type="checkbox"
+              checked={acceptedTerms}
+              onChange={(e) => setAcceptedTerms(e.target.checked)}
+              style={{ marginTop: 2, flexShrink: 0, accentColor: "var(--color-brand)" }}
+            />
+            <label style={{ margin: 0, cursor: "pointer" }}>
+              I agree to the{" "}
+              <Link to="/terms" target="_blank" className="link-button">Terms of Service</Link>
+              {" "}and{" "}
+              <Link to="/privacy" target="_blank" className="link-button">Privacy Policy</Link>.
+            </label>
+          </div>
 
 
           {error && <div className="auth-error">{error}</div>}
 
-          <button type="submit" className="primary" disabled={!canSubmit || submitting}>
+          <button type="submit" className="btn btn-primary btn-wide" style={{ marginTop: "var(--s-5)" }} disabled={!canSubmit || submitting}>
             {submitting ? "Creating account…" : "Continue"}
           </button>
         </form>

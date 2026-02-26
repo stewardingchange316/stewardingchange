@@ -108,7 +108,7 @@ const churchName = churchMap[profile.church_id] || "Not selected";
         </div>
 
         {/* Profile Card */}
-        <div className="glass card stack-6">
+        <div className="card stack-6">
           <h3>Your Stewarding Profile</h3>
 
          <div className="row-between">
@@ -164,7 +164,7 @@ const churchName = churchMap[profile.church_id] || "Not selected";
         </div>
 
         {/* Mission Card (UNCHANGED UI) */}
-        <div className="glass card stack-6">
+        <div className="card stack-6">
           <div className="stack-2">
             <h3>Current Church Goal</h3>
             <h2>Food Truck Outreach Initiative</h2>
@@ -183,23 +183,8 @@ const churchName = churchMap[profile.church_id] || "Not selected";
               We’re making meaningful progress toward this mission.
             </div>
 
-            <div
-              style={{
-                height: "10px",
-                borderRadius: "999px",
-                background: "rgba(255,255,255,0.08)",
-                overflow: "hidden",
-              }}
-            >
-              <div
-                style={{
-                  width: "64%",
-                  height: "100%",
-                  background:
-                    "linear-gradient(90deg, rgba(17,240,180,1), rgba(47,128,255,1))",
-                  borderRadius: "999px",
-                }}
-              />
+            <div className="progress-bar">
+              <div className="progress-fill" style={{ width: "64%" }} />
             </div>
 
             <div className="muted small">

@@ -1,110 +1,101 @@
 /* src/styles/tokens.css */
-/* Premium “fintech” tokens: deep graphite + emerald + subtle neon */
+/* Stewarding Change — light mode design tokens */
 
 :root {
-  /* ---- Brand palette ---- */
-  --bg-0: #06090d;
-  --bg-1: #070c12;
-  --bg-2: #0a111a;
-  --bg-3: #0d1622;
+  /* ---- Colors ---- */
+  --color-bg:            #f8f7f4;   /* off-white page background */
+  --color-surface:       #ffffff;   /* cards, panels */
+  --color-surface-2:     #f3f2ef;   /* input backgrounds, secondary surface */
+  --color-border:        #e4e2dd;   /* default borders */
+  --color-border-strong: #c9c6bf;   /* emphasized borders */
 
-  --surface-0: rgba(255, 255, 255, 0.04);
-  --surface-1: rgba(255, 255, 255, 0.06);
-  --surface-2: rgba(255, 255, 255, 0.08);
-  --surface-3: rgba(255, 255, 255, 0.10);
+  --color-text-primary:  #1a1f2e;   /* headings, strong labels */
+  --color-text-body:     #3d3f4a;   /* body copy */
+  --color-text-muted:    #7a7d8a;   /* helper text, labels */
+  --color-text-inverse:  #ffffff;   /* text on dark backgrounds */
 
-  --stroke-0: rgba(255, 255, 255, 0.08);
-  --stroke-1: rgba(255, 255, 255, 0.12);
-  --stroke-2: rgba(255, 255, 255, 0.16);
+  --color-brand:         #3d6b4f;   /* muted forest green */
+  --color-brand-hover:   #2f5540;
+  --color-brand-light:   #eaf3ed;   /* brand tint for selected states */
 
-  --text-0: rgba(255, 255, 255, 0.92);
-  --text-1: rgba(255, 255, 255, 0.78);
-  --text-2: rgba(255, 255, 255, 0.60);
-  --text-3: rgba(255, 255, 255, 0.42);
-
-  --muted-0: rgba(255, 255, 255, 0.10);
-  --muted-1: rgba(255, 255, 255, 0.14);
-
-  --brand-0: #11f0b4; /* neon mint */
-  --brand-1: #19d59b; /* emerald */
-  --brand-2: #0fbf82; /* deeper emerald */
-  --brand-3: #0b8a62; /* forest */
-
-  --cyan: #2fe7ff;
-  --blue: #2f80ff;
-  --purple: #8a5bff;
-  --amber: #ffcc66;
-  --red: #ff4d6d;
+  --color-danger:        #c0392b;
+  --color-danger-light:  #fdf0ef;
+  --color-success:       #2e7d52;
+  --color-success-light: #edf7f2;
+  --color-warning:       #a56c00;
+  --color-warning-light: #fef9ec;
 
   /* ---- Shadows ---- */
-  --shadow-1: 0 8px 24px rgba(0,0,0,0.35);
-  --shadow-2: 0 16px 48px rgba(0,0,0,0.45);
-  --shadow-3: 0 24px 72px rgba(0,0,0,0.55);
-
-  --glow-brand: 0 0 0 1px rgba(17,240,180,0.20), 0 16px 48px rgba(17,240,180,0.10);
-  --glow-brand-strong: 0 0 0 1px rgba(17,240,180,0.28), 0 24px 72px rgba(17,240,180,0.16);
+  --shadow-xs: 0 1px 2px rgba(26, 31, 46, 0.06);
+  --shadow-sm: 0 1px 3px rgba(26, 31, 46, 0.08), 0 1px 2px rgba(26, 31, 46, 0.04);
+  --shadow-md: 0 4px 6px rgba(26, 31, 46, 0.07), 0 2px 4px rgba(26, 31, 46, 0.04);
+  --shadow-lg: 0 10px 15px rgba(26, 31, 46, 0.07), 0 4px 6px rgba(26, 31, 46, 0.04);
+  --shadow-xl: 0 20px 25px rgba(26, 31, 46, 0.08), 0 8px 10px rgba(26, 31, 46, 0.04);
 
   /* ---- Radii ---- */
-  --r-xs: 10px;
-  --r-sm: 14px;
-  --r-md: 18px;
-  --r-lg: 22px;
-  --r-xl: 28px;
-  --r-2xl: 34px;
+  --r-sm:   6px;
+  --r-md:   10px;
+  --r-lg:   14px;
+  --r-xl:   20px;
+  --r-full: 9999px;
 
-  /* ---- Spacing ---- */
-  --s-1: 4px;
-  --s-2: 8px;
-  --s-3: 12px;
-  --s-4: 16px;
-  --s-5: 20px;
-  --s-6: 24px;
-  --s-7: 28px;
-  --s-8: 32px;
-  --s-9: 40px;
-  --s-10: 48px;
-  --s-11: 56px;
-  --s-12: 64px;
-  --s-13: 72px;
-  --s-14: 80px;
+  /* ---- Spacing (8px grid) ---- */
+  --s-1:  4px;
+  --s-2:  8px;
+  --s-3:  12px;
+  --s-4:  16px;
+  --s-5:  20px;
+  --s-6:  24px;
+  --s-7:  32px;
+  --s-8:  40px;
+  --s-9:  48px;
+  --s-10: 56px;
+  --s-11: 64px;
+  --s-12: 80px;
 
   /* ---- Typography ---- */
-  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-  --fs-0: 12px;
-  --fs-1: 14px;
-  --fs-2: 16px;
-  --fs-3: 18px;
-  --fs-4: 20px;
-  --fs-5: 24px;
-  --fs-6: 30px;
-  --fs-7: 36px;
-  --fs-8: 44px;
-  --fs-9: 52px;
-  --fs-10: 64px;
+  --fs-0:  11px;
+  --fs-1:  13px;
+  --fs-2:  15px;
+  --fs-3:  17px;
+  --fs-4:  20px;
+  --fs-5:  24px;
+  --fs-6:  30px;
+  --fs-7:  36px;
+  --fs-8:  44px;
 
-  --lh-tight: 1.05;
-  --lh-snug: 1.15;
-  --lh-normal: 1.35;
-  --lh-relaxed: 1.55;
+  --lh-tight:   1.1;
+  --lh-snug:    1.25;
+  --lh-normal:  1.5;
+  --lh-relaxed: 1.65;
+
+  --fw-normal:    400;
+  --fw-medium:    500;
+  --fw-semibold:  600;
+  --fw-bold:      700;
+  --fw-extrabold: 800;
 
   /* ---- Motion ---- */
-  --ease-out: cubic-bezier(.16,1,.3,1);
-  --ease-in: cubic-bezier(.7,0,.84,0);
-  --ease: cubic-bezier(.2,.8,.2,1);
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --ease-in:  cubic-bezier(.7, 0, .84, 0);
+  --ease:     cubic-bezier(.2, .8, .2, 1);
 
-  --dur-1: 120ms;
-  --dur-2: 180ms;
-  --dur-3: 240ms;
-  --dur-4: 320ms;
-  --dur-5: 420ms;
+  --dur-1: 100ms;
+  --dur-2: 160ms;
+  --dur-3: 220ms;
+  --dur-4: 300ms;
+  --dur-5: 400ms;
 
   /* ---- Layout ---- */
-  --container: 1120px;
-  --container-narrow: 900px;
-  --header-h: 72px;
+  --container-max:  1100px;
+  --content-max:    480px;
+  --container:      1100px;        /* backward compat alias */
+  --container-narrow: 480px;       /* backward compat alias */
+  --header-h:       64px;
 
   /* ---- Focus ---- */
-  --focus-ring: 0 0 0 3px rgba(17,240,180,0.22), 0 0 0 1px rgba(17,240,180,0.35);
+  --focus-ring: 0 0 0 3px rgba(61, 107, 79, 0.20);
 }

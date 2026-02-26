@@ -17,7 +17,8 @@ export default function Verified() {
         </p>
 
         <button
-          className="primary"
+          className="btn btn-primary btn-wide"
+          style={{ marginTop: "var(--s-5)" }}
           onClick={() => navigate("/church-select")}
         >
           Start Setup
