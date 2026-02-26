@@ -1,36 +1,36 @@
 /* src/styles/tokens.css */
-/* Stewarding Change — light mode design tokens */
+/* Stewarding Change — refined dark mode design tokens */
 
 :root {
   /* ---- Colors ---- */
-  --color-bg:            #f8f7f4;   /* off-white page background */
-  --color-surface:       #ffffff;   /* cards, panels */
-  --color-surface-2:     #f3f2ef;   /* input backgrounds, secondary surface */
-  --color-border:        #e4e2dd;   /* default borders */
-  --color-border-strong: #c9c6bf;   /* emphasized borders */
+  --color-bg:            #0f1117;   /* near-black page background */
+  --color-surface:       #1a1d27;   /* card/panel background */
+  --color-surface-2:     #222535;   /* secondary surface, hover states */
+  --color-border:        #2a2e40;   /* default borders */
+  --color-border-strong: #3a3f58;   /* emphasized borders */
 
-  --color-text-primary:  #1a1f2e;   /* headings, strong labels */
-  --color-text-body:     #3d3f4a;   /* body copy */
-  --color-text-muted:    #7a7d8a;   /* helper text, labels */
-  --color-text-inverse:  #ffffff;   /* text on dark backgrounds */
+  --color-text-primary:  #f0f0f4;   /* headings */
+  --color-text-body:     #b0b4c4;   /* body copy */
+  --color-text-muted:    #606478;   /* labels, helper text */
+  --color-text-inverse:  #ffffff;   /* text on brand bg */
 
-  --color-brand:         #3d6b4f;   /* muted forest green */
-  --color-brand-hover:   #2f5540;
-  --color-brand-light:   #eaf3ed;   /* brand tint for selected states */
+  --color-brand:         #5a9b6f;   /* forest green (lighter for dark mode) */
+  --color-brand-hover:   #4d8760;
+  --color-brand-light:   rgba(90, 155, 111, 0.14); /* brand tint */
 
-  --color-danger:        #c0392b;
-  --color-danger-light:  #fdf0ef;
-  --color-success:       #2e7d52;
-  --color-success-light: #edf7f2;
-  --color-warning:       #a56c00;
-  --color-warning-light: #fef9ec;
+  --color-danger:        #e05c4b;
+  --color-danger-light:  rgba(224, 92, 75, 0.12);
+  --color-success:       #4caf7a;
+  --color-success-light: rgba(76, 175, 122, 0.12);
+  --color-warning:       #d4a040;
+  --color-warning-light: rgba(212, 160, 64, 0.12);
 
   /* ---- Shadows ---- */
-  --shadow-xs: 0 1px 2px rgba(26, 31, 46, 0.06);
-  --shadow-sm: 0 1px 3px rgba(26, 31, 46, 0.08), 0 1px 2px rgba(26, 31, 46, 0.04);
-  --shadow-md: 0 4px 6px rgba(26, 31, 46, 0.07), 0 2px 4px rgba(26, 31, 46, 0.04);
-  --shadow-lg: 0 10px 15px rgba(26, 31, 46, 0.07), 0 4px 6px rgba(26, 31, 46, 0.04);
-  --shadow-xl: 0 20px 25px rgba(26, 31, 46, 0.08), 0 8px 10px rgba(26, 31, 46, 0.04);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.30);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35), 0 1px 2px rgba(0, 0, 0, 0.20);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.35), 0 2px 4px rgba(0, 0, 0, 0.20);
+  --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.40), 0 4px 8px rgba(0, 0, 0, 0.24);
+  --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.50), 0 8px 16px rgba(0, 0, 0, 0.28);
 
   /* ---- Radii ---- */
   --r-sm:   6px;
@@ -90,12 +90,12 @@
   --dur-5: 400ms;
 
   /* ---- Layout ---- */
-  --container-max:  1100px;
-  --content-max:    480px;
-  --container:      1100px;        /* backward compat alias */
+  --container-max:    1100px;
+  --content-max:      480px;
+  --container:        1100px;      /* backward compat alias */
   --container-narrow: 480px;       /* backward compat alias */
-  --header-h:       64px;
+  --header-h:         64px;
 
   /* ---- Focus ---- */
-  --focus-ring: 0 0 0 3px rgba(61, 107, 79, 0.20);
+  --focus-ring: 0 0 0 3px rgba(90, 155, 111, 0.25);
 }
