@@ -1,8 +1,11 @@
-// web/src/pages/Dashboard.jsx
-
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+
+const CHURCH_MAP = {
+  countryside: "Countryside Christian Church",
+  grace: "Grace Community Church",
+};
 
 export default function Dashboard() {
   const nav = useNavigate();
@@ -14,10 +17,6 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function load() {
-      // getSession() reads from localStorage — no network call.
-      // RequireAuth has already verified this session, so re-calling
-      // getUser() (which hits the network) is redundant and causes the
-      // Loading flash on mobile.
       const { data: { session } } = await supabase.auth.getSession();
 
       if (!session?.user) {
@@ -47,183 +46,227 @@ export default function Dashboard() {
     load();
   }, [nav]);
 
+  async function handleSignOut() {
+    await supabase.auth.signOut();
+    nav("/");
+  }
+
   if (loading || !profile) {
     return (
-      <div className="page">
-        <div className="container-narrow">
-          <p>Loading...</p>
+      <>
+        <header className="header">
+          <div className="header-inner">
+            <Link to="/" className="brand">
+              <img src="/logo.png" alt="Stewarding Change" className="brand-mark" style={{ height: "36px", width: "36px", objectFit: "contain" }} />
+              <span className="brand-name">Stewarding Change</span>
+            </Link>
+          </div>
+        </header>
+        <div className="center" style={{ minHeight: "60vh" }}>
+          <div className="spinner" />
         </div>
-      </div>
+      </>
     );
   }
 
-  /* ================= Derived Values ================= */
-
-  const churchMap = {
-  countryside: "Countryside Christian Church",
-  grace: "Grace Community Church",
-};
-
-const churchName = churchMap[profile.church_id] || "Not selected";
-
-
-  const givingCap =
-    profile.weekly_cap === null
-      ? "No limit"
-      : typeof profile.weekly_cap === "number"
-      ? `$${profile.weekly_cap} per week`
-      : "Not set";
-
+  /* ── Derived values ── */
+  const churchName   = CHURCH_MAP[profile.church_id] || "Not selected";
   const bankConnected = profile.bank_connected === true;
+  const firstName    = profile.first_name
+    || authUser?.user_metadata?.first_name
+    || authUser?.email?.split("@")[0]
+    || "Friend";
 
-  const firstName =
-    profile.first_name ||
-    authUser?.user_metadata?.first_name ||
-    authUser?.email?.split("@")[0] ||
-    "Friend";
+  const givingCap = profile.weekly_cap === null
+    ? "No limit"
+    : typeof profile.weekly_cap === "number"
+    ? `$${profile.weekly_cap} / week`
+    : "Not set";
 
-  /* ================= UI ================= */
+  const initials = firstName.charAt(0).toUpperCase();
 
+  /* ── UI ── */
   return (
-    <div className="page">
-      <div className="container-narrow stack-8">
+    <div className="dash-root">
 
-        {/* Welcome */}
-        <div className="row-between">
-          <div className="stack-2">
-            <h2>Welcome back, {firstName} 👋</h2>
-            <div className="muted">
-              You’re stewarding with {churchName}.
-            </div>
-          </div>
+      {/* ── Header ── */}
+      <header className="header">
+        <div className="header-inner">
+          <Link to="/" className="brand">
+            <img
+              src="/logo.png"
+              alt="Stewarding Change"
+              className="brand-mark"
+              style={{ height: "36px", width: "36px", objectFit: "contain" }}
+            />
+            <span className="brand-name">Stewarding Change</span>
+          </Link>
 
-          <button
-            className="btn btn-ghost btn-sm"
-            onClick={async () => {
-              await supabase.auth.signOut();
-              nav("/");
-            }}
-          >
-            Sign out
-          </button>
-        </div>
-
-        {/* Profile Card */}
-        <div className="card stack-6">
-          <h3>Your Stewarding Profile</h3>
-
-         <div className="row-between">
-  <div>
-    <div className="muted small">Church</div>
-    <div>{churchName}</div>
-  </div>
-  <button
-    className="btn btn-secondary btn-sm"
-    onClick={() => nav("/church-select")}
-  >
-    Edit
-  </button>
-</div>
-
-          <div className="row-between">
-            <div>
-              <div className="muted small">Weekly Cap</div>
-              <div>{givingCap}</div>
-            </div>
-
-            <button
-              className="btn btn-secondary btn-sm"
-              onClick={() => nav("/giving-cap")}
-            >
-              Edit
+          <div style={{ display: "flex", alignItems: "center", gap: "var(--s-3)" }}>
+            <div className="dash-avatar">{initials}</div>
+            <button className="btn btn-ghost btn-sm" onClick={handleSignOut}>
+              Sign out
             </button>
           </div>
+        </div>
+      </header>
 
-          <div className="row-between">
-            <div>
-              <div className="muted small">Bank Status</div>
-              <div>
-                {bankConnected ? "Connected securely" : "Not connected"}
-              </div>
-            </div>
+      {/* ── Page body ── */}
+      <div className="dash-body">
+        <div className="container-narrow stack-7">
 
-            {!bankConnected && (
-              <button
-                className="btn btn-primary btn-sm"
-                onClick={() => nav("/bank")}
-              >
-                Connect Now
-              </button>
-            )}
+          {/* ── Welcome ── */}
+          <div className="stack-1">
+            <h2 style={{ margin: 0 }}>Welcome back, {firstName}</h2>
+            <p className="muted" style={{ margin: 0 }}>
+              Stewarding with {churchName}
+            </p>
           </div>
 
+          {/* ── Giving stats row ── */}
+          <div className="dash-stats">
+            <div className="dash-stat">
+              <div className="dash-stat-label">This Month</div>
+              <div className="dash-stat-value">$0.00</div>
+            </div>
+            <div className="dash-stat">
+              <div className="dash-stat-label">All Time</div>
+              <div className="dash-stat-value">$0.00</div>
+            </div>
+            <div className="dash-stat">
+              <div className="dash-stat-label">Transactions</div>
+              <div className="dash-stat-value">0</div>
+            </div>
+          </div>
+
+          {/* ── Giving status banner (when bank connected) ── */}
           {bankConnected && (
-            <div className="row-between">
-              <div>
-                <div className="muted small">Giving Status</div>
-                <div>{paused ? "Paused" : "Active"}</div>
+            <div className={`dash-status-banner ${paused ? "is-paused" : "is-active"}`}>
+              <div style={{ display: "flex", alignItems: "center", gap: "var(--s-3)" }}>
+                <div className={`status-dot ${paused ? "is-paused" : "is-active"}`} />
+                <div>
+                  <div style={{ fontWeight: "var(--fw-semibold)", fontSize: "var(--fs-2)", color: "var(--color-text-primary)" }}>
+                    {paused ? "Giving Paused" : "Giving Active"}
+                  </div>
+                  <div className="small muted">
+                    {paused
+                      ? "Resume to continue rounding up purchases"
+                      : "Rounding up purchases automatically"}
+                  </div>
+                </div>
               </div>
               <button
                 className={`btn btn-sm ${paused ? "btn-primary" : "btn-secondary"}`}
                 onClick={() => setPaused(!paused)}
               >
-                {paused ? "Resume Giving" : "Pause Giving"}
+                {paused ? "Resume" : "Pause"}
               </button>
             </div>
           )}
 
-          <div className="small muted">
-            Every cent given is a tax-deductible donation.
-            Weekly statements and an annual giving summary
-            are automatically provided.
-          </div>
-
-          {bankConnected && (
-            <div style={{ borderTop: "1px solid var(--color-border)", paddingTop: "var(--s-5)" }}>
-              <button
-                className="btn btn-danger btn-sm"
-                onClick={() => {
-                  if (confirm("Disconnect your bank account? You can reconnect at any time.")) {
-                    nav("/bank");
-                  }
-                }}
-              >
-                Disconnect Bank
+          {/* ── Bank connect prompt (when not connected) ── */}
+          {!bankConnected && (
+            <div className="dash-status-banner is-pending">
+              <div style={{ display: "flex", alignItems: "center", gap: "var(--s-3)" }}>
+                <div className="status-dot is-pending" />
+                <div>
+                  <div style={{ fontWeight: "var(--fw-semibold)", fontSize: "var(--fs-2)", color: "var(--color-text-primary)" }}>
+                    Bank not connected
+                  </div>
+                  <div className="small muted">Connect your bank to start giving</div>
+                </div>
+              </div>
+              <button className="btn btn-primary btn-sm" onClick={() => nav("/bank")}>
+                Connect Now
               </button>
             </div>
           )}
+
+          {/* ── Account card ── */}
+          <div className="card stack-5">
+            <div className="row-between">
+              <h3 style={{ margin: 0 }}>Account</h3>
+            </div>
+
+            <div className="dash-row">
+              <div>
+                <div className="dash-row-label">Church</div>
+                <div className="dash-row-value">{churchName}</div>
+              </div>
+              <button className="btn btn-secondary btn-sm" onClick={() => nav("/church-select")}>Edit</button>
+            </div>
+
+            <div className="dash-divider" />
+
+            <div className="dash-row">
+              <div>
+                <div className="dash-row-label">Weekly Cap</div>
+                <div className="dash-row-value">{givingCap}</div>
+              </div>
+              <button className="btn btn-secondary btn-sm" onClick={() => nav("/giving-cap")}>Edit</button>
+            </div>
+
+            <div className="dash-divider" />
+
+            <div className="dash-row">
+              <div>
+                <div className="dash-row-label">Bank Account</div>
+                <div className="dash-row-value">
+                  {bankConnected ? "Connected securely" : "Not connected"}
+                </div>
+              </div>
+              {bankConnected
+                ? <button
+                    className="btn btn-danger btn-sm"
+                    onClick={() => {
+                      if (confirm("Disconnect your bank account? You can reconnect at any time.")) {
+                        nav("/bank");
+                      }
+                    }}
+                  >
+                    Disconnect
+                  </button>
+                : <button className="btn btn-primary btn-sm" onClick={() => nav("/bank")}>
+                    Connect
+                  </button>
+              }
+            </div>
+
+            <p className="small muted" style={{ margin: 0 }}>
+              All donations are 100% tax-deductible. Weekly statements and an annual giving
+              summary are provided automatically.
+            </p>
+          </div>
+
+          {/* ── Mission card ── */}
+          <div className="card stack-5">
+            <div className="stack-1">
+              <div className="kicker" style={{ marginBottom: 0 }}>
+                <span className="dot" />
+                {churchName}
+              </div>
+              <h3 style={{ margin: 0 }}>Food Truck Outreach Initiative</h3>
+            </div>
+
+            <p className="muted" style={{ margin: 0, fontSize: "var(--fs-2)" }}>
+              Our church is working toward launching a food truck that will serve warm meals
+              across Clearwater to families in need. Once funded, outreach days will be
+              shared so you can see the impact firsthand.
+            </p>
+
+            <div className="stack-2">
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span className="small muted">Progress toward goal</span>
+                <span className="small" style={{ color: "var(--color-brand)", fontWeight: "var(--fw-semibold)" }}>64%</span>
+              </div>
+              <div className="progress-bar">
+                <div className="progress-fill" style={{ width: "64%" }} />
+              </div>
+              <p className="small muted" style={{ margin: 0 }}>Every purchase rounded up moves this forward.</p>
+            </div>
+          </div>
+
         </div>
-
-        {/* Mission Card (UNCHANGED UI) */}
-        <div className="card stack-6">
-          <div className="stack-2">
-            <h3>Current Church Goal</h3>
-            <h2>Food Truck Outreach Initiative</h2>
-          </div>
-
-          <div className="muted">
-            Our church is working toward launching a food truck
-            that will serve warm meals across Clearwater to families in need.
-            Once funded, outreach days will be shared so you can see
-            the impact firsthand.
-          </div>
-
-          {/* Vague Progress */}
-          <div className="stack-2">
-            <div className="muted small">
-              We’re making meaningful progress toward this mission.
-            </div>
-
-            <div className="progress-bar">
-              <div className="progress-fill" style={{ width: "64%" }} />
-            </div>
-
-            <div className="muted small">
-              Every swipe helps move this goal forward.
-            </div>
-          </div>
-        </div>
-
       </div>
     </div>
   );
