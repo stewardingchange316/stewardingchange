@@ -197,7 +197,7 @@ export default function Admin() {
       const [{ data: userData }, { data: churchData }] = await Promise.all([
         supabase
           .from("users")
-          .select("id, first_name, last_name, email, church_id, weekly_cap, bank_connected, onboarding_step, role, created_at, churches(name)")
+          .select("id, first_name, last_name, email, church_id, weekly_cap, bank_connected, onboarding_step, role, created_at")
           .order("created_at", { ascending: false }),
         supabase
           .from("churches")
@@ -342,6 +342,7 @@ export default function Admin() {
                   )}
                   {users.map((u) => {
                     const name = [u.first_name, u.last_name].filter(Boolean).join(" ") || "—";
+                    const churchName = churches.find((c) => c.id === u.church_id)?.name;
                     const cap = u.weekly_cap === null
                       ? <span className="muted">No limit</span>
                       : `$${u.weekly_cap} / wk`;
@@ -352,7 +353,7 @@ export default function Admin() {
                           {name}
                         </td>
                         <td style={{ color: "var(--color-text-muted)" }}>{u.email || "—"}</td>
-                        <td style={{ whiteSpace: "nowrap" }}>{u.churches?.name || <span className="muted">—</span>}</td>
+                        <td style={{ whiteSpace: "nowrap" }}>{churchName || <span className="muted">—</span>}</td>
                         <td>{cap}</td>
                         <td>
                           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
