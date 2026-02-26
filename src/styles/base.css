@@ -396,7 +396,7 @@ button.primary:disabled {
   color: var(--color-text-primary);
 }
 
-.auth-card input {
+.auth-card input:not([type="checkbox"]) {
   width: 100%;
   padding: 11px 14px;
   border-radius: var(--r-md);
@@ -408,12 +408,12 @@ button.primary:disabled {
   transition: border-color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
 }
 
-.auth-card input:focus {
+.auth-card input:not([type="checkbox"]):focus {
   border-color: var(--color-brand);
   box-shadow: var(--focus-ring);
 }
 
-.auth-card input::placeholder {
+.auth-card input:not([type="checkbox"])::placeholder {
   color: var(--color-text-muted);
 }
 
