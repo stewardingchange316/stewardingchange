@@ -1,30 +1,11 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 
 export default function ChurchSelect() {
   const navigate = useNavigate();
 
-  const churches = useMemo(
-    () => [
-      {
-        id: "countryside",
-        name: "Countryside Christian Church",
-        mission: "Helping Hands Foundation",
-        goal: "120 families",
-        cadence: "Weekly",
-      },
-      {
-        id: "grace",
-        name: "Grace Community Church",
-        mission: "Local Food Relief",
-        goal: "90 families",
-        cadence: "Weekly",
-      },
-    ],
-    []
-  );
-
+  const [churches, setChurches] = useState([]);
   const [selected, setSelected] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -59,6 +40,13 @@ export default function ChurchSelect() {
       } else if (existing?.church_id) {
         setSelected(existing.church_id);
       }
+
+      const { data: churchList } = await supabase
+        .from("churches")
+        .select("id, name, mission_label, mission_goal, giving_cadence")
+        .eq("active", true)
+        .order("name");
+      setChurches(churchList ?? []);
 
       setLoading(false);
     }
@@ -135,16 +123,16 @@ export default function ChurchSelect() {
                 {isSelected && <span className="checkmark">✓</span>}
               </div>
 
-              <p className="church-mission">{church.mission}</p>
+              <p className="church-mission">{church.mission_label}</p>
 
               <div className="church-meta">
                 <div>
                   <span className="label">Monthly goal</span>
-                  <strong>{church.goal}</strong>
+                  <strong>{church.mission_goal}</strong>
                 </div>
                 <div>
                   <span className="label">Updates</span>
-                  <strong>{church.cadence}</strong>
+                  <strong>{church.giving_cadence}</strong>
                 </div>
               </div>
 

@@ -2,17 +2,13 @@ import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 import { useNavigate, Link } from "react-router-dom";
 
-const CHURCH_MAP = {
-  countryside: "Countryside Christian Church",
-  grace: "Grace Community Church",
-};
-
 export default function Dashboard() {
   const nav = useNavigate();
 
   const [loading, setLoading] = useState(true);
   const [authUser, setAuthUser] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [church, setChurch] = useState(null);
   const [paused, setPaused] = useState(false);
 
   useEffect(() => {
@@ -40,6 +36,16 @@ export default function Dashboard() {
       }
 
       setProfile(data);
+
+      if (data.church_id) {
+        const { data: churchData } = await supabase
+          .from("churches")
+          .select("name, mission_label, mission_title, mission_description, mission_progress")
+          .eq("id", data.church_id)
+          .maybeSingle();
+        setChurch(churchData);
+      }
+
       setLoading(false);
     }
 
@@ -70,7 +76,7 @@ export default function Dashboard() {
   }
 
   /* ── Derived values ── */
-  const churchName   = CHURCH_MAP[profile.church_id] || "Not selected";
+  const churchName   = church?.name || "Not selected";
   const bankConnected = profile.bank_connected === true;
   const firstName    = profile.first_name
     || authUser?.user_metadata?.first_name
@@ -239,32 +245,34 @@ export default function Dashboard() {
           </div>
 
           {/* ── Mission card ── */}
-          <div className="card stack-5">
-            <div className="stack-1">
-              <div className="kicker" style={{ marginBottom: 0 }}>
-                <span className="dot" />
-                {churchName}
+          {church && (
+            <div className="card stack-5">
+              <div className="stack-1">
+                <div className="kicker" style={{ marginBottom: 0 }}>
+                  <span className="dot" />
+                  {church.mission_label || churchName}
+                </div>
+                <h3 style={{ margin: 0 }}>{church.mission_title || "Mission"}</h3>
               </div>
-              <h3 style={{ margin: 0 }}>Food Truck Outreach Initiative</h3>
-            </div>
 
-            <p className="muted" style={{ margin: 0, fontSize: "var(--fs-2)" }}>
-              Our church is working toward launching a food truck that will serve warm meals
-              across Clearwater to families in need. Once funded, outreach days will be
-              shared so you can see the impact firsthand.
-            </p>
+              <p className="muted" style={{ margin: 0, fontSize: "var(--fs-2)" }}>
+                {church.mission_description}
+              </p>
 
-            <div className="stack-2">
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span className="small muted">Progress toward goal</span>
-                <span className="small" style={{ color: "var(--color-brand)", fontWeight: "var(--fw-semibold)" }}>64%</span>
+              <div className="stack-2">
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span className="small muted">Progress toward goal</span>
+                  <span className="small" style={{ color: "var(--color-brand)", fontWeight: "var(--fw-semibold)" }}>
+                    {`${church.mission_progress ?? 0}%`}
+                  </span>
+                </div>
+                <div className="progress-bar">
+                  <div className="progress-fill" style={{ width: `${church.mission_progress ?? 0}%` }} />
+                </div>
+                <p className="small muted" style={{ margin: 0 }}>Every purchase rounded up moves this forward.</p>
               </div>
-              <div className="progress-bar">
-                <div className="progress-fill" style={{ width: "64%" }} />
-              </div>
-              <p className="small muted" style={{ margin: 0 }}>Every purchase rounded up moves this forward.</p>
             </div>
-          </div>
+          )}
 
         </div>
       </div>

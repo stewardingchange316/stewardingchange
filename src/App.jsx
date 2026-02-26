@@ -15,6 +15,8 @@ import UpdatePassword from "./pages/UpdatePassword";
 
 
 import RequireAuth from "./components/guards/RequireAuth";
+import RequireAdmin from "./components/guards/RequireAdmin";
+import Admin from "./pages/Admin";
 import Footer from "./components/Footer";
 
 export default function App() {
@@ -39,6 +41,11 @@ export default function App() {
           <Route path="/giving-cap" element={<GivingCap />} />
           <Route path="/bank" element={<Bank />} />
           <Route path="/dashboard" element={<Dashboard />} />
+        </Route>
+
+        {/* Admin only */}
+        <Route element={<RequireAdmin />}>
+          <Route path="/admin" element={<Admin />} />
         </Route>
 
         {/* Catch-all */}

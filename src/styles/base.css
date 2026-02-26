@@ -1277,6 +1277,18 @@ button.primary:disabled {
   color: var(--color-brand);
 }
 
+.badge-done {
+  background: var(--color-success-light);
+  border-color: rgba(76, 175, 122, 0.20);
+  color: var(--color-success);
+}
+
+.badge-warn {
+  background: var(--color-warning-light);
+  border-color: rgba(212, 160, 64, 0.20);
+  color: var(--color-warning);
+}
+
 .badge .dot {
   width: 6px;
   height: 6px;
