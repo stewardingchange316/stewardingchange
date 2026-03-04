@@ -36,6 +36,7 @@ export default function Dashboard() {
       }
 
       setProfile(data);
+      setPaused(data.giving_paused ?? false);
 
       if (data.church_id) {
         const { data: churchData } = await supabase
@@ -51,6 +52,25 @@ export default function Dashboard() {
 
     load();
   }, [nav]);
+
+  async function handleTogglePause() {
+    const next = !paused;
+    setPaused(next);
+    await supabase
+      .from("users")
+      .update({ giving_paused: next })
+      .eq("id", authUser.id);
+  }
+
+  async function handleDisconnectBank() {
+    if (!confirm("Disconnect your bank account? Giving will stop immediately. You can reconnect at any time.")) return;
+    await supabase
+      .from("users")
+      .update({ bank_connected: false, giving_paused: false })
+      .eq("id", authUser.id);
+    setProfile((p) => ({ ...p, bank_connected: false }));
+    setPaused(false);
+  }
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -163,7 +183,7 @@ export default function Dashboard() {
               </div>
               <button
                 className={`btn btn-sm ${paused ? "btn-primary" : "btn-secondary"}`}
-                onClick={() => setPaused(!paused)}
+                onClick={handleTogglePause}
               >
                 {paused ? "Resume" : "Pause"}
               </button>
@@ -222,14 +242,7 @@ export default function Dashboard() {
                 </div>
               </div>
               {bankConnected
-                ? <button
-                    className="btn btn-danger btn-sm"
-                    onClick={() => {
-                      if (confirm("Disconnect your bank account? You can reconnect at any time.")) {
-                        nav("/bank");
-                      }
-                    }}
-                  >
+                ? <button className="btn btn-danger btn-sm" onClick={handleDisconnectBank}>
                     Disconnect
                   </button>
                 : <button className="btn btn-primary btn-sm" onClick={() => nav("/bank")}>

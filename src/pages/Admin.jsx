@@ -218,6 +218,12 @@ export default function Admin() {
   const doneCount     = filteredUsers.filter((u) => u.onboarding_step === "done").length;
   const donePct       = totalUsers ? Math.round((doneCount / totalUsers) * 100) : 0;
 
+  const now           = new Date();
+  const weekAgo       = new Date(now - 7 * 24 * 60 * 60 * 1000);
+  const monthStart    = new Date(now.getFullYear(), now.getMonth(), 1);
+  const newThisWeek   = filteredUsers.filter((u) => u.created_at && new Date(u.created_at) >= weekAgo).length;
+  const newThisMonth  = filteredUsers.filter((u) => u.created_at && new Date(u.created_at) >= monthStart).length;
+
   // ── Incomplete signups (respects filters) ───────────────────────────────────
 
   const incompleteUsers = useMemo(
@@ -285,6 +291,16 @@ export default function Admin() {
     a.download = `sc-users-${new Date().toISOString().split("T")[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  function handleAnnounce() {
+    const emails  = filteredUsers.map((u) => u.email).filter(Boolean).join(",");
+    const church  = activeChurchName ?? "your church";
+    const subject = encodeURIComponent(`Update from ${church}`);
+    const body    = encodeURIComponent(
+      `Hi everyone,\n\nI wanted to share a quick update with you regarding our giving initiative at ${church}.\n\n[Your message here]\n\nThank you for your continued support.\n\nBlessings,\nTerence`
+    );
+    window.location.href = `mailto:?bcc=${encodeURIComponent(emails)}&subject=${subject}&body=${body}`;
   }
 
   function handleCopyIncompleteEmails() {
@@ -365,6 +381,16 @@ export default function Admin() {
               <div className="dash-stat">
                 <div className="dash-stat-label">Total Users</div>
                 <div className="dash-stat-value">{totalUsers}</div>
+                {newThisWeek > 0 && (
+                  <div className="small muted" style={{ marginTop: 4 }}>
+                    +{newThisWeek} this week
+                  </div>
+                )}
+                {newThisMonth > 0 && newThisWeek !== newThisMonth && (
+                  <div className="small muted">
+                    +{newThisMonth} this month
+                  </div>
+                )}
               </div>
               <div className="dash-stat">
                 <div className="dash-stat-label">Bank Connected</div>
@@ -453,6 +479,13 @@ export default function Admin() {
                   disabled={filteredUsers.length === 0}
                 >
                   Export CSV
+                </button>
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={handleAnnounce}
+                  disabled={filteredUsers.length === 0}
+                >
+                  Announce
                 </button>
                 {(churchFilter !== "all" || bankFilter !== "all" || search) && (
                   <button
