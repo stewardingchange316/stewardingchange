@@ -150,7 +150,7 @@ export default function Home() {
                   className="btn btn-primary btn-lg"
                   onClick={() => nav("/signup")}
                 >
-                  Start giving in 3 minutes
+                  Start Giving
                 </button>
                 <button
                   className="btn btn-secondary btn-lg"
@@ -190,7 +190,7 @@ export default function Home() {
                     This week
                   </div>
                   <div style={{ fontSize: "var(--fs-5)", fontWeight: "var(--fw-bold)", color: "var(--color-brand)", lineHeight: 1.1 }}>
-                    +$2.47
+                    +$1.72
                   </div>
                 </div>
 
@@ -198,7 +198,7 @@ export default function Home() {
                   {[
                     { name: "Coffee Shop", amt: "+$0.73" },
                     { name: "Gas Station",  amt: "+$0.41" },
-                    { name: "Grocery Store", amt: "+$1.33" },
+                    { name: "Grocery Store", amt: "+$0.58" },
                   ].map((t) => (
                     <div key={t.name} className="home-preview-txn">
                       <span style={{ fontSize: "var(--fs-0)", color: "var(--color-text-muted)" }}>{t.name}</span>
