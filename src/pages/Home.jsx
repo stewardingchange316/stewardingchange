@@ -19,6 +19,8 @@ export default function Home() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [churches, setChurches] = useState([]);
+
   // Clean URL after auth (but NOT during password recovery)
   useEffect(() => {
     if (window.location.pathname === "/update-password") return;
@@ -48,6 +50,16 @@ export default function Home() {
     };
     checkUser();
   }, [nav]);
+
+  // Load churches for spotlight section
+  useEffect(() => {
+    supabase
+      .from("churches")
+      .select("id, name, mission_label, mission_title, mission_description, mission_progress")
+      .eq("active", true)
+      .order("name")
+      .then(({ data }) => { if (data) setChurches(data); });
+  }, []);
 
   async function handleLogin(e) {
     e.preventDefault();
@@ -109,72 +121,200 @@ export default function Home() {
         </div>
       </header>
 
-      {/* ── Hero ── */}
       <main>
-        <section className="hero">
-          <div className="hero-content">
-            <div className="kicker">
-              <span className="dot" />
-              For churches and their members
+        {/* ── Hero ── */}
+        <section className="hero home-hero">
+          <div className="home-glow" />
+
+          <div className="home-hero-grid">
+            {/* Left: copy */}
+            <div className="home-hero-copy">
+              <div className="kicker">
+                <span className="dot" />
+                Effortless church giving
+              </div>
+
+              <h1 className="hero-title home-hero-title">
+                Your spare change,<br />
+                <span className="text-brand">purposefully given.</span>
+              </h1>
+
+              <p className="lede home-hero-lede">
+                Every purchase rounds up automatically. The difference goes
+                straight to your church's active mission — tax-deductible,
+                every week.
+              </p>
+
+              <div className="hero-actions home-hero-actions">
+                <button
+                  className="btn btn-primary btn-lg"
+                  onClick={() => nav("/signup")}
+                >
+                  Start giving in 3 minutes
+                </button>
+                <button
+                  className="btn btn-secondary btn-lg"
+                  onClick={() => { setMode("login"); setShowLogin(true); }}
+                >
+                  Sign in
+                </button>
+              </div>
             </div>
 
-            <h1 className="hero-title">
-              Your spare change,<br />
-              <span className="text-brand">purposefully given.</span>
-            </h1>
+            {/* Right: product preview card */}
+            <div className="home-preview-wrap">
+              <div className="home-preview-card">
+                <div className="home-preview-header">
+                  <span style={{ fontWeight: "var(--fw-semibold)", fontSize: "var(--fs-1)", color: "var(--color-text-primary)" }}>
+                    Stewarding Change
+                  </span>
+                  <div className="home-preview-avatar">T</div>
+                </div>
 
-            <p className="lede" style={{ maxWidth: "46ch", margin: "0 auto var(--s-7)" }}>
-              Stewarding Change rounds up your everyday purchases and
-              donates the difference to your church — automatically,
-              securely, and tax-deductibly.
-            </p>
+                <div className="home-preview-status">
+                  <div style={{ display: "flex", alignItems: "center", gap: "var(--s-2)" }}>
+                    <div className="status-dot is-active" />
+                    <span style={{ fontSize: "var(--fs-1)", fontWeight: "var(--fw-semibold)", color: "var(--color-text-primary)" }}>
+                      Giving Active
+                    </span>
+                  </div>
+                  <span style={{ fontSize: "var(--fs-0)", color: "var(--color-text-muted)" }}>
+                    Countryside Christian
+                  </span>
+                </div>
 
-            <div className="hero-actions">
-              <button
-                className="btn btn-primary btn-lg"
-                onClick={() => nav("/signup")}
-              >
-                Start Giving
-              </button>
+                <div className="home-preview-divider" />
 
-              <button
-                className="btn btn-secondary btn-lg"
-                onClick={() => { setMode("login"); setShowLogin(true); }}
-              >
-                Sign in
-              </button>
+                <div style={{ marginBottom: "var(--s-3)" }}>
+                  <div style={{ fontSize: "var(--fs-0)", color: "var(--color-text-muted)", marginBottom: "var(--s-1)" }}>
+                    This week
+                  </div>
+                  <div style={{ fontSize: "var(--fs-5)", fontWeight: "var(--fw-bold)", color: "var(--color-brand)", lineHeight: 1.1 }}>
+                    +$2.47
+                  </div>
+                </div>
+
+                <div className="home-preview-txns">
+                  {[
+                    { name: "Coffee Shop", amt: "+$0.73" },
+                    { name: "Gas Station",  amt: "+$0.41" },
+                    { name: "Grocery Store", amt: "+$1.33" },
+                  ].map((t) => (
+                    <div key={t.name} className="home-preview-txn">
+                      <span style={{ fontSize: "var(--fs-0)", color: "var(--color-text-muted)" }}>{t.name}</span>
+                      <span style={{ fontSize: "var(--fs-0)", color: "var(--color-brand)", fontWeight: "var(--fw-semibold)" }}>{t.amt}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="home-preview-divider" />
+
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "var(--s-2)" }}>
+                    <span style={{ fontSize: "var(--fs-0)", color: "var(--color-text-muted)" }}>Mission progress</span>
+                    <span style={{ fontSize: "var(--fs-0)", color: "var(--color-brand)", fontWeight: "var(--fw-semibold)" }}>64%</span>
+                  </div>
+                  <div className="progress-bar">
+                    <div className="progress-fill" style={{ width: "64%" }} />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* ── How It Works ── */}
+        {/* ── Stats bar ── */}
+        <div className="home-stats-bar">
+          {[
+            { val: "2 min",  label: "to set up" },
+            { val: "$0",     label: "in fees" },
+            { val: "100%",   label: "tax-deductible" },
+            { val: "Cancel", label: "any time" },
+          ].map((s) => (
+            <div key={s.label} className="home-stat-item">
+              <div className="home-stat-val">{s.val}</div>
+              <div className="home-stat-label">{s.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* ── How it works ── */}
         <section className="steps-section">
           <h2>How it works</h2>
 
-          <div className="step-card">
-            <div className="step-number">1</div>
-            <div className="step-body">
-              <h4>Select your church</h4>
-              <p>Choose the congregation you want to support. Your giving goes directly to their active mission.</p>
-            </div>
-          </div>
-
-          <div className="step-card">
-            <div className="step-number">2</div>
-            <div className="step-body">
-              <h4>Set a weekly cap</h4>
-              <p>You decide the maximum amount per week — as little as $5. You're always in control.</p>
-            </div>
-          </div>
-
-          <div className="step-card">
-            <div className="step-number">3</div>
-            <div className="step-body">
-              <h4>Give as you live</h4>
-              <p>Every purchase rounds up. The change accumulates and is donated weekly on your behalf.</p>
-            </div>
+          <div className="home-features-grid">
+            {[
+              {
+                icon: (
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                    <polyline points="9 22 9 12 15 12 15 22" />
+                  </svg>
+                ),
+                title: "Choose your church",
+                body: "Pick the congregation you want to support. Your giving flows directly to their active mission — not a general fund.",
+              },
+              {
+                icon: (
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  </svg>
+                ),
+                title: "Set your weekly limit",
+                body: "Start at $5 or more. Pause, adjust, or disconnect any time — you're always in full control.",
+              },
+              {
+                icon: (
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                  </svg>
+                ),
+                title: "Give as you live",
+                body: "Every coffee, every errand rounds up. The spare change accumulates and is donated to your church weekly.",
+              },
+            ].map((f) => (
+              <div key={f.title} className="home-feature-card">
+                <div className="home-feature-icon">{f.icon}</div>
+                <h4 style={{ margin: "0 0 var(--s-2)", fontSize: "var(--fs-2)" }}>{f.title}</h4>
+                <p className="muted" style={{ margin: 0, fontSize: "var(--fs-1)" }}>{f.body}</p>
+              </div>
+            ))}
           </div>
         </section>
+
+        {/* ── Church spotlight ── */}
+        {churches.length > 0 && (
+          <section className="steps-section" style={{ paddingBottom: "var(--s-10)" }}>
+            <h2>Missions you'll support</h2>
+            <div className="home-spotlight-grid">
+              {churches.map((c) => (
+                <div key={c.id} className="card stack-4">
+                  <div className="stack-1">
+                    <div className="kicker" style={{ marginBottom: 0 }}>
+                      <span className="dot" />
+                      {c.mission_label || c.name}
+                    </div>
+                    <h4 style={{ margin: 0 }}>{c.mission_title || "Mission"}</h4>
+                  </div>
+                  <p className="muted" style={{ margin: 0, fontSize: "var(--fs-1)" }}>
+                    {c.mission_description}
+                  </p>
+                  <div>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "var(--s-2)" }}>
+                      <span className="small muted">Progress toward goal</span>
+                      <span className="small" style={{ color: "var(--color-brand)", fontWeight: "var(--fw-semibold)" }}>
+                        {c.mission_progress ?? 0}%
+                      </span>
+                    </div>
+                    <div className="progress-bar">
+                      <div className="progress-fill" style={{ width: `${c.mission_progress ?? 0}%` }} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* ── Trust line ── */}
         <div className="trust-line" style={{ padding: "var(--s-5) var(--s-4) var(--s-10)" }}>

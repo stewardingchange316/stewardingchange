@@ -1584,3 +1584,250 @@ button.primary:disabled {
     width: 100%;
   }
 }
+
+/* =========================================================
+   Homepage redesign
+========================================================= */
+
+/* Ambient glow behind hero */
+.home-glow {
+  position: absolute;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 600px;
+  background: radial-gradient(ellipse at center, rgba(76, 175, 122, 0.10) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.home-hero {
+  position: relative;
+  overflow: visible;
+  /* Override the centered text from .hero */
+  text-align: left;
+  padding-bottom: var(--s-8);
+}
+
+/* Two-column grid */
+.home-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-10);
+  align-items: center;
+  max-width: 960px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.home-hero-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.home-hero-title {
+  text-align: left;
+}
+
+.home-hero-lede {
+  text-align: left;
+  max-width: 42ch;
+  margin: 0 0 var(--s-7);
+}
+
+.home-hero-actions {
+  justify-content: flex-start;
+}
+
+/* Product preview card */
+.home-preview-wrap {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+.home-preview-card {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+  width: 100%;
+  max-width: 270px;
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.12),
+    0 16px 48px rgba(0, 0, 0, 0.20),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.home-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--s-4);
+}
+
+.home-preview-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-brand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: var(--fw-bold);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.home-preview-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--s-3);
+}
+
+.home-preview-divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: var(--s-3) 0;
+}
+
+.home-preview-txns {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.home-preview-txn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Stats bar */
+.home-stats-bar {
+  display: flex;
+  align-items: stretch;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+}
+
+.home-stat-item {
+  flex: 1;
+  text-align: center;
+  padding: var(--s-5) var(--s-4);
+  border-right: 1px solid var(--color-border);
+}
+
+.home-stat-item:last-child {
+  border-right: none;
+}
+
+.home-stat-val {
+  font-size: var(--fs-4);
+  font-weight: var(--fw-bold);
+  color: var(--color-brand);
+  line-height: 1.1;
+  margin-bottom: var(--s-1);
+}
+
+.home-stat-label {
+  font-size: var(--fs-0);
+  color: var(--color-text-muted);
+}
+
+/* Feature cards grid (replaces step-cards) */
+.home-features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-5);
+}
+
+.home-feature-card {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+}
+
+.home-feature-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-md);
+  background: rgba(76, 175, 122, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-brand);
+  margin-bottom: var(--s-4);
+  flex-shrink: 0;
+}
+
+/* Church spotlight grid */
+.home-spotlight-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--s-5);
+}
+
+/* ── Homepage mobile ── */
+@media (max-width: 768px) {
+  .home-hero-grid {
+    grid-template-columns: 1fr;
+    gap: var(--s-6);
+  }
+
+  .home-preview-wrap {
+    display: none;
+  }
+
+  .home-hero {
+    text-align: center;
+  }
+
+  .home-hero-title,
+  .home-hero-lede {
+    text-align: center;
+  }
+
+  .home-hero-lede {
+    max-width: 100%;
+  }
+
+  .home-hero-actions {
+    justify-content: center;
+  }
+
+  .home-hero-copy .kicker {
+    justify-content: center;
+  }
+
+  .home-features-grid {
+    grid-template-columns: 1fr;
+    gap: var(--s-4);
+  }
+
+  .home-stats-bar {
+    flex-wrap: wrap;
+  }
+
+  .home-stat-item {
+    flex: 0 0 50%;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .home-stat-item:nth-child(odd) {
+    border-right: 1px solid var(--color-border);
+  }
+
+  .home-stat-item:nth-last-child(-n+2) {
+    border-bottom: none;
+  }
+}
