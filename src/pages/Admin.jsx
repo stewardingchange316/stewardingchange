@@ -143,7 +143,8 @@ export default function Admin() {
   const [bankFilter,   setBankFilter]   = useState("all"); // "all" | "connected" | "not_connected"
   const [search,       setSearch]       = useState("");
   const [capSort,      setCapSort]      = useState(null);  // null | "desc" | "asc"
-  const [copied,       setCopied]       = useState(false);
+  const [copied,          setCopied]          = useState(false);
+  const [copiedIncomplete, setCopiedIncomplete] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -211,11 +212,37 @@ export default function Admin() {
 
   // ── Stats — always reflect current filter ───────────────────────────────────
 
-  const totalUsers = filteredUsers.length;
-  const bankCount  = filteredUsers.filter((u) => u.bank_connected).length;
-  const bankPct    = totalUsers ? Math.round((bankCount / totalUsers) * 100) : 0;
-  const doneCount  = filteredUsers.filter((u) => u.onboarding_step === "done").length;
-  const donePct    = totalUsers ? Math.round((doneCount / totalUsers) * 100) : 0;
+  const totalUsers    = filteredUsers.length;
+  const bankCount     = filteredUsers.filter((u) => u.bank_connected).length;
+  const bankPct       = totalUsers ? Math.round((bankCount / totalUsers) * 100) : 0;
+  const doneCount     = filteredUsers.filter((u) => u.onboarding_step === "done").length;
+  const donePct       = totalUsers ? Math.round((doneCount / totalUsers) * 100) : 0;
+
+  // ── Incomplete signups (respects filters) ───────────────────────────────────
+
+  const incompleteUsers = useMemo(
+    () => filteredUsers.filter((u) => u.onboarding_step !== "done"),
+    [filteredUsers]
+  );
+
+  // ── Cap distribution (respects filters, only done users) ────────────────────
+
+  const CAP_BUCKETS = [
+    { label: "No limit",  test: (v) => v === null },
+    { label: "Under $10", test: (v) => v !== null && v < 10 },
+    { label: "$10–$25",   test: (v) => v !== null && v >= 10 && v <= 25 },
+    { label: "$26–$50",   test: (v) => v !== null && v > 25 && v <= 50 },
+    { label: "Over $50",  test: (v) => v !== null && v > 50 },
+  ];
+
+  const capBuckets = useMemo(() => {
+    const base = filteredUsers.filter((u) => u.onboarding_step === "done");
+    const total = base.length || 1;
+    return CAP_BUCKETS.map(({ label, test }) => {
+      const count = base.filter((u) => test(u.weekly_cap)).length;
+      return { label, count, pct: Math.round((count / total) * 100) };
+    });
+  }, [filteredUsers]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const activeChurchName = churchFilter !== "all"
     ? churches.find((c) => c.id === churchFilter)?.name
@@ -258,6 +285,13 @@ export default function Admin() {
     a.download = `sc-users-${new Date().toISOString().split("T")[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  function handleCopyIncompleteEmails() {
+    const emails = incompleteUsers.map((u) => u.email).filter(Boolean).join(", ");
+    navigator.clipboard.writeText(emails);
+    setCopiedIncomplete(true);
+    setTimeout(() => setCopiedIncomplete(false), 2000);
   }
 
   function toggleCapSort() {
@@ -496,6 +530,113 @@ export default function Admin() {
                   })}
                 </tbody>
               </table>
+            </div>
+          </div>
+
+          {/* ── Incomplete signups ── */}
+          <div className="stack-4">
+            <div className="row-between">
+              <div>
+                <h3 style={{ margin: 0 }}>
+                  Incomplete Signups
+                  {incompleteUsers.length > 0 && (
+                    <span className="badge badge-warn" style={{ marginLeft: "var(--s-3)", verticalAlign: "middle" }}>
+                      {incompleteUsers.length}
+                    </span>
+                  )}
+                </h3>
+                <p className="small muted" style={{ margin: "4px 0 0" }}>
+                  Users who started but haven't finished setup.
+                </p>
+              </div>
+              {incompleteUsers.length > 0 && (
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={handleCopyIncompleteEmails}
+                >
+                  {copiedIncomplete ? "Copied!" : "Copy emails"}
+                </button>
+              )}
+            </div>
+
+            {incompleteUsers.length === 0 ? (
+              <div className="dash-status-banner is-active">
+                <div style={{ display: "flex", alignItems: "center", gap: "var(--s-3)" }}>
+                  <div className="status-dot is-active" />
+                  <span className="small muted">All users have completed setup.</span>
+                </div>
+              </div>
+            ) : (
+              <div style={{ overflowX: "auto", borderRadius: "var(--r-lg)" }}>
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Stuck on</th>
+                      <th>Joined</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {incompleteUsers.map((u) => {
+                      const name = [u.first_name, u.last_name].filter(Boolean).join(" ") || "—";
+                      const stepLabel = {
+                        church: "Church selection",
+                        cap:    "Giving cap",
+                        bank:   "Bank connection",
+                      }[u.onboarding_step] ?? u.onboarding_step;
+
+                      return (
+                        <tr key={u.id}>
+                          <td style={{ fontWeight: "var(--fw-medium)", color: "var(--color-text-primary)", whiteSpace: "nowrap" }}>
+                            {name}
+                          </td>
+                          <td style={{ color: "var(--color-text-muted)" }}>{u.email || "—"}</td>
+                          <td><StepBadge step={u.onboarding_step} /></td>
+                          <td style={{ whiteSpace: "nowrap", color: "var(--color-text-muted)" }}>
+                            {fmt(u.created_at)}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* ── Cap distribution ── */}
+          <div className="stack-4">
+            <div>
+              <h3 style={{ margin: 0 }}>Weekly Cap Distribution</h3>
+              <p className="small muted" style={{ margin: "4px 0 0" }}>
+                Based on {doneCount} fully set-up user{doneCount !== 1 ? "s" : ""}{activeChurchName ? ` at ${activeChurchName}` : ""}.
+              </p>
+            </div>
+
+            <div className="card stack-4">
+              {capBuckets.every((b) => b.count === 0) ? (
+                <p className="small muted" style={{ margin: 0 }}>No data yet.</p>
+              ) : (
+                capBuckets.map(({ label, count, pct }) => (
+                  <div key={label} className="stack-2">
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontSize: "var(--fs-1)", color: "var(--color-text-primary)", fontWeight: "var(--fw-medium)" }}>
+                        {label}
+                      </span>
+                      <span className="small muted">
+                        {count} user{count !== 1 ? "s" : ""} · {pct}%
+                      </span>
+                    </div>
+                    <div className="progress-bar">
+                      <div
+                        className="progress-fill"
+                        style={{ width: `${pct}%`, opacity: count === 0 ? 0.2 : 1 }}
+                      />
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
