@@ -23,20 +23,25 @@ Deno.serve(async (req) => {
   }
 
   // Use user-scoped client — SUPABASE_ANON_KEY + user JWT auto-injected by runtime
-  const supabaseUrl     = Deno.env.get("SUPABASE_URL")!;
-  const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-  const stripeKey       = Deno.env.get("STRIPE_SECRET_KEY")!;
+  const supabaseUrl        = Deno.env.get("SUPABASE_URL")!;
+  const supabaseAnonKey    = Deno.env.get("SUPABASE_ANON_KEY")!;
+  const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const stripeKey          = Deno.env.get("STRIPE_SECRET_KEY")!;
 
   console.log("[stripe-setup-intent] env:", {
-    url:   !!supabaseUrl,
-    anon:  !!supabaseAnonKey,
-    stripe: !!stripeKey,
+    url:     !!supabaseUrl,
+    anon:    !!supabaseAnonKey,
+    service: !!supabaseServiceKey,
+    stripe:  !!stripeKey,
   });
 
-  // User client: RLS lets this user read/write their own row
+  // User client: RLS-scoped, used for reads only — cannot write stripe fields
   const userClient = createClient(supabaseUrl, supabaseAnonKey, {
     global: { headers: { Authorization: authHeader } },
   });
+
+  // Admin client: service_role, bypasses RLS — used only for writing stripe_customer_id
+  const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
   const { data: { user }, error: authError } = await userClient.auth.getUser();
   if (authError || !user) {
@@ -82,8 +87,8 @@ Deno.serve(async (req) => {
       return json({ error: "Failed to create customer" }, 500);
     }
 
-    // Persist — non-fatal if write fails
-    const { error: writeErr } = await userClient
+    // Persist via service_role — stripe_customer_id is locked from client writes via RLS
+    const { error: writeErr } = await adminClient
       .from("users")
       .update({ stripe_customer_id: customerId })
       .eq("id", user.id);
