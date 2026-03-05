@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabase";
 import { useNavigate, Link } from "react-router-dom";
 import BadgesModal from "../components/BadgesModal";
+import EditProfileModal from "../components/EditProfileModal";
 import { checkAndAwardBadges, BADGE_DISPLAY } from "../services/badgeService";
 
 export default function Dashboard() {
@@ -11,9 +12,12 @@ export default function Dashboard() {
   const [authUser, setAuthUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [church, setChurch] = useState(null);
-  const [myBadges,        setMyBadges]        = useState([]);
-  const [paused,          setPaused]          = useState(false);
-  const [showBadgesModal, setShowBadgesModal] = useState(false);
+  const [myBadges,           setMyBadges]           = useState([]);
+  const [paused,             setPaused]             = useState(false);
+  const [showBadgesModal,    setShowBadgesModal]    = useState(false);
+  const [showEditProfile,    setShowEditProfile]    = useState(false);
+  const [menuOpen,           setMenuOpen]           = useState(false);
+  const menuRef = useRef(null);
 
   useEffect(() => {
     async function load() {
@@ -125,6 +129,15 @@ export default function Dashboard() {
 
   const initials = firstName.charAt(0).toUpperCase();
 
+  // Close menu on outside click
+  useEffect(() => {
+    function onOutside(e) {
+      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
+    }
+    document.addEventListener("mousedown", onOutside);
+    return () => document.removeEventListener("mousedown", onOutside);
+  }, []);
+
   const earnedEmojis = myBadges
     .map((row) => BADGE_DISPLAY.find((b) => b.id === row.badge_id)?.emoji)
     .filter(Boolean);
@@ -148,6 +161,7 @@ export default function Dashboard() {
           </Link>
 
           <div style={{ display: "flex", alignItems: "center", gap: "var(--s-3)" }}>
+            {/* Earned badge strip */}
             {earnedEmojis.length > 0 && (
               <div className="social-header-badges" onClick={() => setShowBadgesModal(true)}
                    title="My Badges" style={{ cursor: "pointer" }}>
@@ -162,10 +176,38 @@ export default function Dashboard() {
             <button className="btn btn-secondary btn-sm" onClick={() => setShowBadgesModal(true)}>
               🏅 My Badges
             </button>
-            <div className="dash-avatar">{initials}</div>
-            <button className="btn btn-ghost btn-sm" onClick={handleSignOut}>
-              Sign out
-            </button>
+
+            {/* Avatar + hamburger menu */}
+            <div ref={menuRef} style={{ position: "relative" }}>
+              <button
+                className="avatar-menu-trigger"
+                onClick={() => setMenuOpen((o) => !o)}
+                aria-label="Account menu"
+              >
+                <div className="dash-avatar">{initials}</div>
+                <div className="avatar-hamburger">
+                  <span /><span /><span />
+                </div>
+              </button>
+
+              {menuOpen && (
+                <div className="avatar-dropdown">
+                  <button
+                    className="avatar-dropdown-item"
+                    onClick={() => { setMenuOpen(false); setShowEditProfile(true); }}
+                  >
+                    <span>✏️</span> Edit Profile
+                  </button>
+                  <div className="avatar-dropdown-divider" />
+                  <button
+                    className="avatar-dropdown-item is-danger"
+                    onClick={handleSignOut}
+                  >
+                    <span>→</span> Sign Out
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -314,6 +356,20 @@ export default function Dashboard() {
       <BadgesModal
         userId={authUser.id}
         onClose={() => setShowBadgesModal(false)}
+      />
+    )}
+
+    {showEditProfile && (
+      <EditProfileModal
+        userId={authUser.id}
+        initialFirstName={profile.first_name ?? ""}
+        initialLastName={profile.last_name ?? ""}
+        initialEmail={authUser.email ?? ""}
+        onClose={() => setShowEditProfile(false)}
+        onSaved={(patch) => {
+          setProfile((p) => ({ ...p, ...patch }));
+          setShowEditProfile(false);
+        }}
       />
     )}
     </>
