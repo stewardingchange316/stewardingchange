@@ -3,15 +3,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { BADGE_DISPLAY } from "../services/badgeService";
 
-// Reaction options matching user spec
 const REACTIONS = [
   { emoji: "🙏", label: "Amen" },
   { emoji: "🙌", label: "Praise" },
   { emoji: "🔥", label: "Let's Go" },
   { emoji: "👍", label: "Like" },
 ];
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function timeAgo(dateStr) {
   const diff  = Date.now() - new Date(dateStr).getTime();
@@ -25,58 +22,56 @@ function timeAgo(dateStr) {
   return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-function badgeDisplay(badgeId) {
-  return BADGE_DISPLAY.find((b) => b.id === badgeId);
-}
+// ── Feed item (Venmo-style) ───────────────────────────────────────────────────
 
-// ── FeedPostCard ──────────────────────────────────────────────────────────────
-
-function FeedPostCard({ post, myEmoji, reactionCounts, onReact }) {
-  const authorName = post.users?.first_name ?? "A member";
-  const badge      = post.badge_id ? badgeDisplay(post.badge_id) : null;
+function FeedItem({ item, myEmoji, reactionCounts, onReact, isLast }) {
+  const { type, authorName, authorInitial, body, badge, createdAt, postId, isPinned } = item;
 
   return (
-    <div className={`feed-post-card${post.is_pinned ? " is-pinned" : ""}`}>
-      {post.is_pinned && <div className="feed-post-pinned-label">Pinned</div>}
+    <div className={`social-feed-item${isPinned ? " is-pinned" : ""}${isLast ? " is-last" : ""}`}>
+      {isPinned && <div className="social-pinned-label">Pinned</div>}
 
-      <div className="feed-post-header">
-        <div className="feed-post-avatar">{authorName.charAt(0).toUpperCase()}</div>
-        <div>
-          <div style={{ fontWeight: "var(--fw-semibold)", fontSize: "var(--fs-2)", color: "var(--color-text-primary)" }}>
-            {authorName}
+      <div className="social-item-row">
+        {/* Avatar */}
+        <div className="social-item-avatar">{authorInitial}</div>
+
+        {/* Content */}
+        <div className="social-item-content">
+          <div className="social-item-header">
+            <span className="social-item-name">{authorName}</span>
+            <span className="social-item-time">{timeAgo(createdAt)}</span>
           </div>
-          <div className="small muted">{timeAgo(post.created_at)}</div>
+
+          {badge && (
+            <div className="social-item-badge-line">
+              <span className="social-badge-emoji">{badge.emoji}</span>
+              <span className="social-badge-name">earned {badge.name}</span>
+            </div>
+          )}
+
+          <p className="social-item-body">{body}</p>
+
+          {/* Reactions — only for church feed posts */}
+          {postId && (
+            <div className="social-item-reactions">
+              {REACTIONS.map(({ emoji, label }) => {
+                const count    = reactionCounts?.[emoji] ?? 0;
+                const isActive = myEmoji === emoji;
+                return (
+                  <button
+                    key={emoji}
+                    className={`feed-reaction-btn${isActive ? " is-active" : ""}`}
+                    onClick={() => onReact?.(emoji)}
+                    title={label}
+                  >
+                    {emoji}
+                    {count > 0 && <span className="feed-reaction-count">{count}</span>}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
-        {badge && (
-          <span style={{ marginLeft: "auto", fontSize: "20px" }} title={badge.name}>
-            {badge.emoji}
-          </span>
-        )}
-      </div>
-
-      <p style={{ margin: "var(--s-3) 0 0", fontSize: "var(--fs-2)", color: "var(--color-text-body)", lineHeight: "var(--lh-normal)" }}>
-        {post.body}
-      </p>
-
-      {/* ── Reactions ── */}
-      <div className="feed-post-reactions">
-        {REACTIONS.map(({ emoji, label }) => {
-          const count    = reactionCounts[emoji] ?? 0;
-          const isActive = myEmoji === emoji;
-          return (
-            <button
-              key={emoji}
-              className={`feed-reaction-btn${isActive ? " is-active" : ""}`}
-              onClick={() => onReact(emoji)}
-              title={label}
-            >
-              {emoji}
-              {count > 0 && (
-                <span className="feed-reaction-count">{count}</span>
-              )}
-            </button>
-          );
-        })}
       </div>
     </div>
   );
@@ -87,13 +82,13 @@ function FeedPostCard({ post, myEmoji, reactionCounts, onReact }) {
 export default function SocialPage() {
   const nav = useNavigate();
 
-  const [loading,   setLoading]   = useState(true);
-  const [authUser,  setAuthUser]  = useState(null);
-  const [profile,   setProfile]   = useState(null);
-  const [church,    setChurch]    = useState(null);
-  const [banners,   setBanners]   = useState([]);
-  const [posts,     setPosts]     = useState([]);
-  // reactionState: { [postId]: { [emoji]: count, _myEmoji: string|null } }
+  const [loading,      setLoading]      = useState(true);
+  const [authUser,     setAuthUser]     = useState(null);
+  const [profile,      setProfile]      = useState(null);
+  const [church,       setChurch]       = useState(null);
+  const [banners,      setBanners]      = useState([]);
+  const [myBadges,     setMyBadges]     = useState([]);  // from user_badges directly
+  const [posts,        setPosts]        = useState([]);
   const [reactionState, setReactionState] = useState({});
 
   useEffect(() => {
@@ -114,9 +109,19 @@ export default function SocialPage() {
       setProfile(profileData);
 
       const churchId = profileData.church_id;
+
+      // Always fetch user's own badges regardless of church
+      const { data: earnedRows } = await supabase
+        .from("user_badges")
+        .select("badge_id, awarded_at")
+        .eq("user_id", user.id)
+        .order("awarded_at", { ascending: false });
+
+      setMyBadges(earnedRows ?? []);
+
       if (!churchId) { setLoading(false); return; }
 
-      // Parallel fetches
+      // Church-scoped fetches
       const [
         { data: churchData },
         { data: bannerData },
@@ -132,7 +137,7 @@ export default function SocialPage() {
           .select("*")
           .or(`church_id.eq.${churchId},church_id.is.null`)
           .eq("is_active", true)
-          .order("church_id", { nullsFirst: false })  // church-specific first, global last
+          .order("church_id", { nullsFirst: false })
           .order("created_at", { ascending: false }),
         supabase
           .from("social_feed_posts")
@@ -149,7 +154,7 @@ export default function SocialPage() {
       const allPosts = postData ?? [];
       setPosts(allPosts);
 
-      // Fetch reactions for all posts
+      // Fetch reactions
       const postIds = allPosts.map((p) => p.id);
       if (postIds.length > 0) {
         const { data: reactionData } = await supabase
@@ -177,47 +182,75 @@ export default function SocialPage() {
 
     const current = reactionState[postId]?._myEmoji ?? null;
 
-    // Optimistic update
     setReactionState((prev) => {
       const slot = { ...(prev[postId] ?? { _myEmoji: null }) };
-
-      // Remove previous reaction
       if (current) {
         slot[current] = Math.max(0, (slot[current] ?? 1) - 1);
         if (slot[current] === 0) delete slot[current];
       }
-
       if (current === emoji) {
-        // Toggle off
         slot._myEmoji = null;
       } else {
-        // Add new
         slot[emoji]   = (slot[emoji] ?? 0) + 1;
         slot._myEmoji = emoji;
       }
-
       return { ...prev, [postId]: slot };
     });
 
-    // Persist
     if (current) {
-      await supabase
-        .from("feed_reactions")
-        .delete()
-        .eq("post_id", postId)
-        .eq("user_id", authUser.id)
-        .eq("emoji", current);
+      await supabase.from("feed_reactions").delete()
+        .eq("post_id", postId).eq("user_id", authUser.id).eq("emoji", current);
     }
-
     if (current !== emoji) {
-      await supabase
-        .from("feed_reactions")
-        .upsert(
-          { post_id: postId, user_id: authUser.id, emoji },
-          { onConflict: "post_id,user_id,emoji" }
-        );
+      await supabase.from("feed_reactions")
+        .upsert({ post_id: postId, user_id: authUser.id, emoji }, { onConflict: "post_id,user_id,emoji" });
     }
   }
+
+  // ── Build unified feed items from posts ───────────────────────────────────
+
+  const feedItems = posts.map((post) => {
+    const authorName    = post.users?.first_name ?? "A member";
+    const badgeInfo     = post.badge_id ? BADGE_DISPLAY.find((b) => b.id === post.badge_id) : null;
+    const slot          = reactionState[post.id] ?? { _myEmoji: null };
+    const { _myEmoji, ...counts } = slot;
+    return {
+      key:            post.id,
+      type:           "post",
+      postId:         post.id,
+      authorName,
+      authorInitial:  authorName.charAt(0).toUpperCase(),
+      body:           post.body,
+      badge:          badgeInfo ?? null,
+      createdAt:      post.created_at,
+      isPinned:       post.is_pinned,
+      myEmoji:        _myEmoji,
+      reactionCounts: counts,
+    };
+  });
+
+  // ── My earned badges (always shown, pull directly from user_badges) ────────
+
+  const firstName    = profile?.first_name ?? "You";
+  const firstInitial = firstName.charAt(0).toUpperCase();
+
+  const myBadgeItems = myBadges.map((row) => {
+    const badgeInfo = BADGE_DISPLAY.find((b) => b.id === row.badge_id);
+    if (!badgeInfo) return null;
+    return {
+      key:           `badge-${row.badge_id}`,
+      type:          "my_badge",
+      postId:        null,          // no reactions on personal badge items
+      authorName:    firstName,
+      authorInitial: firstInitial,
+      body:          badgeInfo.desc,
+      badge:         badgeInfo,
+      createdAt:     row.awarded_at,
+      isPinned:      false,
+      myEmoji:       null,
+      reactionCounts: {},
+    };
+  }).filter(Boolean);
 
   // ── Loading ───────────────────────────────────────────────────────────────
 
@@ -239,8 +272,6 @@ export default function SocialPage() {
       </>
     );
   }
-
-  // ── No church selected ────────────────────────────────────────────────────
 
   if (!profile.church_id) {
     return (
@@ -275,7 +306,6 @@ export default function SocialPage() {
   return (
     <div className="dash-root">
 
-      {/* ── Header ── */}
       <header className="header">
         <div className="header-inner">
           <Link to="/dashboard" className="brand">
@@ -289,22 +319,19 @@ export default function SocialPage() {
         </div>
       </header>
 
-      {/* ── Body ── */}
       <div className="dash-body">
         <div className="container-narrow stack-7">
 
           {/* ── Church header ── */}
           <div className="stack-1">
-            {church && (
-              <div className="kicker"><span className="dot" />{church.name}</div>
-            )}
+            {church && <div className="kicker"><span className="dot" />{church.name}</div>}
             <h2 style={{ margin: 0 }}>Stewarding Social</h2>
             <p className="muted" style={{ margin: 0 }}>
               See what your church community is accomplishing together.
             </p>
           </div>
 
-          {/* ── Impact stats (mission progress from church) ── */}
+          {/* ── Mission progress ── */}
           {church && (
             <div className="card stack-5">
               <div className="stack-1">
@@ -332,7 +359,7 @@ export default function SocialPage() {
             </div>
           )}
 
-          {/* ── Pinned banners ── */}
+          {/* ── Banners ── */}
           {banners.map((banner) => (
             <div key={banner.id} className="dash-status-banner is-active"
                  style={{ flexDirection: "column", alignItems: "flex-start", gap: "var(--s-2)" }}>
@@ -342,13 +369,8 @@ export default function SocialPage() {
                   {banner.title}
                 </div>
                 {banner.video_url && (
-                  <a
-                    href={banner.video_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn btn-sm btn-secondary"
-                    style={{ flexShrink: 0 }}
-                  >
+                  <a href={banner.video_url} target="_blank" rel="noopener noreferrer"
+                     className="btn btn-sm btn-secondary" style={{ flexShrink: 0 }}>
                     Watch Video
                   </a>
                 )}
@@ -359,33 +381,48 @@ export default function SocialPage() {
             </div>
           ))}
 
-          {/* ── Community feed ── */}
-          <div className="stack-4">
+          {/* ── My Badges ── */}
+          {myBadgeItems.length > 0 && (
+            <div className="stack-3">
+              <h3 style={{ margin: 0 }}>My Badges</h3>
+              <div className="social-feed-list">
+                {myBadgeItems.map((item, i) => (
+                  <FeedItem
+                    key={item.key}
+                    item={item}
+                    isLast={i === myBadgeItems.length - 1}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── Community Feed ── */}
+          <div className="stack-3">
             <h3 style={{ margin: 0 }}>Community Feed</h3>
 
-            {posts.length === 0 ? (
+            {feedItems.length === 0 ? (
               <div className="dash-status-banner is-pending">
                 <div style={{ display: "flex", alignItems: "center", gap: "var(--s-3)" }}>
                   <div className="status-dot is-pending" />
                   <span className="small muted">
-                    No posts yet — be the first to earn a badge!
+                    No activity yet — badge posts will appear here as members earn them.
                   </span>
                 </div>
               </div>
             ) : (
-              posts.map((post) => {
-                const slot = reactionState[post.id] ?? { _myEmoji: null };
-                const { _myEmoji, ...counts } = slot;
-                return (
-                  <FeedPostCard
-                    key={post.id}
-                    post={post}
-                    myEmoji={_myEmoji}
-                    reactionCounts={counts}
-                    onReact={(emoji) => handleReact(post.id, emoji)}
+              <div className="social-feed-list">
+                {feedItems.map((item, i) => (
+                  <FeedItem
+                    key={item.key}
+                    item={item}
+                    myEmoji={item.myEmoji}
+                    reactionCounts={item.reactionCounts}
+                    onReact={(emoji) => handleReact(item.postId, emoji)}
+                    isLast={i === feedItems.length - 1}
                   />
-                );
-              })
+                ))}
+              </div>
             )}
           </div>
 

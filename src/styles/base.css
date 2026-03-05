@@ -1839,43 +1839,52 @@ button.primary:disabled {
 }
 
 /* =========================================================
-   24) Social feed
+   24) Social feed — Venmo-style list
 ========================================================= */
 
-.feed-post-card {
+/* Outer container — single card with items inside */
+.social-feed-list {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--r-lg);
-  padding: var(--s-5);
-  position: relative;
-  transition: border-color var(--dur-2) var(--ease-out);
+  overflow: hidden;
 }
 
-.feed-post-card.is-pinned {
-  border-color: rgba(76, 175, 122, 0.35);
+/* Each row */
+.social-feed-item {
+  padding: var(--s-4) var(--s-5);
+  border-bottom: 1px solid var(--color-border);
+  position: relative;
+  transition: background var(--dur-2) var(--ease-out);
+}
+
+.social-feed-item.is-last {
+  border-bottom: none;
+}
+
+.social-feed-item.is-pinned {
   background: rgba(76, 175, 122, 0.04);
 }
 
-.feed-post-pinned-label {
-  position: absolute;
-  top: var(--s-3);
-  right: var(--s-4);
+.social-pinned-label {
   font-size: var(--fs-0);
   font-weight: var(--fw-semibold);
   color: var(--color-brand);
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  margin-bottom: var(--s-2);
 }
 
-.feed-post-header {
+/* Row: avatar + content side by side */
+.social-item-row {
   display: flex;
-  align-items: center;
   gap: var(--s-3);
+  align-items: flex-start;
 }
 
-.feed-post-avatar {
-  width: 34px;
-  height: 34px;
+.social-item-avatar {
+  width: 36px;
+  height: 36px;
   border-radius: var(--r-full);
   background: var(--color-brand-light);
   border: 1.5px solid rgba(76, 175, 122, 0.30);
@@ -1887,26 +1896,80 @@ button.primary:disabled {
   justify-content: center;
   flex-shrink: 0;
   user-select: none;
+  margin-top: 1px;
 }
 
-.feed-post-reactions {
+.social-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.social-item-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-3);
+  margin-bottom: var(--s-1);
+}
+
+.social-item-name {
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-2);
+  color: var(--color-text-primary);
+}
+
+.social-item-time {
+  font-size: var(--fs-0);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.social-item-badge-line {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-bottom: var(--s-1);
+}
+
+.social-badge-emoji {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.social-badge-name {
+  font-size: var(--fs-1);
+  font-weight: var(--fw-medium);
+  color: var(--color-brand);
+}
+
+.social-item-body {
+  margin: 0;
+  font-size: var(--fs-1);
+  color: var(--color-text-muted);
+  line-height: var(--lh-normal);
+}
+
+/* Reactions inside item */
+.social-item-reactions {
   display: flex;
   gap: var(--s-2);
-  margin-top: var(--s-4);
+  margin-top: var(--s-3);
   flex-wrap: wrap;
 }
 
+/* Reaction buttons (shared with BadgesModal) */
 .feed-reaction-btn {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 10px;
+  padding: 3px 9px;
   border-radius: var(--r-full);
   border: 1px solid var(--color-border);
   background: var(--color-surface-2);
-  font-size: var(--fs-2);
+  font-size: var(--fs-1);
   cursor: pointer;
-  line-height: 1.4;
+  line-height: 1.5;
   transition:
     background var(--dur-2) var(--ease-out),
     border-color var(--dur-2) var(--ease-out);

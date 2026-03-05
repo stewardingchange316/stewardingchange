@@ -169,7 +169,7 @@ export default function Dashboard() {
               onClick={() => nav("/social")}
               style={{ marginLeft: "auto" }}
             >
-              Stewarding Social →
+              Stewarding Social
             </button>
           </div>
 
