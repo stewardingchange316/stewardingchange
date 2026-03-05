@@ -281,33 +281,19 @@ export default function Dashboard() {
             </p>
           </div>
 
-          {/* ── Mission card ── */}
+          {/* ── Social teaser ── */}
           {church && (
-            <div className="card stack-5">
-              <div className="stack-1">
-                <div className="kicker" style={{ marginBottom: 0 }}>
-                  <span className="dot" />
-                  {church.mission_label || churchName}
-                </div>
-                <h3 style={{ margin: 0 }}>{church.mission_title || "Mission"}</h3>
+            <div className="card stack-3" style={{ textAlign: "center", cursor: "pointer" }} onClick={() => nav("/social")}>
+              <div className="kicker" style={{ justifyContent: "center", marginBottom: 0 }}>
+                <span className="dot" />{church.name}
               </div>
-
+              <h3 style={{ margin: 0 }}>See the community feed</h3>
               <p className="muted" style={{ margin: 0, fontSize: "var(--fs-2)" }}>
-                {church.mission_description}
+                Check out what your church is accomplishing — badges, milestones, and more.
               </p>
-
-              <div className="stack-2">
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span className="small muted">Progress toward goal</span>
-                  <span className="small" style={{ color: "var(--color-brand)", fontWeight: "var(--fw-semibold)" }}>
-                    {`${church.mission_progress ?? 0}%`}
-                  </span>
-                </div>
-                <div className="progress-bar">
-                  <div className="progress-fill" style={{ width: `${church.mission_progress ?? 0}%` }} />
-                </div>
-                <p className="small muted" style={{ margin: 0 }}>Every purchase rounded up moves this forward.</p>
-              </div>
+              <button className="btn btn-secondary btn-sm" style={{ alignSelf: "center" }}>
+                Open Stewarding Social
+              </button>
             </div>
           )}
 

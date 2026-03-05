@@ -1990,6 +1990,47 @@ button.primary:disabled {
   color: var(--color-text-muted);
 }
 
+/* ── Social page title (glowing headline) ── */
+.social-page-title {
+  font-size: clamp(32px, 6vw, 52px);
+  font-weight: var(--fw-extrabold);
+  letter-spacing: -0.03em;
+  line-height: var(--lh-tight);
+  color: var(--color-text-primary);
+  margin: 0;
+  text-shadow:
+    0 0 24px rgba(76, 175, 122, 0.55),
+    0 0 60px rgba(76, 175, 122, 0.25);
+}
+
+/* ── Earned badge emoji strip in header ── */
+.social-header-badges {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 8px;
+  border-radius: var(--r-full);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+  transition: border-color var(--dur-2) var(--ease-out);
+}
+
+.social-header-badges:hover {
+  border-color: rgba(76, 175, 122, 0.4);
+}
+
+.social-header-badge-emoji {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.social-header-badge-more {
+  font-size: var(--fs-0);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-muted);
+  margin-left: 2px;
+}
+
 /* ── Homepage mobile ── */
 @media (max-width: 768px) {
   .home-hero-grid {

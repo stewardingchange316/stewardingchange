@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { BADGE_DISPLAY } from "../services/badgeService";
+import BadgesModal from "../components/BadgesModal";
 
 const REACTIONS = [
   { emoji: "🙏", label: "Amen" },
@@ -25,17 +26,15 @@ function timeAgo(dateStr) {
 // ── Feed item (Venmo-style) ───────────────────────────────────────────────────
 
 function FeedItem({ item, myEmoji, reactionCounts, onReact, isLast }) {
-  const { type, authorName, authorInitial, body, badge, createdAt, postId, isPinned } = item;
+  const { authorName, authorInitial, body, badge, createdAt, postId, isPinned } = item;
 
   return (
     <div className={`social-feed-item${isPinned ? " is-pinned" : ""}${isLast ? " is-last" : ""}`}>
       {isPinned && <div className="social-pinned-label">Pinned</div>}
 
       <div className="social-item-row">
-        {/* Avatar */}
         <div className="social-item-avatar">{authorInitial}</div>
 
-        {/* Content */}
         <div className="social-item-content">
           <div className="social-item-header">
             <span className="social-item-name">{authorName}</span>
@@ -51,7 +50,6 @@ function FeedItem({ item, myEmoji, reactionCounts, onReact, isLast }) {
 
           <p className="social-item-body">{body}</p>
 
-          {/* Reactions — only for church feed posts */}
           {postId && (
             <div className="social-item-reactions">
               {REACTIONS.map(({ emoji, label }) => {
@@ -82,14 +80,15 @@ function FeedItem({ item, myEmoji, reactionCounts, onReact, isLast }) {
 export default function SocialPage() {
   const nav = useNavigate();
 
-  const [loading,      setLoading]      = useState(true);
-  const [authUser,     setAuthUser]     = useState(null);
-  const [profile,      setProfile]      = useState(null);
-  const [church,       setChurch]       = useState(null);
-  const [banners,      setBanners]      = useState([]);
-  const [myBadges,     setMyBadges]     = useState([]);  // from user_badges directly
-  const [posts,        setPosts]        = useState([]);
-  const [reactionState, setReactionState] = useState({});
+  const [loading,        setLoading]        = useState(true);
+  const [authUser,       setAuthUser]       = useState(null);
+  const [profile,        setProfile]        = useState(null);
+  const [church,         setChurch]         = useState(null);
+  const [banners,        setBanners]        = useState([]);
+  const [myBadges,       setMyBadges]       = useState([]);
+  const [posts,          setPosts]          = useState([]);
+  const [reactionState,  setReactionState]  = useState({});
+  const [showBadgesModal, setShowBadgesModal] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -110,7 +109,6 @@ export default function SocialPage() {
 
       const churchId = profileData.church_id;
 
-      // Always fetch user's own badges regardless of church
       const { data: earnedRows } = await supabase
         .from("user_badges")
         .select("badge_id, awarded_at")
@@ -121,7 +119,6 @@ export default function SocialPage() {
 
       if (!churchId) { setLoading(false); return; }
 
-      // Church-scoped fetches
       const [
         { data: churchData },
         { data: bannerData },
@@ -154,7 +151,6 @@ export default function SocialPage() {
       const allPosts = postData ?? [];
       setPosts(allPosts);
 
-      // Fetch reactions
       const postIds = allPosts.map((p) => p.id);
       if (postIds.length > 0) {
         const { data: reactionData } = await supabase
@@ -207,7 +203,7 @@ export default function SocialPage() {
     }
   }
 
-  // ── Build unified feed items from posts ───────────────────────────────────
+  // ── Build feed items ───────────────────────────────────────────────────────
 
   const feedItems = posts.map((post) => {
     const authorName    = post.author_first_name ?? "A member";
@@ -229,28 +225,11 @@ export default function SocialPage() {
     };
   });
 
-  // ── My earned badges (always shown, pull directly from user_badges) ────────
+  // ── Earned badge emojis for header ────────────────────────────────────────
 
-  const firstName    = profile?.first_name ?? "You";
-  const firstInitial = firstName.charAt(0).toUpperCase();
-
-  const myBadgeItems = myBadges.map((row) => {
-    const badgeInfo = BADGE_DISPLAY.find((b) => b.id === row.badge_id);
-    if (!badgeInfo) return null;
-    return {
-      key:           `badge-${row.badge_id}`,
-      type:          "my_badge",
-      postId:        null,          // no reactions on personal badge items
-      authorName:    firstName,
-      authorInitial: firstInitial,
-      body:          badgeInfo.desc,
-      badge:         badgeInfo,
-      createdAt:     row.awarded_at,
-      isPinned:      false,
-      myEmoji:       null,
-      reactionCounts: {},
-    };
-  }).filter(Boolean);
+  const earnedEmojis = myBadges
+    .map((row) => BADGE_DISPLAY.find((b) => b.id === row.badge_id)?.emoji)
+    .filter(Boolean);
 
   // ── Loading ───────────────────────────────────────────────────────────────
 
@@ -304,6 +283,7 @@ export default function SocialPage() {
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
+    <>
     <div className="dash-root">
 
       <header className="header">
@@ -313,9 +293,27 @@ export default function SocialPage() {
                  style={{ height: "36px", width: "36px", objectFit: "contain" }} />
             <span className="brand-name">Stewarding Change</span>
           </Link>
-          <button className="btn btn-ghost btn-sm" onClick={() => nav("/dashboard")}>
-            ← Dashboard
-          </button>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "var(--s-3)" }}>
+            {/* Earned badge emoji strip */}
+            {earnedEmojis.length > 0 && (
+              <div className="social-header-badges" onClick={() => setShowBadgesModal(true)}
+                   title="My Badges" style={{ cursor: "pointer" }}>
+                {earnedEmojis.slice(0, 5).map((emoji, i) => (
+                  <span key={i} className="social-header-badge-emoji">{emoji}</span>
+                ))}
+                {earnedEmojis.length > 5 && (
+                  <span className="social-header-badge-more">+{earnedEmojis.length - 5}</span>
+                )}
+              </div>
+            )}
+            <button className="btn btn-secondary btn-sm" onClick={() => setShowBadgesModal(true)}>
+              🏅 My Badges
+            </button>
+            <button className="btn btn-ghost btn-sm" onClick={() => nav("/dashboard")}>
+              ← Dashboard
+            </button>
+          </div>
         </div>
       </header>
 
@@ -323,9 +321,9 @@ export default function SocialPage() {
         <div className="container-narrow stack-7">
 
           {/* ── Church header ── */}
-          <div className="stack-1">
+          <div className="stack-2">
             {church && <div className="kicker"><span className="dot" />{church.name}</div>}
-            <h2 style={{ margin: 0 }}>Stewarding Social</h2>
+            <h1 className="social-page-title">Stewarding Social</h1>
             <p className="muted" style={{ margin: 0 }}>
               See what your church community is accomplishing together.
             </p>
@@ -381,22 +379,6 @@ export default function SocialPage() {
             </div>
           ))}
 
-          {/* ── My Badges ── */}
-          {myBadgeItems.length > 0 && (
-            <div className="stack-3">
-              <h3 style={{ margin: 0 }}>My Badges</h3>
-              <div className="social-feed-list">
-                {myBadgeItems.map((item, i) => (
-                  <FeedItem
-                    key={item.key}
-                    item={item}
-                    isLast={i === myBadgeItems.length - 1}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* ── Community Feed ── */}
           <div className="stack-3">
             <h3 style={{ margin: 0 }}>Community Feed</h3>
@@ -429,5 +411,13 @@ export default function SocialPage() {
         </div>
       </div>
     </div>
+
+    {showBadgesModal && authUser && (
+      <BadgesModal
+        userId={authUser.id}
+        onClose={() => setShowBadgesModal(false)}
+      />
+    )}
+    </>
   );
 }
