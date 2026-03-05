@@ -114,15 +114,13 @@ export async function checkAndAwardBadges(userId) {
     if (ctx.churchId && showOnFeed) {
       const display = BADGE_DISPLAY.find((b) => b.id === badgeId);
       if (display) {
-        const { error: postErr } = await supabase.rpc("create_feed_post", {
+        await supabase.rpc("create_feed_post", {
           p_church_id: ctx.churchId,
           p_user_id:   userId,
           p_post_type: "badge",
           p_body:      `Earned the "${display.name}" badge — ${display.desc}`,
           p_badge_id:  badgeId,
         });
-        if (postErr) console.error("[badgeService] create_feed_post failed:", postErr);
-        else console.log("[badgeService] feed post created for", badgeId);
       }
     }
   }

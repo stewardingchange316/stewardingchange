@@ -152,7 +152,6 @@ export default function SocialPage() {
       setBanners(bannerData ?? []);
 
       const allPosts = postData ?? [];
-      console.log("[SocialPage] churchId:", churchId, "posts fetched:", allPosts.length, allPosts);
       setPosts(allPosts);
 
       // Fetch reactions
