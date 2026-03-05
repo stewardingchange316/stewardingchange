@@ -19,6 +19,15 @@ export default function Dashboard() {
   const [menuOpen,           setMenuOpen]           = useState(false);
   const menuRef = useRef(null);
 
+  // Close avatar menu on outside click — must be before any early returns
+  useEffect(() => {
+    function onOutside(e) {
+      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
+    }
+    document.addEventListener("mousedown", onOutside);
+    return () => document.removeEventListener("mousedown", onOutside);
+  }, []);
+
   useEffect(() => {
     async function load() {
       const { data: { session } } = await supabase.auth.getSession();
@@ -128,15 +137,6 @@ export default function Dashboard() {
     : "Not set";
 
   const initials = firstName.charAt(0).toUpperCase();
-
-  // Close menu on outside click
-  useEffect(() => {
-    function onOutside(e) {
-      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
-    }
-    document.addEventListener("mousedown", onOutside);
-    return () => document.removeEventListener("mousedown", onOutside);
-  }, []);
 
   const earnedEmojis = myBadges
     .map((row) => BADGE_DISPLAY.find((b) => b.id === row.badge_id)?.emoji)
