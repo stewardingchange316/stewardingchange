@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 import { useNavigate, Link } from "react-router-dom";
 import BadgesModal from "../components/BadgesModal";
-import { checkAndAwardBadges } from "../services/badgeService";
+import { checkAndAwardBadges, BADGE_DISPLAY } from "../services/badgeService";
 
 export default function Dashboard() {
   const nav = useNavigate();
@@ -11,6 +11,7 @@ export default function Dashboard() {
   const [authUser, setAuthUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [church, setChurch] = useState(null);
+  const [myBadges,        setMyBadges]        = useState([]);
   const [paused,          setPaused]          = useState(false);
   const [showBadgesModal, setShowBadgesModal] = useState(false);
 
@@ -49,6 +50,13 @@ export default function Dashboard() {
           .maybeSingle();
         setChurch(churchData);
       }
+
+      // Fetch earned badges for header display
+      const { data: badgeRows } = await supabase
+        .from("user_badges")
+        .select("badge_id")
+        .eq("user_id", user.id);
+      setMyBadges(badgeRows ?? []);
 
       setLoading(false);
 
@@ -117,6 +125,10 @@ export default function Dashboard() {
 
   const initials = firstName.charAt(0).toUpperCase();
 
+  const earnedEmojis = myBadges
+    .map((row) => BADGE_DISPLAY.find((b) => b.id === row.badge_id)?.emoji)
+    .filter(Boolean);
+
   /* ── UI ── */
   return (
     <>
@@ -136,6 +148,20 @@ export default function Dashboard() {
           </Link>
 
           <div style={{ display: "flex", alignItems: "center", gap: "var(--s-3)" }}>
+            {earnedEmojis.length > 0 && (
+              <div className="social-header-badges" onClick={() => setShowBadgesModal(true)}
+                   title="My Badges" style={{ cursor: "pointer" }}>
+                {earnedEmojis.slice(0, 5).map((emoji, i) => (
+                  <span key={i} className="social-header-badge-emoji">{emoji}</span>
+                ))}
+                {earnedEmojis.length > 5 && (
+                  <span className="social-header-badge-more">+{earnedEmojis.length - 5}</span>
+                )}
+              </div>
+            )}
+            <button className="btn btn-secondary btn-sm" onClick={() => setShowBadgesModal(true)}>
+              🏅 My Badges
+            </button>
             <div className="dash-avatar">{initials}</div>
             <button className="btn btn-ghost btn-sm" onClick={handleSignOut}>
               Sign out
@@ -156,22 +182,21 @@ export default function Dashboard() {
             </p>
           </div>
 
-          {/* ── Quick actions ── */}
-          <div style={{ display: "flex", gap: "var(--s-3)" }}>
-            <button
-              className="btn btn-secondary btn-sm"
-              onClick={() => setShowBadgesModal(true)}
-            >
-              🏅 Badges
-            </button>
-            <button
-              className="btn btn-secondary btn-sm"
-              onClick={() => nav("/social")}
-              style={{ marginLeft: "auto" }}
-            >
-              Stewarding Social
-            </button>
-          </div>
+          {/* ── Social teaser ── */}
+          {church && (
+            <div className="card stack-3" style={{ textAlign: "center", cursor: "pointer" }} onClick={() => nav("/social")}>
+              <div className="kicker" style={{ justifyContent: "center", marginBottom: 0 }}>
+                <span className="dot" />{church.name}
+              </div>
+              <h3 style={{ margin: 0 }}>See the community feed</h3>
+              <p className="muted" style={{ margin: 0, fontSize: "var(--fs-2)" }}>
+                Check out what your church is accomplishing — badges, milestones, and more.
+              </p>
+              <button className="btn btn-secondary btn-sm" style={{ alignSelf: "center" }}>
+                Open Stewarding Social
+              </button>
+            </div>
+          )}
 
           {/* ── Giving stats row ── */}
           <div className="dash-stats">
@@ -280,22 +305,6 @@ export default function Dashboard() {
               summary are provided automatically.
             </p>
           </div>
-
-          {/* ── Social teaser ── */}
-          {church && (
-            <div className="card stack-3" style={{ textAlign: "center", cursor: "pointer" }} onClick={() => nav("/social")}>
-              <div className="kicker" style={{ justifyContent: "center", marginBottom: 0 }}>
-                <span className="dot" />{church.name}
-              </div>
-              <h3 style={{ margin: 0 }}>See the community feed</h3>
-              <p className="muted" style={{ margin: 0, fontSize: "var(--fs-2)" }}>
-                Check out what your church is accomplishing — badges, milestones, and more.
-              </p>
-              <button className="btn btn-secondary btn-sm" style={{ alignSelf: "center" }}>
-                Open Stewarding Social
-              </button>
-            </div>
-          )}
 
         </div>
       </div>
