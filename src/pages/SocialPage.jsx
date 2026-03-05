@@ -141,7 +141,7 @@ export default function SocialPage() {
           .order("created_at", { ascending: false }),
         supabase
           .from("social_feed_posts")
-          .select("id, post_type, body, badge_id, is_pinned, created_at, users(first_name)")
+          .select("id, post_type, body, badge_id, is_pinned, created_at, author_first_name")
           .eq("church_id", churchId)
           .order("is_pinned", { ascending: false })
           .order("created_at", { ascending: false })
@@ -211,7 +211,7 @@ export default function SocialPage() {
   // ── Build unified feed items from posts ───────────────────────────────────
 
   const feedItems = posts.map((post) => {
-    const authorName    = post.users?.first_name ?? "A member";
+    const authorName    = post.author_first_name ?? "A member";
     const badgeInfo     = post.badge_id ? BADGE_DISPLAY.find((b) => b.id === post.badge_id) : null;
     const slot          = reactionState[post.id] ?? { _myEmoji: null };
     const { _myEmoji, ...counts } = slot;
@@ -363,20 +363,20 @@ export default function SocialPage() {
           {/* ── Banners ── */}
           {banners.map((banner) => (
             <div key={banner.id} className="dash-status-banner is-active"
-                 style={{ flexDirection: "column", alignItems: "flex-start", gap: "var(--s-2)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "var(--s-3)", width: "100%" }}>
+                 style={{ flexDirection: "column", alignItems: "center", gap: "var(--s-3)", textAlign: "center" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "var(--s-2)" }}>
                 <div className="status-dot is-active" />
-                <div style={{ fontWeight: "var(--fw-semibold)", fontSize: "var(--fs-2)", color: "var(--color-text-primary)", flex: 1 }}>
+                <div style={{ fontWeight: "var(--fw-semibold)", fontSize: "var(--fs-2)", color: "var(--color-text-primary)" }}>
                   {banner.title}
                 </div>
-                {banner.video_url && (
-                  <a href={banner.video_url} target="_blank" rel="noopener noreferrer"
-                     className="btn btn-sm btn-secondary" style={{ flexShrink: 0 }}>
-                    Watch Video
-                  </a>
-                )}
               </div>
-              <p className="small muted" style={{ margin: 0, paddingLeft: "calc(8px + var(--s-3))" }}>
+              {banner.video_url && (
+                <a href={banner.video_url} target="_blank" rel="noopener noreferrer"
+                   className="btn btn-sm btn-secondary">
+                  Watch Video
+                </a>
+              )}
+              <p className="small muted" style={{ margin: 0 }}>
                 {banner.message}
               </p>
             </div>
