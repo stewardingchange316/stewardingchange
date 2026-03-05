@@ -44,7 +44,7 @@ function FeedItem({ item, myEmoji, reactionCounts, onReact, isLast }) {
           {badge && (
             <div className="social-item-badge-line">
               <span className="social-badge-emoji">{badge.emoji}</span>
-              <span className="social-badge-name">earned {badge.name}</span>
+              <span className="social-badge-name">Earned {badge.name}</span>
             </div>
           )}
 
@@ -295,18 +295,6 @@ export default function SocialPage() {
           </Link>
 
           <div style={{ display: "flex", alignItems: "center", gap: "var(--s-3)" }}>
-            {/* Earned badge emoji strip */}
-            {earnedEmojis.length > 0 && (
-              <div className="social-header-badges" onClick={() => setShowBadgesModal(true)}
-                   title="My Badges" style={{ cursor: "pointer" }}>
-                {earnedEmojis.slice(0, 5).map((emoji, i) => (
-                  <span key={i} className="social-header-badge-emoji">{emoji}</span>
-                ))}
-                {earnedEmojis.length > 5 && (
-                  <span className="social-header-badge-more">+{earnedEmojis.length - 5}</span>
-                )}
-              </div>
-            )}
             <button className="btn btn-secondary btn-sm" onClick={() => setShowBadgesModal(true)}>
               🏅 My Badges
             </button>
