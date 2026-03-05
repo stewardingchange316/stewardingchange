@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 import { useNavigate, Link } from "react-router-dom";
+import BadgesModal from "../components/BadgesModal";
+import { checkAndAwardBadges } from "../services/badgeService";
 
 export default function Dashboard() {
   const nav = useNavigate();
@@ -9,7 +11,8 @@ export default function Dashboard() {
   const [authUser, setAuthUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [church, setChurch] = useState(null);
-  const [paused, setPaused] = useState(false);
+  const [paused,          setPaused]          = useState(false);
+  const [showBadgesModal, setShowBadgesModal] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -48,6 +51,9 @@ export default function Dashboard() {
       }
 
       setLoading(false);
+
+      // Background badge check — fire and forget, does not block render
+      checkAndAwardBadges(user.id).catch(console.error);
     }
 
     load();
@@ -113,6 +119,7 @@ export default function Dashboard() {
 
   /* ── UI ── */
   return (
+    <>
     <div className="dash-root">
 
       {/* ── Header ── */}
@@ -147,6 +154,23 @@ export default function Dashboard() {
             <p className="muted" style={{ margin: 0 }}>
               Stewarding with {churchName}
             </p>
+          </div>
+
+          {/* ── Quick actions ── */}
+          <div style={{ display: "flex", gap: "var(--s-3)" }}>
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={() => setShowBadgesModal(true)}
+            >
+              🏅 Badges
+            </button>
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={() => nav("/social")}
+              style={{ marginLeft: "auto" }}
+            >
+              Stewarding Social →
+            </button>
           </div>
 
           {/* ── Giving stats row ── */}
@@ -290,5 +314,13 @@ export default function Dashboard() {
         </div>
       </div>
     </div>
+
+    {showBadgesModal && (
+      <BadgesModal
+        userId={authUser.id}
+        onClose={() => setShowBadgesModal(false)}
+      />
+    )}
+    </>
   );
 }

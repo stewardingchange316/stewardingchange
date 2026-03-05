@@ -1776,6 +1776,157 @@ button.primary:disabled {
   gap: var(--s-5);
 }
 
+/* =========================================================
+   23) Badges modal
+========================================================= */
+
+.badges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: var(--s-3);
+  margin-top: var(--s-2);
+}
+
+.badge-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-4) var(--s-3);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--color-border);
+  text-align: center;
+  position: relative;
+  transition: border-color var(--dur-2) var(--ease-out);
+}
+
+.badge-tile.is-earned {
+  background: var(--color-brand-light);
+  border-color: rgba(76, 175, 122, 0.35);
+}
+
+.badge-tile.is-locked {
+  background: var(--color-surface-2);
+  opacity: 0.5;
+  filter: grayscale(0.4);
+}
+
+.badge-tile-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.badge-tile-name {
+  font-size: var(--fs-1);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-primary);
+  line-height: var(--lh-snug);
+}
+
+.badge-tile-desc {
+  font-size: var(--fs-0);
+  color: var(--color-text-muted);
+  line-height: var(--lh-normal);
+}
+
+.badge-tile-earned-label {
+  font-size: var(--fs-0);
+  font-weight: var(--fw-semibold);
+  color: var(--color-brand);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: var(--s-1);
+}
+
+/* =========================================================
+   24) Social feed
+========================================================= */
+
+.feed-post-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+  position: relative;
+  transition: border-color var(--dur-2) var(--ease-out);
+}
+
+.feed-post-card.is-pinned {
+  border-color: rgba(76, 175, 122, 0.35);
+  background: rgba(76, 175, 122, 0.04);
+}
+
+.feed-post-pinned-label {
+  position: absolute;
+  top: var(--s-3);
+  right: var(--s-4);
+  font-size: var(--fs-0);
+  font-weight: var(--fw-semibold);
+  color: var(--color-brand);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.feed-post-header {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.feed-post-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-full);
+  background: var(--color-brand-light);
+  border: 1.5px solid rgba(76, 175, 122, 0.30);
+  color: var(--color-brand);
+  font-size: var(--fs-1);
+  font-weight: var(--fw-bold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.feed-post-reactions {
+  display: flex;
+  gap: var(--s-2);
+  margin-top: var(--s-4);
+  flex-wrap: wrap;
+}
+
+.feed-reaction-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--r-full);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+  font-size: var(--fs-2);
+  cursor: pointer;
+  line-height: 1.4;
+  transition:
+    background var(--dur-2) var(--ease-out),
+    border-color var(--dur-2) var(--ease-out);
+}
+
+.feed-reaction-btn.is-active {
+  background: var(--color-brand-light);
+  border-color: rgba(76, 175, 122, 0.40);
+}
+
+.feed-reaction-btn:hover {
+  border-color: var(--color-border-strong);
+}
+
+.feed-reaction-count {
+  font-size: var(--fs-0);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-muted);
+}
+
 /* ── Homepage mobile ── */
 @media (max-width: 768px) {
   .home-hero-grid {

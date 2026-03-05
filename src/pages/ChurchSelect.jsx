@@ -65,7 +65,7 @@ export default function ChurchSelect() {
 
       const { error, data } = await supabase
         .from("users")
-        .update({ church_id: selected, onboarding_step: "cap" })
+        .update({ church_id: selected, onboarding_step: "cap", church_joined_at: new Date().toISOString() })
         .eq("id", user.id)
         .select();
 

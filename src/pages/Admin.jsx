@@ -129,6 +129,232 @@ function ChurchCard({ church, onSaved }) {
   );
 }
 
+// ─── Banner section ───────────────────────────────────────────────────────────
+
+function BannerSection({ churches }) {
+  const [churchId,       setChurchId]       = useState(churches[0]?.id ?? "");
+  const [title,          setTitle]          = useState("");
+  const [message,        setMessage]        = useState("");
+  const [videoUrl,       setVideoUrl]       = useState("");
+  const [allChurches,    setAllChurches]    = useState(false);
+  const [saving,         setSaving]         = useState(false);
+  const [saved,          setSaved]          = useState(false);
+  const [banners,        setBanners]        = useState([]);
+  const [loadingBanners, setLoadingBanners] = useState(true);
+
+  const effectiveChurchId = allChurches ? null : (churchId || churches[0]?.id);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoadingBanners(true);
+
+    const query = allChurches
+      ? supabase.from("church_banners").select("id, title, message, video_url, is_active, church_id, created_at").order("created_at", { ascending: false })
+      : supabase.from("church_banners").select("id, title, message, video_url, is_active, church_id, created_at").eq("church_id", effectiveChurchId).order("created_at", { ascending: false });
+
+    query.then(({ data }) => {
+      if (!cancelled) { setBanners(data ?? []); setLoadingBanners(false); }
+    });
+
+    return () => { cancelled = true; };
+  }, [effectiveChurchId, allChurches]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function handleCreate(e) {
+    e.preventDefault();
+    if (!title.trim() || !message.trim()) return;
+    setSaving(true);
+
+    const { data: { session } } = await supabase.auth.getSession();
+    const userId = session?.user?.id;
+
+    const payload = {
+      church_id:  effectiveChurchId,
+      title:      title.trim(),
+      message:    message.trim(),
+      video_url:  videoUrl.trim() || null,
+      created_by: userId,
+    };
+
+    const { data: newBanner, error } = await supabase
+      .from("church_banners")
+      .insert(payload)
+      .select()
+      .single();
+
+    setSaving(false);
+    if (!error && newBanner) {
+      setBanners((prev) => [newBanner, ...prev]);
+      setTitle("");
+      setMessage("");
+      setVideoUrl("");
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    }
+  }
+
+  async function handleDeactivate(bannerId) {
+    await supabase.from("church_banners").update({ is_active: false }).eq("id", bannerId);
+    setBanners((prev) => prev.map((b) => b.id === bannerId ? { ...b, is_active: false } : b));
+  }
+
+  async function handleDelete(bannerId) {
+    if (!confirm("Delete this banner?")) return;
+    await supabase.from("church_banners").delete().eq("id", bannerId);
+    setBanners((prev) => prev.filter((b) => b.id !== bannerId));
+  }
+
+  const churchNameFor = (cId) => cId ? (churches.find((c) => c.id === cId)?.name ?? cId) : "All Churches";
+
+  return (
+    <div className="stack-4">
+      <div>
+        <h3 style={{ margin: 0 }}>Church Banners</h3>
+        <p className="small muted" style={{ margin: "4px 0 0" }}>
+          Pinned announcements shown at the top of the Stewarding Social page.
+        </p>
+      </div>
+
+      {/* ── Create form ── */}
+      <div className="card stack-4">
+        <h4 style={{ margin: 0 }}>New Banner</h4>
+        <form onSubmit={handleCreate} className="stack-4">
+
+          {/* Church selector */}
+          <div className="stack-2">
+            <label style={{ fontSize: "var(--fs-1)", fontWeight: "var(--fw-medium)", color: "var(--color-text-primary)" }}>
+              Post to
+            </label>
+            <div style={{ display: "flex", gap: "var(--s-3)", flexWrap: "wrap", alignItems: "center" }}>
+              <button
+                type="button"
+                className={`btn btn-sm ${allChurches ? "btn-primary" : "btn-secondary"}`}
+                onClick={() => setAllChurches(true)}
+              >
+                All Churches
+              </button>
+              {churches.map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  className={`btn btn-sm ${!allChurches && churchId === c.id ? "btn-primary" : "btn-secondary"}`}
+                  onClick={() => { setAllChurches(false); setChurchId(c.id); }}
+                >
+                  {c.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="stack-2">
+            <label style={{ fontSize: "var(--fs-1)", fontWeight: "var(--fw-medium)", color: "var(--color-text-primary)" }}>
+              Title
+            </label>
+            <input
+              className="input"
+              placeholder="E.g. Food drive update"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="stack-2">
+            <label style={{ fontSize: "var(--fs-1)", fontWeight: "var(--fw-medium)", color: "var(--color-text-primary)" }}>
+              Message
+            </label>
+            <textarea
+              className="textarea"
+              placeholder="What do you want to share with the congregation?"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              rows={3}
+              required
+            />
+          </div>
+
+          <div className="stack-2">
+            <label style={{ fontSize: "var(--fs-1)", fontWeight: "var(--fw-medium)", color: "var(--color-text-primary)" }}>
+              Video URL <span className="muted" style={{ fontWeight: "var(--fw-normal)" }}>(optional)</span>
+            </label>
+            <input
+              className="input"
+              type="url"
+              placeholder="https://youtube.com/watch?v=..."
+              value={videoUrl}
+              onChange={(e) => setVideoUrl(e.target.value)}
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="btn btn-primary btn-sm"
+            disabled={saving || !title.trim() || !message.trim()}
+          >
+            {saving ? "Creating…" : saved ? "Created!" : "Create Banner"}
+          </button>
+        </form>
+      </div>
+
+      {/* ── Existing banners ── */}
+      {loadingBanners ? (
+        <div className="center" style={{ padding: "var(--s-5)" }}>
+          <div className="spinner" />
+        </div>
+      ) : banners.length === 0 ? (
+        <div className="dash-status-banner is-pending">
+          <div style={{ display: "flex", alignItems: "center", gap: "var(--s-3)" }}>
+            <div className="status-dot is-pending" />
+            <span className="small muted">No banners created yet.</span>
+          </div>
+        </div>
+      ) : (
+        <div className="stack-3">
+          {banners.map((banner) => (
+            <div key={banner.id} className="card stack-3">
+              <div className="row-between">
+                <div>
+                  <div style={{ fontWeight: "var(--fw-semibold)", color: "var(--color-text-primary)" }}>
+                    {banner.title}
+                  </div>
+                  <div className="small muted" style={{ marginTop: 2 }}>
+                    {churchNameFor(banner.church_id)} · {fmt(banner.created_at)}
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: "var(--s-2)", alignItems: "center" }}>
+                  <span
+                    className="badge"
+                    style={{
+                      background:  banner.is_active ? "rgba(76,175,122,0.12)" : "var(--color-surface-2)",
+                      color:       banner.is_active ? "var(--color-success)"   : "var(--color-text-muted)",
+                      borderColor: banner.is_active ? "rgba(76,175,122,0.2)"   : "var(--color-border)",
+                    }}
+                  >
+                    {banner.is_active ? "Active" : "Inactive"}
+                  </span>
+                  {banner.is_active && (
+                    <button className="btn btn-secondary btn-sm" onClick={() => handleDeactivate(banner.id)}>
+                      Deactivate
+                    </button>
+                  )}
+                  <button className="btn btn-danger btn-sm" onClick={() => handleDelete(banner.id)}>
+                    Delete
+                  </button>
+                </div>
+              </div>
+              <p className="small muted" style={{ margin: 0 }}>{banner.message}</p>
+              {banner.video_url && (
+                <a href={banner.video_url} target="_blank" rel="noopener noreferrer" className="link-button" style={{ fontSize: "var(--fs-1)" }}>
+                  Watch Video →
+                </a>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function Admin() {
@@ -682,6 +908,11 @@ export default function Admin() {
               ))}
             </div>
           </div>
+
+          {/* ── Banners section ── */}
+          {churches.length > 0 && (
+            <BannerSection churches={churches} />
+          )}
 
           {/* ── Giving history placeholder ── */}
           <div className="stack-3">
