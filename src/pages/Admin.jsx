@@ -388,6 +388,12 @@ export default function Admin() {
       setUsers(userData ?? []);
       setChurches(churchData ?? []);
       setLoading(false);
+
+      // Debug: log badge/feed counts to console
+      supabase.rpc("admin_feed_debug").then(({ data, error }) => {
+        if (error) console.warn("[admin_feed_debug] error:", error);
+        else console.log("[admin_feed_debug]", data?.[0]);
+      });
     }
 
     load();
