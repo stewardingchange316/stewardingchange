@@ -25,6 +25,12 @@ export default function EditProfileModal({ userId, initialFirstName, initialLast
 
     if (nameErr) { setError("Failed to save. Please try again."); setSaving(false); return; }
 
+    // Keep feed posts in sync with the new name
+    await supabase
+      .from("social_feed_posts")
+      .update({ author_first_name: firstName.trim() })
+      .eq("user_id", userId);
+
     if (email.trim() && email.trim() !== initialEmail) {
       const { error: emailErr } = await supabase.auth.updateUser({ email: email.trim() });
       if (emailErr) {
