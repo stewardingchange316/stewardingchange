@@ -27,7 +27,7 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 img, svg, video, canvas {
@@ -438,7 +438,7 @@ button.primary:disabled {
   height: var(--header-h);
   display: flex;
   align-items: center;
-  background: rgba(15, 17, 23, 0.88);
+  background: rgba(255, 255, 255, 0.92);
   border-bottom: 1px solid var(--color-border);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
@@ -899,19 +899,19 @@ button.primary:disabled {
 
 .alert-success {
   background: var(--color-success-light);
-  border: 1px solid rgba(46, 125, 82, 0.20);
+  border: 1px solid rgba(26, 158, 74, 0.20);
   color: var(--color-success);
 }
 
 .alert-warn {
   background: var(--color-warning-light);
-  border: 1px solid rgba(165, 108, 0, 0.20);
+  border: 1px solid rgba(184, 112, 0, 0.20);
   color: var(--color-warning);
 }
 
 .alert-danger {
   background: var(--color-danger-light);
-  border: 1px solid rgba(192, 57, 43, 0.20);
+  border: 1px solid rgba(217, 43, 43, 0.20);
   color: var(--color-danger);
 }
 
@@ -1028,7 +1028,7 @@ button.primary:disabled {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(26, 31, 46, 0.50);
+  background: rgba(0, 0, 0, 0.35);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   display: flex;
@@ -1273,13 +1273,13 @@ button.primary:disabled {
 
 .badge-brand {
   background: var(--color-brand-light);
-  border-color: rgba(61, 107, 79, 0.20);
+  border-color: rgba(0, 112, 224, 0.20);
   color: var(--color-brand);
 }
 
 .badge-done {
   background: var(--color-success-light);
-  border-color: rgba(76, 175, 122, 0.20);
+  border-color: rgba(26, 158, 74, 0.20);
   color: var(--color-success);
 }
 
@@ -1464,7 +1464,7 @@ button.primary:disabled {
   height: 36px;
   border-radius: 50%;
   background: var(--color-brand-light);
-  border: 1.5px solid rgba(90, 155, 111, 0.30);
+  border: 1.5px solid rgba(0, 112, 224, 0.25);
   color: var(--color-brand);
   font-size: var(--fs-1);
   font-weight: var(--fw-bold);
@@ -1488,8 +1488,8 @@ button.primary:disabled {
 }
 
 .dash-status-banner.is-active {
-  border-color: rgba(90, 155, 111, 0.35);
-  background: rgba(90, 155, 111, 0.07);
+  border-color: rgba(0, 112, 224, 0.25);
+  background: rgba(0, 112, 224, 0.05);
 }
 
 .dash-status-banner.is-paused {
@@ -1512,7 +1512,7 @@ button.primary:disabled {
 
 .status-dot.is-active {
   background: var(--color-success);
-  box-shadow: 0 0 0 3px rgba(76, 175, 122, 0.25);
+  box-shadow: 0 0 0 3px rgba(26, 158, 74, 0.25);
   animation: pulse 2s ease infinite;
 }
 
@@ -1525,8 +1525,8 @@ button.primary:disabled {
 }
 
 @keyframes pulse {
-  0%, 100% { box-shadow: 0 0 0 3px rgba(76, 175, 122, 0.25); }
-  50%       { box-shadow: 0 0 0 6px rgba(76, 175, 122, 0.10); }
+  0%, 100% { box-shadow: 0 0 0 3px rgba(26, 158, 74, 0.25); }
+  50%       { box-shadow: 0 0 0 6px rgba(26, 158, 74, 0.10); }
 }
 
 /* ── Account card rows ── */
@@ -1597,7 +1597,7 @@ button.primary:disabled {
   transform: translateX(-50%);
   width: 800px;
   height: 600px;
-  background: radial-gradient(ellipse at center, rgba(76, 175, 122, 0.10) 0%, transparent 65%);
+  background: radial-gradient(ellipse at center, rgba(0, 112, 224, 0.07) 0%, transparent 65%);
   pointer-events: none;
   z-index: 0;
 }
@@ -1658,9 +1658,8 @@ button.primary:disabled {
   width: 100%;
   max-width: 270px;
   box-shadow:
-    0 4px 6px rgba(0, 0, 0, 0.12),
-    0 16px 48px rgba(0, 0, 0, 0.20),
-    0 0 0 1px rgba(255, 255, 255, 0.04);
+    0 4px 6px rgba(0, 0, 0, 0.06),
+    0 16px 48px rgba(0, 0, 0, 0.10);
 }
 
 .home-preview-header {
@@ -1760,7 +1759,7 @@ button.primary:disabled {
   width: 44px;
   height: 44px;
   border-radius: var(--r-md);
-  background: rgba(76, 175, 122, 0.12);
+  background: rgba(0, 112, 224, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1802,7 +1801,7 @@ button.primary:disabled {
 
 .badge-tile.is-earned {
   background: var(--color-brand-light);
-  border-color: rgba(76, 175, 122, 0.35);
+  border-color: rgba(0, 112, 224, 0.30);
 }
 
 .badge-tile.is-locked {
@@ -1863,7 +1862,7 @@ button.primary:disabled {
 }
 
 .social-feed-item.is-pinned {
-  background: rgba(76, 175, 122, 0.04);
+  background: rgba(0, 112, 224, 0.04);
 }
 
 .social-pinned-label {
@@ -1887,7 +1886,7 @@ button.primary:disabled {
   height: 36px;
   border-radius: var(--r-full);
   background: var(--color-brand-light);
-  border: 1.5px solid rgba(76, 175, 122, 0.30);
+  border: 1.5px solid rgba(0, 112, 224, 0.25);
   color: var(--color-brand);
   font-size: var(--fs-1);
   font-weight: var(--fw-bold);
@@ -1977,7 +1976,7 @@ button.primary:disabled {
 
 .feed-reaction-btn.is-active {
   background: var(--color-brand-light);
-  border-color: rgba(76, 175, 122, 0.40);
+  border-color: rgba(0, 112, 224, 0.35);
 }
 
 .feed-reaction-btn:hover {
@@ -2004,7 +2003,7 @@ button.primary:disabled {
 }
 
 .avatar-menu-trigger:hover {
-  border-color: rgba(76, 175, 122, 0.4);
+  border-color: rgba(0, 112, 224, 0.35);
 }
 
 .avatar-hamburger {
@@ -2035,7 +2034,7 @@ button.primary:disabled {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--r-lg);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.10);
   overflow: hidden;
   z-index: 200;
   animation: dropdown-in 0.12s var(--ease-out);
@@ -2084,8 +2083,8 @@ button.primary:disabled {
   color: var(--color-text-primary);
   margin: 0;
   text-shadow:
-    0 0 24px rgba(76, 175, 122, 0.55),
-    0 0 60px rgba(76, 175, 122, 0.25);
+    0 2px 16px rgba(0, 112, 224, 0.20),
+    0 0 48px rgba(0, 112, 224, 0.10);
 }
 
 /* ── Earned badge emoji strip in header ── */
@@ -2101,7 +2100,7 @@ button.primary:disabled {
 }
 
 .social-header-badges:hover {
-  border-color: rgba(76, 175, 122, 0.4);
+  border-color: rgba(0, 112, 224, 0.35);
 }
 
 .social-header-badge-emoji {
