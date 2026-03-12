@@ -61,6 +61,27 @@ export default function Home() {
       .then(({ data }) => { if (data) setChurches(data); });
   }, []);
 
+  // Scroll-reveal observer
+  useEffect(() => {
+    const els = document.querySelectorAll(".reveal");
+    if (!els.length) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -40px 0px" }
+    );
+
+    els.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [churches]);
+
   async function handleLogin(e) {
     e.preventDefault();
     setError("");
@@ -161,70 +182,128 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Right: product preview card */}
+            {/* Right: product preview in phone frame */}
             <div className="home-preview-wrap">
-              <div className="home-preview-card">
-                <div className="home-preview-header">
-                  <span style={{ fontWeight: "var(--fw-semibold)", fontSize: "var(--fs-1)", color: "var(--color-text-primary)" }}>
-                    Stewarding Change
-                  </span>
-                  <div className="home-preview-avatar">T</div>
-                </div>
+              <div className="phone-frame">
+                <div className="phone-notch" />
+                <div className="home-preview-card">
 
-                <div className="home-preview-status">
-                  <div style={{ display: "flex", alignItems: "center", gap: "var(--s-2)" }}>
-                    <div className="status-dot is-active" />
-                    <span style={{ fontSize: "var(--fs-1)", fontWeight: "var(--fw-semibold)", color: "var(--color-text-primary)" }}>
-                      Giving Active
+                  {/* Status bar */}
+                  <div className="phone-status-bar">
+                    <span>9:41</span>
+                    <div className="phone-status-icons">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 12.55a10.94 10.94 0 0 1 5.17-2.39M10.71 5.05A16 16 0 0 1 22.56 9M1.42 9a15.91 15.91 0 0 1 4.7-2.88M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="1" y="6" width="4" height="12" rx="1" opacity=".3"/><rect x="7" y="4" width="4" height="14" rx="1" opacity=".5"/><rect x="13" y="2" width="4" height="16" rx="1" opacity=".7"/><rect x="19" y="0" width="4" height="18" rx="1"/></svg>
+                      <svg width="18" height="14" viewBox="0 0 28 14" fill="currentColor"><rect x="0" y="1" width="24" height="12" rx="3" stroke="currentColor" strokeWidth="1.5" fill="none"/><rect x="25" y="4.5" width="2.5" height="5" rx="1" opacity=".4"/><rect x="2" y="3" width="16" height="8" rx="1.5" fill="var(--color-brand)"/></svg>
+                    </div>
+                  </div>
+
+                  {/* App header */}
+                  <div className="home-preview-header">
+                    <span style={{ fontWeight: "var(--fw-semibold)", fontSize: "var(--fs-1)", color: "var(--color-text-primary)" }}>
+                      Stewarding Change
+                    </span>
+                    <div className="home-preview-avatar">T</div>
+                  </div>
+
+                  {/* Status */}
+                  <div className="home-preview-status">
+                    <div style={{ display: "flex", alignItems: "center", gap: "var(--s-2)" }}>
+                      <div className="status-dot is-active" />
+                      <span style={{ fontSize: "var(--fs-1)", fontWeight: "var(--fw-semibold)", color: "var(--color-text-primary)" }}>
+                        Giving Active
+                      </span>
+                    </div>
+                    <span style={{ fontSize: "var(--fs-0)", color: "var(--color-text-muted)" }}>
+                      Countryside Christian
                     </span>
                   </div>
-                  <span style={{ fontSize: "var(--fs-0)", color: "var(--color-text-muted)" }}>
-                    Countryside Christian
-                  </span>
-                </div>
 
-                <div className="home-preview-divider" />
+                  <div className="home-preview-divider" />
 
-                <div style={{ marginBottom: "var(--s-3)" }}>
-                  <div style={{ fontSize: "var(--fs-0)", color: "var(--color-text-muted)", marginBottom: "var(--s-1)" }}>
-                    This week
-                  </div>
-                  <div style={{ fontSize: "var(--fs-5)", fontWeight: "var(--fw-bold)", color: "var(--color-brand)", lineHeight: 1.1 }}>
-                    +$1.72
-                  </div>
-                </div>
-
-                <div className="home-preview-txns">
-                  {[
-                    { name: "Coffee Shop", amt: "+$0.73" },
-                    { name: "Gas Station",  amt: "+$0.41" },
-                    { name: "Grocery Store", amt: "+$0.58" },
-                  ].map((t) => (
-                    <div key={t.name} className="home-preview-txn">
-                      <span style={{ fontSize: "var(--fs-0)", color: "var(--color-text-muted)" }}>{t.name}</span>
-                      <span style={{ fontSize: "var(--fs-0)", color: "var(--color-brand)", fontWeight: "var(--fw-semibold)" }}>{t.amt}</span>
+                  {/* Weekly amount */}
+                  <div style={{ marginBottom: "var(--s-3)" }}>
+                    <div style={{ fontSize: "var(--fs-0)", color: "var(--color-text-muted)", marginBottom: "var(--s-1)" }}>
+                      This week
                     </div>
-                  ))}
-                </div>
-
-                <div className="home-preview-divider" />
-
-                <div>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "var(--s-2)" }}>
-                    <span style={{ fontSize: "var(--fs-0)", color: "var(--color-text-muted)" }}>Mission progress</span>
-                    <span style={{ fontSize: "var(--fs-0)", color: "var(--color-brand)", fontWeight: "var(--fw-semibold)" }}>64%</span>
+                    <div style={{ fontSize: "var(--fs-5)", fontWeight: "var(--fw-bold)", color: "var(--color-brand)", lineHeight: 1.1 }}>
+                      +$1.72
+                    </div>
                   </div>
-                  <div className="progress-bar">
-                    <div className="progress-fill" style={{ width: "64%" }} />
+
+                  {/* Transactions */}
+                  <div className="home-preview-txns">
+                    {[
+                      { name: "Coffee Shop", amt: "+$0.73" },
+                      { name: "Gas Station",  amt: "+$0.41" },
+                      { name: "Grocery Store", amt: "+$0.58" },
+                      { name: "Restaurant",     amt: "+$0.22" },
+                      { name: "Pharmacy",       amt: "+$0.37" },
+                    ].map((t) => (
+                      <div key={t.name} className="home-preview-txn">
+                        <span style={{ fontSize: "var(--fs-0)", color: "var(--color-text-muted)" }}>{t.name}</span>
+                        <span style={{ fontSize: "var(--fs-0)", color: "var(--color-brand)", fontWeight: "var(--fw-semibold)" }}>{t.amt}</span>
+                      </div>
+                    ))}
                   </div>
+
+                  <div className="home-preview-divider" />
+
+                  {/* Mission progress */}
+                  <div>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "var(--s-2)" }}>
+                      <span style={{ fontSize: "var(--fs-0)", color: "var(--color-text-muted)" }}>Mission progress</span>
+                      <span style={{ fontSize: "var(--fs-0)", color: "var(--color-brand)", fontWeight: "var(--fw-semibold)" }}>64%</span>
+                    </div>
+                    <div className="progress-bar">
+                      <div className="progress-fill" style={{ width: "64%" }} />
+                    </div>
+                  </div>
+
+                  <div className="home-preview-divider" />
+
+                  {/* Weekly cap */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div>
+                      <div style={{ fontSize: "var(--fs-0)", color: "var(--color-text-muted)" }}>Weekly cap</div>
+                      <div style={{ fontSize: "var(--fs-2)", fontWeight: "var(--fw-semibold)", color: "var(--color-text-primary)" }}>$25.00</div>
+                    </div>
+                    <div style={{ fontSize: "var(--fs-0)", padding: "4px 10px", borderRadius: "var(--r-full)", background: "rgba(26, 158, 74, 0.08)", color: "var(--color-success)", fontWeight: "var(--fw-semibold)" }}>
+                      $23.28 left
+                    </div>
+                  </div>
+
+                  {/* Bottom tab bar */}
+                  <div className="phone-tab-bar">
+                    <div className="phone-tab is-active">
+                      <div className="phone-tab-dot">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                      </div>
+                      <span>Home</span>
+                    </div>
+                    <div className="phone-tab">
+                      <div className="phone-tab-dot">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                      </div>
+                      <span>Social</span>
+                    </div>
+                    <div className="phone-tab">
+                      <div className="phone-tab-dot">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                      </div>
+                      <span>Settings</span>
+                    </div>
+                  </div>
+
                 </div>
+                <div className="phone-home-bar" />
               </div>
             </div>
           </div>
         </section>
 
         {/* ── Stats bar ── */}
-        <div className="home-stats-bar">
+        <div className="home-stats-bar reveal">
           {[
             { val: "2 min",  label: "to set up" },
             { val: "$0",     label: "in fees" },
@@ -239,7 +318,7 @@ export default function Home() {
         </div>
 
         {/* ── How it works ── */}
-        <section className="steps-section">
+        <section className="steps-section reveal">
           <h2>How it works</h2>
           <p className="muted" style={{ textAlign: "center", margin: "-20px auto var(--s-7)", maxWidth: "48ch", fontSize: "var(--fs-2)", lineHeight: "var(--lh-relaxed)" }}>
             Three simple steps to start giving effortlessly.
@@ -287,7 +366,7 @@ export default function Home() {
 
         {/* ── Church spotlight ── */}
         {churches.length > 0 && (
-          <section className="steps-section" style={{ paddingBottom: "var(--s-10)" }}>
+          <section className="steps-section reveal" style={{ paddingBottom: "var(--s-10)" }}>
             <h2>Missions you'll support</h2>
             <p className="muted" style={{ textAlign: "center", margin: "-20px auto var(--s-7)", maxWidth: "48ch", fontSize: "var(--fs-2)", lineHeight: "var(--lh-relaxed)" }}>
               See the real-world impact your spare change makes.
@@ -323,7 +402,7 @@ export default function Home() {
         )}
 
         {/* ── Trust line ── */}
-        <div className="trust-line" style={{ padding: "var(--s-5) var(--s-4) var(--s-10)" }}>
+        <div className="trust-line reveal" style={{ padding: "var(--s-5) var(--s-4) var(--s-10)" }}>
           <span>Bank-grade security</span>
           <span className="trust-dot" />
           <span>100% tax-deductible</span>

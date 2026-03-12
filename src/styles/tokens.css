@@ -33,10 +33,10 @@
   --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.11), 0 8px 16px rgba(0, 0, 0, 0.06);
 
   /* ---- Radii ---- */
-  --r-sm:   6px;
-  --r-md:   10px;
-  --r-lg:   14px;
-  --r-xl:   20px;
+  --r-sm:   8px;
+  --r-md:   12px;
+  --r-lg:   16px;
+  --r-xl:   24px;
   --r-full: 9999px;
 
   /* ---- Spacing (8px grid) ---- */
@@ -94,7 +94,7 @@
   --content-max:      480px;
   --container:        1100px;      /* backward compat alias */
   --container-narrow: 480px;       /* backward compat alias */
-  --header-h:         64px;
+  --header-h:         72px;
 
   /* ---- Focus ---- */
   --focus-ring: 0 0 0 3px rgba(0, 112, 224, 0.20);
