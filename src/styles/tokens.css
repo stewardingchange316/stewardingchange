@@ -14,9 +14,9 @@
   --color-text-muted:    #7a83a8;   /* labels, helper text */
   --color-text-inverse:  #ffffff;   /* text on brand bg */
 
-  --color-brand:         #0070e0;   /* Venmo / PayPal blue */
-  --color-brand-hover:   #0059b3;
-  --color-brand-light:   rgba(0, 112, 224, 0.08); /* brand tint */
+  --color-brand:         #1a4fd4;   /* deeper chrome blue */
+  --color-brand-hover:   #1340b0;
+  --color-brand-light:   rgba(26, 79, 212, 0.08); /* brand tint */
 
   --color-danger:        #d92b2b;
   --color-danger-light:  rgba(217, 43, 43, 0.08);

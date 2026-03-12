@@ -34,7 +34,7 @@ export default function EditProfileModal({ userId, initialFirstName, initialLast
     if (email.trim() && email.trim() !== initialEmail) {
       const { error: emailErr } = await supabase.auth.updateUser({ email: email.trim() });
       if (emailErr) {
-        setError("Name saved, but email update failed: " + emailErr.message);
+        setError("Name saved, but email update failed. Please try again.");
         setSaving(false);
         onSaved({ first_name: firstName.trim(), last_name: lastName.trim() || null });
         return;

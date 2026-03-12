@@ -69,7 +69,7 @@ export default function Home() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
-      setError(error.message);
+      setError("Invalid email or password.");
       setLoading(false);
       return;
     }
@@ -91,7 +91,7 @@ export default function Home() {
     setResetLoading(false);
 
     if (error) {
-      setError(error.message);
+      setError("Unable to send reset link. Please check your email and try again.");
     } else {
       setResetSent(true);
     }
@@ -113,7 +113,7 @@ export default function Home() {
           </Link>
 
           <button
-            className="btn btn-ghost btn-sm"
+            className="btn btn-secondary btn-sm"
             onClick={() => { setMode("login"); setShowLogin(true); }}
           >
             Sign in
@@ -241,6 +241,9 @@ export default function Home() {
         {/* ── How it works ── */}
         <section className="steps-section">
           <h2>How it works</h2>
+          <p className="muted" style={{ textAlign: "center", margin: "-20px auto var(--s-7)", maxWidth: "48ch", fontSize: "var(--fs-2)", lineHeight: "var(--lh-relaxed)" }}>
+            Three simple steps to start giving effortlessly.
+          </p>
 
           <div className="home-features-grid">
             {[
@@ -286,6 +289,9 @@ export default function Home() {
         {churches.length > 0 && (
           <section className="steps-section" style={{ paddingBottom: "var(--s-10)" }}>
             <h2>Missions you'll support</h2>
+            <p className="muted" style={{ textAlign: "center", margin: "-20px auto var(--s-7)", maxWidth: "48ch", fontSize: "var(--fs-2)", lineHeight: "var(--lh-relaxed)" }}>
+              See the real-world impact your spare change makes.
+            </p>
             <div className="home-spotlight-grid">
               {churches.map((c) => (
                 <div key={c.id} className="card stack-4">

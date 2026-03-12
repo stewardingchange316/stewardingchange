@@ -72,6 +72,11 @@ export default function ChurchSelect() {
       if (error) throw error;
       if (!data || data.length === 0) throw new Error("Update did not persist");
 
+      // Migrate existing feed posts to the new church so badges follow the user
+      await supabase.rpc("migrate_feed_posts_to_church", {
+        p_new_church_id: selected,
+      });
+
       navigate("/giving-cap", { replace: true });
     } catch (err) {
       console.error("Church save error:", err);
