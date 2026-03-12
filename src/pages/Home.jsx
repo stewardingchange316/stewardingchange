@@ -61,25 +61,11 @@ export default function Home() {
       .then(({ data }) => { if (data) setChurches(data); });
   }, []);
 
-  // Scroll-reveal observer
+  // Add reveal visibility after first paint so content is always scrollable
   useEffect(() => {
-    const els = document.querySelectorAll(".reveal");
-    if (!els.length) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-visible");
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.15, rootMargin: "0px 0px -40px 0px" }
-    );
-
-    els.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
+    document.querySelectorAll(".reveal").forEach((el) => {
+      el.classList.add("is-visible");
+    });
   }, [churches]);
 
   async function handleLogin(e) {
