@@ -200,40 +200,45 @@ export default function Home() {
 
                   {/* App header */}
                   <div className="home-preview-header">
-                    <span style={{ fontWeight: "var(--fw-semibold)", fontSize: 13, color: "var(--color-text-primary)" }}>
+                    <span style={{ fontWeight: "var(--fw-semibold)", fontSize: "var(--fs-1)", color: "var(--color-text-primary)" }}>
                       Stewarding Change
                     </span>
                     <div className="home-preview-avatar">T</div>
                   </div>
 
                   {/* Status */}
-                  <div style={{ display: "flex", alignItems: "center", gap: "var(--s-2)", marginBottom: "var(--s-5)" }}>
-                    <div className="status-dot is-active" />
-                    <span style={{ fontSize: 12, fontWeight: "var(--fw-medium)", color: "var(--color-text-muted)" }}>
-                      Giving Active
+                  <div className="home-preview-status">
+                    <div style={{ display: "flex", alignItems: "center", gap: "var(--s-2)" }}>
+                      <div className="status-dot is-active" />
+                      <span style={{ fontSize: "var(--fs-1)", fontWeight: "var(--fw-semibold)", color: "var(--color-text-primary)" }}>
+                        Giving Active
+                      </span>
+                    </div>
+                    <span style={{ fontSize: "var(--fs-0)", color: "var(--color-text-muted)" }}>
+                      Countryside Christian
                     </span>
-                  </div>
-
-                  {/* Weekly amount */}
-                  <div style={{ textAlign: "center", padding: "var(--s-4) 0 var(--s-3)" }}>
-                    <div style={{ fontSize: 11, color: "var(--color-text-muted)", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: "var(--fw-medium)" }}>
-                      This week
-                    </div>
-                    <div style={{ fontSize: 36, fontWeight: "var(--fw-bold)", color: "var(--color-brand)", lineHeight: 1, letterSpacing: "-0.02em" }}>
-                      +$3.16
-                    </div>
                   </div>
 
                   <div className="home-preview-divider" />
 
+                  {/* Weekly amount */}
+                  <div style={{ marginBottom: "var(--s-3)" }}>
+                    <div style={{ fontSize: "var(--fs-0)", color: "var(--color-text-muted)", marginBottom: "var(--s-1)" }}>
+                      This week
+                    </div>
+                    <div style={{ fontSize: "var(--fs-5)", fontWeight: "var(--fw-bold)", color: "var(--color-brand)", lineHeight: 1.1 }}>
+                      +$1.72
+                    </div>
+                  </div>
+
                   {/* Transactions */}
-                  <div className="home-preview-txns" style={{ padding: "var(--s-2) 0" }}>
+                  <div className="home-preview-txns">
                     {[
-                      { name: "Coffee Shop",    amt: "+$0.73" },
-                      { name: "Gas Station",     amt: "+$0.41" },
-                      { name: "Grocery Store",   amt: "+$0.58" },
-                      { name: "Restaurant",      amt: "+$0.86" },
-                      { name: "Pharmacy",        amt: "+$0.58" },
+                      { name: "Coffee Shop", amt: "+$0.73" },
+                      { name: "Gas Station",  amt: "+$0.41" },
+                      { name: "Grocery Store", amt: "+$0.58" },
+                      { name: "Restaurant",     amt: "+$0.22" },
+                      { name: "Pharmacy",       amt: "+$0.37" },
                     ].map((t) => (
                       <div key={t.name} className="home-preview-txn">
                         <span style={{ fontSize: "var(--fs-0)", color: "var(--color-text-muted)" }}>{t.name}</span>
@@ -245,13 +250,26 @@ export default function Home() {
                   <div className="home-preview-divider" />
 
                   {/* Mission progress */}
-                  <div style={{ padding: "var(--s-2) 0" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                      <span style={{ fontSize: 11, color: "var(--color-text-muted)" }}>Mission progress</span>
-                      <span style={{ fontSize: 11, color: "var(--color-brand)", fontWeight: "var(--fw-semibold)" }}>64%</span>
+                  <div>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "var(--s-2)" }}>
+                      <span style={{ fontSize: "var(--fs-0)", color: "var(--color-text-muted)" }}>Mission progress</span>
+                      <span style={{ fontSize: "var(--fs-0)", color: "var(--color-brand)", fontWeight: "var(--fw-semibold)" }}>64%</span>
                     </div>
                     <div className="progress-bar">
                       <div className="progress-fill" style={{ width: "64%" }} />
+                    </div>
+                  </div>
+
+                  <div className="home-preview-divider" />
+
+                  {/* Weekly cap */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div>
+                      <div style={{ fontSize: "var(--fs-0)", color: "var(--color-text-muted)" }}>Weekly cap</div>
+                      <div style={{ fontSize: "var(--fs-2)", fontWeight: "var(--fw-semibold)", color: "var(--color-text-primary)" }}>$25.00</div>
+                    </div>
+                    <div style={{ fontSize: "var(--fs-0)", padding: "4px 10px", borderRadius: "var(--r-full)", background: "rgba(26, 158, 74, 0.08)", color: "var(--color-success)", fontWeight: "var(--fw-semibold)" }}>
+                      $23.28 left
                     </div>
                   </div>
 
@@ -277,10 +295,8 @@ export default function Home() {
                     </div>
                   </div>
 
-                  {/* Home indicator */}
-                  <div className="phone-home-bar" />
-
                 </div>
+                <div className="phone-home-bar" />
               </div>
             </div>
           </div>
