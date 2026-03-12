@@ -273,7 +273,7 @@ export default function Home() {
                   </svg>
                 ),
                 title: "Give as you live",
-                body: "Every coffee, every errand rounds up. The spare change accumulates and is donated to your church weekly.",
+                body: "Every purchase rounds up to the nearest dollar. Your spare change helps advance your church’s mission each week.",
               },
             ].map((f) => (
               <div key={f.title} className="home-feature-card">
