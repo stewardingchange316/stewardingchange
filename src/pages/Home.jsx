@@ -389,13 +389,25 @@ export default function Home() {
 
         {/* ── Trust line ── */}
         <div className="trust-line reveal" style={{ padding: "var(--s-5) var(--s-4) var(--s-10)" }}>
-          <span>Bank-grade security</span>
+          <span className="trust-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Bank-grade security
+          </span>
           <span className="trust-dot" />
-          <span>100% tax-deductible</span>
+          <span className="trust-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            100% tax-deductible
+          </span>
           <span className="trust-dot" />
-          <span>Cancel any time</span>
+          <span className="trust-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Cancel any time
+          </span>
           <span className="trust-dot" />
-          <span>No hidden fees</span>
+          <span className="trust-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            No hidden fees
+          </span>
         </div>
       </main>
 
