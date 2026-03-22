@@ -11,6 +11,9 @@ export default function GivingProfile() {
   const [badges, setBadges] = useState([]);
   const [ringAnimated, setRingAnimated] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [filter, setFilter] = useState("all"); // "week" | "month" | "ytd" | "all" | "custom"
+  const [customFrom, setCustomFrom] = useState("");
+  const [customTo, setCustomTo] = useState("");
   const cardRef = useRef(null);
 
   useEffect(() => {
@@ -66,41 +69,50 @@ export default function GivingProfile() {
   const firstName = profile.first_name || "Friend";
   const initials = firstName.charAt(0).toUpperCase();
   const memberSince = new Date(profile.created_at);
-  const weeksActive = Math.max(1, Math.floor((Date.now() - memberSince.getTime()) / (7 * 24 * 60 * 60 * 1000)));
+  const now = new Date();
+  const weeksActive = Math.max(1, Math.floor((now - memberSince) / (7 * 24 * 60 * 60 * 1000)));
   const cap = profile.weekly_cap ?? 25;
 
+  // Filter date range
+  const { dateFrom, dateTo, filterLabel } = getFilterRange(filter, customFrom, customTo, memberSince);
+  const filterWeeks = Math.max(1, Math.round((dateTo - dateFrom) / (7 * 24 * 60 * 60 * 1000)));
+
   // TODO: Replace with real data from Stripe/payment processor
-  // These mocks create a realistic-looking profile based on account age
   const mockWeeklyGiven = Math.min(cap, Math.round((cap * 0.62) * 100) / 100);
-  const mockTotalGiven = Math.round(weeksActive * cap * 0.58 * 100) / 100;
+  const mockFilteredGiven = Math.round(filterWeeks * cap * 0.58 * 100) / 100;
   const mockStreak = Math.min(weeksActive, Math.max(3, weeksActive - 2));
-  const mockRoundUps = weeksActive * 12;
+  const mockRoundUps = filterWeeks * 12;
   const ringPercent = Math.round((mockWeeklyGiven / cap) * 100);
 
-  // Generate chart data (weekly giving amounts)
-  const chartWeeks = generateChartData(Math.min(weeksActive, 16), cap);
-
-  // Shareable stats
-  const monthsActive = Math.max(1, Math.round(weeksActive / 4.3));
+  // Generate chart data
+  const chartWeeks = generateChartData(Math.min(filterWeeks, 16), cap);
 
   const earnedBadges = badges
     .map((row) => BADGE_DISPLAY.find((b) => b.id === row.badge_id))
     .filter(Boolean);
 
+  // Format dates for display
+  const fmtDate = (d) => d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  const dateRangeText = filter === "all"
+    ? "All Time"
+    : `${fmtDate(dateFrom)} – ${fmtDate(dateTo)}`;
+
   async function handleShare() {
     try {
-      // Upsert share card with current stats
       const cardData = {
         user_id: profile.id,
         first_name: firstName,
         church_name: church?.name || null,
-        total_given: mockTotalGiven,
+        total_given: mockFilteredGiven,
         streak_weeks: mockStreak,
         round_ups: mockRoundUps,
         badges_earned: earnedBadges.length,
         badge_emojis: earnedBadges.map((b) => b.emoji),
         member_since: profile.created_at,
         updated_at: new Date().toISOString(),
+        date_from: filter === "all" ? null : dateFrom.toISOString().slice(0, 10),
+        date_to: filter === "all" ? null : dateTo.toISOString().slice(0, 10),
+        filter_label: filterLabel,
       };
 
       const { data: existing } = await supabase
@@ -123,11 +135,12 @@ export default function GivingProfile() {
       }
 
       const shareUrl = `${window.location.origin}/s/${shareId}`;
+      const rangeText = filter === "all" ? "" : ` (${dateRangeText})`;
 
       if (navigator.share) {
         await navigator.share({
           title: `${firstName} is stewarding change`,
-          text: `See my impact — $${Math.round(mockTotalGiven)} given, ${mockStreak}-week streak at ${church?.name || "my church"}!`,
+          text: `See my impact${rangeText} — $${Math.round(mockFilteredGiven)} given, ${mockStreak}-week streak at ${church?.name || "my church"}!`,
           url: shareUrl,
         });
       } else {
@@ -171,6 +184,55 @@ export default function GivingProfile() {
                 {church?.name || "Your church"} · Member since {memberSince.toLocaleDateString("en-US", { month: "short", year: "numeric" })}
               </p>
             </div>
+          </div>
+
+          {/* ── Date filter ── */}
+          <div className="gp-filter">
+            <div className="gp-filter-pills">
+              {[
+                { key: "week", label: "This Week" },
+                { key: "month", label: "Last Month" },
+                { key: "ytd", label: "YTD" },
+                { key: "all", label: "All Time" },
+                { key: "custom", label: "Custom" },
+              ].map((f) => (
+                <button
+                  key={f.key}
+                  className={`gp-filter-pill ${filter === f.key ? "is-active" : ""}`}
+                  onClick={() => setFilter(f.key)}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+
+            {filter === "custom" && (
+              <div className="gp-filter-custom">
+                <div className="gp-filter-date">
+                  <label>From</label>
+                  <input
+                    type="date"
+                    value={customFrom}
+                    onChange={(e) => setCustomFrom(e.target.value)}
+                    max={customTo || undefined}
+                  />
+                </div>
+                <div className="gp-filter-date">
+                  <label>To</label>
+                  <input
+                    type="date"
+                    value={customTo}
+                    onChange={(e) => setCustomTo(e.target.value)}
+                    min={customFrom || undefined}
+                    max={new Date().toISOString().slice(0, 10)}
+                  />
+                </div>
+              </div>
+            )}
+
+            {filter !== "all" && (
+              <div className="gp-filter-range">{dateRangeText}</div>
+            )}
           </div>
 
           {/* ── Ring + Streak row ── */}
@@ -222,9 +284,9 @@ export default function GivingProfile() {
               </div>
               <div style={{ textAlign: "right" }}>
                 <div style={{ fontSize: "var(--fs-4)", fontWeight: "var(--fw-extrabold)", color: "var(--color-text-primary)", letterSpacing: "-0.03em" }}>
-                  ${mockTotalGiven.toFixed(0)}
+                  ${mockFilteredGiven.toFixed(0)}
                 </div>
-                <div className="small muted">all time</div>
+                <div className="small muted">{filterLabel}</div>
               </div>
             </div>
             <GivingChart weeks={chartWeeks} cap={cap} animated={ringAnimated} />
@@ -288,6 +350,35 @@ export default function GivingProfile() {
  * Returns array of { week: number, amount: number }.
  * TODO: Replace with real transaction data from Stripe.
  */
+/** Compute date range from filter selection. */
+function getFilterRange(filter, customFrom, customTo, memberSince) {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  switch (filter) {
+    case "week": {
+      const weekStart = new Date(today);
+      weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+      return { dateFrom: weekStart, dateTo: today, filterLabel: "this week" };
+    }
+    case "month": {
+      const monthStart = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+      return { dateFrom: monthStart, dateTo: today, filterLabel: "last month" };
+    }
+    case "ytd": {
+      const yearStart = new Date(today.getFullYear(), 0, 1);
+      return { dateFrom: yearStart, dateTo: today, filterLabel: "year to date" };
+    }
+    case "custom": {
+      const from = customFrom ? new Date(customFrom + "T00:00:00") : memberSince;
+      const to = customTo ? new Date(customTo + "T00:00:00") : today;
+      return { dateFrom: from, dateTo: to, filterLabel: "custom range" };
+    }
+    default:
+      return { dateFrom: memberSince, dateTo: today, filterLabel: "all time" };
+  }
+}
+
 function generateChartData(numWeeks, cap) {
   const data = [];
   for (let i = 0; i < numWeeks; i++) {

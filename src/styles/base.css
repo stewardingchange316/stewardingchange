@@ -2165,6 +2165,83 @@ button.primary:disabled {
   font-weight: var(--fw-semibold);
 }
 
+/* ── Date Filter ── */
+.gp-filter {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.gp-filter-pills {
+  display: flex;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
+
+.gp-filter-pill {
+  padding: 7px 16px;
+  border-radius: var(--r-full);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-body);
+  font-size: var(--fs-1);
+  font-weight: var(--fw-semibold);
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.gp-filter-pill:hover {
+  border-color: var(--color-brand);
+  color: var(--color-brand);
+}
+
+.gp-filter-pill.is-active {
+  background: var(--color-brand);
+  border-color: var(--color-brand);
+  color: #fff;
+}
+
+.gp-filter-custom {
+  display: flex;
+  gap: var(--s-3);
+}
+
+.gp-filter-date {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.gp-filter-date label {
+  font-size: var(--fs-0);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-muted);
+}
+
+.gp-filter-date input {
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-1);
+  font-family: inherit;
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+}
+
+.gp-filter-date input:focus {
+  outline: none;
+  border-color: var(--color-brand);
+  box-shadow: var(--focus-ring);
+}
+
+.gp-filter-range {
+  font-size: var(--fs-1);
+  color: var(--color-brand);
+  font-weight: var(--fw-semibold);
+}
+
 /* ── Giving Trend Bar Chart ── */
 .gp-chart-container {
   display: flex;

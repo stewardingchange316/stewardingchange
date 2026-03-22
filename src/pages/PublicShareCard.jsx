@@ -48,6 +48,12 @@ export default function PublicShareCard() {
     year: "numeric",
   });
 
+  const fmtRange = (d) => new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  const hasDateRange = card.date_from && card.date_to;
+  const dateRangeText = hasDateRange
+    ? `${fmtRange(card.date_from)} – ${fmtRange(card.date_to)}`
+    : null;
+
   return (
     <div className="sc-public-page">
       <div className="sc-public-card">
@@ -64,7 +70,11 @@ export default function PublicShareCard() {
         {card.church_name && (
           <div className="sc-public-church">{card.church_name}</div>
         )}
-        <div className="sc-public-since">Member since {memberDate}</div>
+        {dateRangeText ? (
+          <div className="sc-public-since">{dateRangeText}</div>
+        ) : (
+          <div className="sc-public-since">Member since {memberDate}</div>
+        )}
 
         <div className="sc-public-stats">
           <div className="sc-public-stat">
