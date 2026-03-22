@@ -17,17 +17,42 @@ export default function GivingProfile() {
   const cardRef = useRef(null);
 
   useEffect(() => {
+    let cancelled = false;
+
     async function load() {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) { nav("/", { replace: true }); return; }
+      // Wait for auth to be ready — getSession can miss on cold load
+      let session = (await supabase.auth.getSession()).data.session;
 
-      const userId = session.user.id;
+      if (!session) {
+        // Listen for the session to arrive (auth callback, token refresh)
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
+          if (s && !cancelled) {
+            subscription.unsubscribe();
+            fetchData(s.user.id);
+          }
+        });
+        // Timeout — if no session after 4s, redirect
+        setTimeout(() => {
+          if (!cancelled && !profile) {
+            subscription.unsubscribe();
+            nav("/", { replace: true });
+          }
+        }, 4000);
+        return;
+      }
 
-      const [{ data: prof }, { data: badgeRows }, ] = await Promise.all([
+      fetchData(session.user.id);
+    }
+
+    async function fetchData(userId) {
+      if (cancelled) return;
+
+      const [{ data: prof }, { data: badgeRows }] = await Promise.all([
         supabase.from("users").select("*").eq("id", userId).single(),
         supabase.from("user_badges").select("badge_id, awarded_at").eq("user_id", userId),
       ]);
 
+      if (cancelled) return;
       if (!prof) { nav("/", { replace: true }); return; }
 
       setProfile(prof);
@@ -39,14 +64,15 @@ export default function GivingProfile() {
           .select("name, mission_progress")
           .eq("id", prof.church_id)
           .maybeSingle();
-        setChurch(ch);
+        if (!cancelled) setChurch(ch);
       }
 
       setLoading(false);
-      // Trigger ring animation after paint
       requestAnimationFrame(() => setRingAnimated(true));
     }
+
     load();
+    return () => { cancelled = true; };
   }, [nav]);
 
   if (loading || !profile) {
