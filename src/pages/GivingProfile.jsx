@@ -157,6 +157,11 @@ export default function GivingProfile() {
       <div className="gp-root">
         <div className="container-narrow stack-7">
 
+          {/* ── Placeholder disclaimer ── */}
+          <div className="alert" style={{ background: "rgba(26, 79, 212, 0.06)", border: "1px solid rgba(26, 79, 212, 0.15)", borderRadius: "var(--r-md)", padding: "var(--s-3) var(--s-4)", fontSize: "var(--fs-1)", color: "var(--color-text-body)", lineHeight: "var(--lh-normal)" }}>
+            The data on this page is placeholder content for preview purposes. Live giving data will populate once financial services are connected.
+          </div>
+
           {/* ── Header ── */}
           <div className="gp-header">
             <div className="gp-avatar">{initials}</div>
