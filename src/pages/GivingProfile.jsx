@@ -307,7 +307,7 @@ export default function GivingProfile() {
 
                 <div className="gp-share-stats">
                   <div className="gp-share-stat">
-                    <div className="gp-share-stat-val">${mockTotalGiven.toFixed(0)}</div>
+                    <div className="gp-share-stat-val">${mockFilteredGiven.toFixed(0)}</div>
                     <div className="gp-share-stat-label">total given</div>
                   </div>
                   <div className="gp-share-stat-divider" />
