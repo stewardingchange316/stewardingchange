@@ -60,7 +60,7 @@ export default function PublicShareCard() {
           {card.first_name.charAt(0).toUpperCase()}
         </div>
 
-        <h1 className="sc-public-name">{card.first_name}</h1>
+        <h1 className="sc-public-name">{card.first_name}'s Giving Impact</h1>
         {card.church_name && (
           <div className="sc-public-church">{card.church_name}</div>
         )}

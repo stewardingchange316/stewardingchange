@@ -2502,11 +2502,12 @@ button.primary:disabled {
 }
 
 .sc-public-name {
-  font-size: var(--fs-7);
+  font-size: clamp(var(--fs-5), 5vw, var(--fs-7));
   font-weight: var(--fw-extrabold);
   color: var(--color-text-primary);
   letter-spacing: -0.03em;
   margin: 0;
+  line-height: 1.15;
 }
 
 .sc-public-church {
