@@ -127,7 +127,7 @@ export default function GivingProfile() {
       if (navigator.share) {
         await navigator.share({
           title: `${firstName} is stewarding change`,
-          text: `$${Math.round(mockTotalGiven)} given · ${mockStreak}-week streak at ${church?.name || "my church"}`,
+          text: `See my impact — $${Math.round(mockTotalGiven)} given, ${mockStreak}-week streak at ${church?.name || "my church"}!`,
           url: shareUrl,
         });
       } else {
