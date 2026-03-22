@@ -122,9 +122,7 @@ export default function GivingProfile() {
         shareId = inserted.id;
       }
 
-      // Route through edge function so iMessage/Twitter/etc see OG meta tags.
-      // The edge function auto-redirects humans to the app page.
-      const shareUrl = `https://rhghtegxlamvhxytwomx.supabase.co/functions/v1/share-og?id=${shareId}`;
+      const shareUrl = `${window.location.origin}/s/${shareId}`;
 
       if (navigator.share) {
         await navigator.share({
