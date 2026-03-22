@@ -2388,7 +2388,27 @@ button.primary:disabled {
 }
 
 /* ── Giving Profile Mobile ── */
+.gp-root {
+  overflow-x: hidden;
+}
+
+.gp-root .card {
+  overflow: hidden;
+}
+
 @media (max-width: 600px) {
+  .gp-header {
+    flex-wrap: wrap;
+  }
+
+  .gp-header h2 {
+    font-size: var(--fs-4);
+  }
+
+  .gp-header .muted {
+    font-size: var(--fs-0);
+  }
+
   .gp-ring-streak-row {
     grid-template-columns: 1fr;
     gap: var(--s-4);
@@ -2403,26 +2423,35 @@ button.primary:disabled {
     font-size: 40px;
   }
 
+  .gp-chart-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -4px;
+  }
+
   .gp-chart-area {
     height: 160px;
   }
 
-  .gp-chart-container {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
   .gp-bars {
-    min-width: 400px;
+    min-width: 0;
     gap: 3px;
   }
 
+  .gp-share-card {
+    margin: 0 -2px;
+  }
+
   .gp-share-stats {
-    gap: var(--s-4);
+    gap: var(--s-3);
   }
 
   .gp-share-stat-val {
     font-size: var(--fs-4);
+  }
+
+  .gp-share-card-inner {
+    padding: var(--s-6) var(--s-4);
   }
 }
 
