@@ -18,34 +18,42 @@ export default function GivingProfile() {
 
   useEffect(() => {
     let cancelled = false;
+    let resolved = false;
+    let sub = null;
+    let timer = null;
 
     async function load() {
-      // Wait for auth to be ready — getSession can miss on cold load
-      let session = (await supabase.auth.getSession()).data.session;
+      const session = (await supabase.auth.getSession()).data.session;
 
-      if (!session) {
-        // Listen for the session to arrive (auth callback, token refresh)
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
-          if (s && !cancelled) {
-            subscription.unsubscribe();
-            fetchData(s.user.id);
-          }
-        });
-        // Timeout — if no session after 4s, redirect
-        setTimeout(() => {
-          if (!cancelled && !profile) {
-            subscription.unsubscribe();
-            nav("/", { replace: true });
-          }
-        }, 4000);
+      if (session) {
+        fetchData(session.user.id);
         return;
       }
 
-      fetchData(session.user.id);
+      // Session not ready yet — wait for auth state change
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
+        if (s && !cancelled && !resolved) {
+          resolved = true;
+          subscription.unsubscribe();
+          if (timer) clearTimeout(timer);
+          fetchData(s.user.id);
+        }
+      });
+      sub = subscription;
+
+      // Timeout fallback
+      timer = setTimeout(() => {
+        if (!cancelled && !resolved) {
+          resolved = true;
+          subscription.unsubscribe();
+          nav("/", { replace: true });
+        }
+      }, 4000);
     }
 
     async function fetchData(userId) {
       if (cancelled) return;
+      resolved = true;
 
       const [{ data: prof }, { data: badgeRows }] = await Promise.all([
         supabase.from("users").select("*").eq("id", userId).single(),
@@ -72,7 +80,11 @@ export default function GivingProfile() {
     }
 
     load();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+      if (sub) sub.unsubscribe();
+      if (timer) clearTimeout(timer);
+    };
   }, [nav]);
 
   if (loading || !profile) {
