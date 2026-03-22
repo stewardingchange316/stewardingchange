@@ -2026,6 +2026,536 @@ button.primary:disabled {
 }
 
 /* =========================================================
+   22b) Giving Profile / Impact page
+========================================================= */
+
+.gp-root {
+  padding: var(--s-9) 0 var(--s-12);
+}
+
+.gp-header {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+}
+
+.gp-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4a7aef, var(--color-brand));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: var(--fw-extrabold);
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 4px 16px rgba(26, 79, 212, 0.25);
+}
+
+/* ── Ring + Streak row ── */
+.gp-ring-streak-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-5);
+}
+
+.gp-ring-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--s-6) !important;
+}
+
+.gp-ring-label {
+  font-size: var(--fs-1);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: var(--s-4);
+}
+
+.gp-ring-wrap {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  margin-bottom: var(--s-4);
+}
+
+.gp-ring-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.gp-ring-progress {
+  transition: stroke-dashoffset 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gp-ring-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.gp-ring-amount {
+  font-size: var(--fs-5);
+  font-weight: var(--fw-extrabold);
+  color: var(--color-text-primary);
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.gp-ring-cap {
+  font-size: var(--fs-0);
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.gp-ring-pct {
+  font-size: var(--fs-1);
+  color: var(--color-brand);
+  font-weight: var(--fw-semibold);
+}
+
+/* ── Streak card ── */
+.gp-streak-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s-6) !important;
+  text-align: center;
+}
+
+.gp-streak-flame {
+  font-size: 40px;
+  line-height: 1;
+  margin-bottom: var(--s-3);
+  animation: flame-pulse 2s ease-in-out infinite;
+}
+
+@keyframes flame-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+}
+
+.gp-streak-count {
+  font-size: 48px;
+  font-weight: var(--fw-extrabold);
+  color: var(--color-text-primary);
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.gp-streak-label {
+  font-size: var(--fs-2);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-muted);
+  margin-bottom: var(--s-3);
+}
+
+.gp-streak-sub {
+  font-size: var(--fs-1);
+  color: var(--color-brand);
+  font-weight: var(--fw-semibold);
+}
+
+/* ── Giving Trend Bar Chart ── */
+.gp-chart-container {
+  display: flex;
+  gap: 8px;
+}
+
+.gp-chart-yaxis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-bottom: 24px;
+  flex-shrink: 0;
+  width: 36px;
+}
+
+.gp-chart-yaxis-label {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  font-weight: var(--fw-medium);
+  text-align: right;
+  line-height: 1;
+}
+
+.gp-chart-area {
+  flex: 1;
+  position: relative;
+  min-width: 0;
+  height: 200px;
+}
+
+.gp-chart-gridlines {
+  position: absolute;
+  inset: 0;
+  bottom: 24px;
+  pointer-events: none;
+}
+
+.gp-chart-gridline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--color-border);
+  opacity: 0.5;
+}
+
+.gp-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: calc(100% - 24px);
+  position: relative;
+  z-index: 1;
+}
+
+.gp-bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  min-width: 0;
+}
+
+.gp-bar-track {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  position: relative;
+}
+
+.gp-bar-fill {
+  width: 100%;
+  min-height: 3px;
+  border-radius: 4px 4px 0 0;
+  background: var(--color-brand);
+  transform-origin: bottom;
+  transform: scaleY(0);
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), background 0.15s ease;
+}
+
+.gp-chart-container.is-visible .gp-bar-fill {
+  transform: scaleY(1);
+}
+
+.gp-bar-col:hover .gp-bar-fill {
+  background: #4a7aef;
+}
+
+/* Tooltip on hover */
+.gp-bar-tooltip {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100%);
+  background: var(--color-text-primary);
+  color: #fff;
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 2;
+}
+
+.gp-bar-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: var(--color-text-primary);
+}
+
+.gp-bar-col:hover .gp-bar-tooltip {
+  opacity: 1;
+}
+
+.gp-bar-label {
+  font-size: 9px;
+  color: var(--color-text-muted);
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+}
+
+/* ── Shareable Impact Card ── */
+.gp-share-section {
+  text-align: center;
+}
+
+.gp-share-card {
+  border-radius: var(--r-xl);
+  padding: 3px;
+  background: linear-gradient(135deg, var(--color-brand), #4a7aef, #7b9ef5);
+  box-shadow: 0 8px 32px rgba(26, 79, 212, 0.18);
+}
+
+.gp-share-card-inner {
+  background: var(--color-surface);
+  border-radius: calc(var(--r-xl) - 2px);
+  padding: var(--s-7) var(--s-6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-4);
+}
+
+.gp-share-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-1);
+  font-weight: var(--fw-bold);
+  color: var(--color-text-muted);
+  letter-spacing: -0.01em;
+}
+
+.gp-share-name {
+  font-size: var(--fs-6);
+  font-weight: var(--fw-extrabold);
+  color: var(--color-text-primary);
+  letter-spacing: -0.03em;
+}
+
+.gp-share-church {
+  font-size: var(--fs-2);
+  color: var(--color-brand);
+  font-weight: var(--fw-semibold);
+  margin-top: calc(-1 * var(--s-2));
+}
+
+.gp-share-stats {
+  display: flex;
+  align-items: center;
+  gap: var(--s-5);
+  margin: var(--s-3) 0;
+}
+
+.gp-share-stat {
+  text-align: center;
+}
+
+.gp-share-stat-val {
+  font-size: var(--fs-5);
+  font-weight: var(--fw-extrabold);
+  color: var(--color-text-primary);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.gp-share-stat-label {
+  font-size: var(--fs-0);
+  color: var(--color-text-muted);
+  font-weight: var(--fw-medium);
+}
+
+.gp-share-stat-divider {
+  width: 1px;
+  height: 32px;
+  background: var(--color-border);
+}
+
+.gp-share-badges {
+  display: flex;
+  gap: var(--s-2);
+  font-size: 24px;
+}
+
+.gp-share-footer {
+  font-size: var(--fs-0);
+  color: var(--color-text-muted);
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.04em;
+}
+
+/* ── Giving Profile Mobile ── */
+@media (max-width: 600px) {
+  .gp-ring-streak-row {
+    grid-template-columns: 1fr;
+    gap: var(--s-4);
+  }
+
+  .gp-ring-wrap {
+    width: 120px;
+    height: 120px;
+  }
+
+  .gp-streak-count {
+    font-size: 40px;
+  }
+
+  .gp-chart-area {
+    height: 160px;
+  }
+
+  .gp-chart-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .gp-bars {
+    min-width: 400px;
+    gap: 3px;
+  }
+
+  .gp-share-stats {
+    gap: var(--s-4);
+  }
+
+  .gp-share-stat-val {
+    font-size: var(--fs-4);
+  }
+}
+
+/* ── Public Share Card page ── */
+.sc-public-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s-6);
+  background: linear-gradient(135deg, #f0f4ff 0%, var(--color-bg) 100%);
+}
+
+.sc-public-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-xl);
+  padding: var(--s-9) var(--s-7);
+  max-width: 440px;
+  width: 100%;
+  text-align: center;
+  box-shadow: var(--shadow-xl);
+}
+
+.sc-public-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-1);
+  font-weight: var(--fw-bold);
+  color: var(--color-text-muted);
+  margin-bottom: var(--s-6);
+}
+
+.sc-public-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4a7aef, var(--color-brand));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: var(--fw-extrabold);
+  color: #fff;
+  margin: 0 auto var(--s-4);
+  box-shadow: 0 4px 20px rgba(26, 79, 212, 0.25);
+}
+
+.sc-public-name {
+  font-size: var(--fs-7);
+  font-weight: var(--fw-extrabold);
+  color: var(--color-text-primary);
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+.sc-public-church {
+  font-size: var(--fs-3);
+  color: var(--color-brand);
+  font-weight: var(--fw-semibold);
+  margin-top: var(--s-1);
+}
+
+.sc-public-since {
+  font-size: var(--fs-1);
+  color: var(--color-text-muted);
+  margin-top: var(--s-1);
+  margin-bottom: var(--s-6);
+}
+
+.sc-public-stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-6);
+  margin: var(--s-5) 0;
+}
+
+.sc-public-stat {
+  text-align: center;
+}
+
+.sc-public-stat-val {
+  font-size: var(--fs-6);
+  font-weight: var(--fw-extrabold);
+  color: var(--color-text-primary);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.sc-public-stat-label {
+  font-size: var(--fs-0);
+  color: var(--color-text-muted);
+  font-weight: var(--fw-medium);
+}
+
+.sc-public-stat-divider {
+  width: 1px;
+  height: 36px;
+  background: var(--color-border);
+}
+
+.sc-public-badges {
+  display: flex;
+  justify-content: center;
+  gap: var(--s-2);
+  font-size: 28px;
+  margin: var(--s-4) 0;
+}
+
+.sc-public-cta-section {
+  margin-top: var(--s-7);
+  padding-top: var(--s-6);
+  border-top: 1px solid var(--color-border);
+}
+
+.sc-public-cta-section p {
+  color: var(--color-text-body);
+  font-size: var(--fs-2);
+  margin: 0 0 var(--s-4);
+}
+
+.sc-public-footer {
+  margin-top: var(--s-6);
+  font-size: var(--fs-0);
+  color: var(--color-text-muted);
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.04em;
+}
+
+/* =========================================================
    23) Badges modal
 ========================================================= */
 

@@ -18,6 +18,8 @@ import RequireAuth from "./components/guards/RequireAuth";
 import RequireAdmin from "./components/guards/RequireAdmin";
 import Admin from "./pages/Admin";
 import SocialPage from "./pages/SocialPage";
+import GivingProfile from "./pages/GivingProfile";
+import PublicShareCard from "./pages/PublicShareCard";
 import Footer from "./components/Footer";
 
 export default function App() {
@@ -34,6 +36,7 @@ export default function App() {
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/update-password" element={<UpdatePassword />} />
+        <Route path="/s/:id" element={<PublicShareCard />} />
 
 
         {/* Protected + Onboarding */}
@@ -43,6 +46,7 @@ export default function App() {
           <Route path="/bank" element={<Bank />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/social"    element={<SocialPage />} />
+          <Route path="/impact"    element={<GivingProfile />} />
         </Route>
 
         {/* Admin only */}

@@ -212,6 +212,18 @@ export default function Dashboard() {
             </p>
           </div>
 
+          {/* ── Impact profile teaser ── */}
+          <div className="card stack-3" style={{ textAlign: "center", cursor: "pointer" }} onClick={() => nav("/impact")}>
+            <div style={{ fontSize: "32px" }}>🔥</div>
+            <h3 style={{ margin: 0 }}>Your Giving Impact</h3>
+            <p className="muted" style={{ margin: 0, fontSize: "var(--fs-2)" }}>
+              See your streak, giving ring, activity grid, and shareable impact card.
+            </p>
+            <button className="btn btn-primary btn-sm" style={{ alignSelf: "center" }}>
+              View Impact
+            </button>
+          </div>
+
           {/* ── Social teaser ── */}
           {church && (
             <div className="card stack-3" style={{ textAlign: "center", cursor: "pointer" }} onClick={() => nav("/social")}>
