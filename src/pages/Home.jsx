@@ -1,6 +1,7 @@
 import { useNavigate, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
+import WaveBackground from "../components/WaveBackground";
 
 export default function Home() {
   const nav = useNavigate();
@@ -106,6 +107,7 @@ export default function Home() {
 
   return (
     <div className="bg-wrap">
+      <WaveBackground />
       {/* ── Header ── */}
       <header className="header">
         <div className="header-inner">

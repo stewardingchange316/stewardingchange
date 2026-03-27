@@ -74,6 +74,13 @@ button, input, textarea, select {
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  position: relative;
+}
+
+/* Keep page content above the wave canvas */
+.bg-wrap > *:not(.wave-canvas) {
+  position: relative;
+  z-index: 1;
 }
 
 /* =========================================================
@@ -514,7 +521,7 @@ button.primary:disabled {
 }
 
 .brand-name {
-  font-size: var(--fs-3);
+  font-size: var(--fs-4);
   font-weight: var(--fw-bold);
   color: var(--color-text-primary);
   letter-spacing: -0.02em;
@@ -605,6 +612,12 @@ button.primary:disabled {
   max-width: 960px;
   margin: 0 auto;
   padding: var(--s-12) var(--s-4) var(--s-10);
+  background: rgba(245, 247, 250, 0.80);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
 }
 
 .steps-section h2 {
@@ -1703,6 +1716,14 @@ button.primary:disabled {
   display: flex;
   flex-direction: column;
   gap: 0;
+  background: rgba(245, 247, 250, 0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  padding: var(--s-6);
+  margin: calc(-1 * var(--s-6));
 }
 
 .home-hero-copy .kicker {
@@ -3107,6 +3128,20 @@ button.primary:disabled {
 
   .home-hero-copy .kicker {
     justify-content: center;
+  }
+
+  .home-hero-copy {
+    background: rgba(245, 247, 250, 0.3);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    padding: var(--s-4);
+    margin: calc(-1 * var(--s-4));
+  }
+
+  .steps-section {
+    background: rgba(245, 247, 250, 0.3);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
   }
 
   .home-features-grid {
