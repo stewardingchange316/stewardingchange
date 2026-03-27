@@ -3172,3 +3172,348 @@ button.primary:disabled {
     border-bottom: none;
   }
 }
+
+/* =========================================================
+   Header nav + Tithe Calculator
+========================================================= */
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+}
+
+.header-nav-link {
+  font-size: var(--fs-1);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition: color var(--dur-2) var(--ease-out);
+  white-space: nowrap;
+}
+
+.header-nav-link:hover {
+  color: var(--color-brand);
+}
+
+@media (max-width: 420px) {
+  .header-nav-link {
+    font-size: var(--fs-0);
+  }
+
+  .header-actions {
+    gap: var(--s-2);
+  }
+}
+
+/* Tithe calculator callout below "How it works" */
+.tithe-calc-callout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-5);
+  margin-top: var(--s-8);
+  padding: var(--s-5) var(--s-6);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.tithe-calc-callout-text {
+  flex: 1;
+}
+
+@media (max-width: 600px) {
+  .tithe-calc-callout {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--s-4);
+    padding: var(--s-5) var(--s-4);
+  }
+}
+
+.tithe-calc-wrap {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: var(--s-8);
+  background: rgba(245, 247, 250, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+}
+
+.tithe-calc-title {
+  font-size: clamp(32px, 5vw, 48px);
+  font-weight: var(--fw-bold);
+  margin: 0 0 var(--s-3);
+  letter-spacing: -0.02em;
+}
+
+.tithe-calc-subtitle {
+  color: var(--color-text-muted);
+  font-size: var(--fs-2);
+  line-height: var(--lh-relaxed);
+  max-width: 48ch;
+  margin: 0 auto var(--s-7);
+}
+
+.tithe-calc-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  margin-bottom: var(--s-6);
+}
+
+.tithe-calc-input-wrap {
+  display: flex;
+  align-items: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  gap: var(--s-2);
+  transition: border-color var(--dur-2) var(--ease-out);
+}
+
+.tithe-calc-input-wrap:focus-within {
+  border-color: var(--color-brand);
+}
+
+.tithe-calc-dollar {
+  font-size: var(--fs-3);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-muted);
+}
+
+.tithe-calc-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: var(--fs-4);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-primary);
+  font-family: inherit;
+}
+
+.tithe-calc-input::placeholder {
+  color: var(--color-text-muted);
+  opacity: 0.5;
+}
+
+.tithe-calc-per {
+  font-size: var(--fs-1);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.tithe-calc-results {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: var(--s-3);
+  margin-bottom: var(--s-5);
+}
+
+.tithe-calc-result-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-lg);
+  padding: var(--s-5) var(--s-3);
+  box-shadow: var(--shadow-sm);
+}
+
+.tithe-calc-result-main {
+  border-color: rgba(26, 79, 212, 0.25);
+  background: linear-gradient(135deg, rgba(26, 79, 212, 0.04), rgba(74, 122, 239, 0.02));
+}
+
+.tithe-calc-result-label {
+  font-size: var(--fs-0);
+  color: var(--color-text-muted);
+  margin-bottom: var(--s-2);
+}
+
+.tithe-calc-result-amount {
+  font-size: var(--fs-4);
+  font-weight: var(--fw-bold);
+  color: var(--color-brand);
+}
+
+.tithe-calc-result-main .tithe-calc-result-amount {
+  font-size: var(--fs-5);
+}
+
+.tithe-calc-cta {
+  font-size: var(--fs-2);
+  color: var(--color-text-muted);
+  margin: 0 0 var(--s-6);
+  line-height: var(--lh-relaxed);
+}
+
+.tithe-calc-cta .link-brand {
+  color: var(--color-brand);
+  font-weight: var(--fw-semibold);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.tithe-calc-disclaimer {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+  text-align: left;
+  font-size: var(--fs-0);
+  color: var(--color-text-muted);
+  line-height: var(--lh-relaxed);
+  background: var(--color-surface-2);
+  border-radius: var(--r-md);
+  padding: var(--s-4);
+}
+
+@media (max-width: 600px) {
+  .tithe-calc-wrap {
+    padding: var(--s-5);
+    margin: 0 var(--s-3);
+  }
+
+  .tithe-calc-results {
+    grid-template-columns: 1fr;
+  }
+
+  .tithe-calc-result-main .tithe-calc-result-amount {
+    font-size: var(--fs-4);
+  }
+}
+
+/* Home FAQ collapsible section */
+.home-faq-section {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: var(--s-6) var(--s-4) var(--s-10);
+}
+
+.home-faq-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-3);
+  width: 100%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-lg);
+  padding: var(--s-5) var(--s-6);
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
+}
+
+.home-faq-toggle:hover {
+  border-color: rgba(26, 79, 212, 0.20);
+  box-shadow: 0 4px 16px rgba(26, 79, 212, 0.08);
+}
+
+.home-faq-toggle-icon {
+  transition: transform var(--dur-3) var(--ease-out);
+}
+
+.home-faq-toggle-icon.is-open {
+  transform: rotate(180deg);
+}
+
+.home-faq-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease-out;
+}
+
+.home-faq-body.is-open {
+  max-height: 2000px;
+  transition: max-height 0.6s ease-in;
+}
+
+.home-faq-body .tithe-faq-list {
+  padding-top: var(--s-4);
+}
+
+/* Tithe FAQ items (shared between home + tithe page) */
+.tithe-faq-section {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: var(--s-6) var(--s-4) var(--s-12);
+}
+
+.tithe-faq-title {
+  font-size: clamp(22px, 3vw, 28px);
+  font-weight: var(--fw-bold);
+  text-align: center;
+  margin: 0 0 var(--s-6);
+}
+
+.tithe-faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.tithe-faq-item {
+  background: rgba(245, 247, 250, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+
+.tithe-faq-question {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  width: 100%;
+  padding: var(--s-4) var(--s-5);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-size: var(--fs-2);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  line-height: var(--lh-snug);
+}
+
+.tithe-faq-question:hover {
+  color: var(--color-brand);
+}
+
+.tithe-faq-chevron {
+  flex-shrink: 0;
+  transition: transform var(--dur-3) var(--ease-out);
+}
+
+.tithe-faq-item.is-open .tithe-faq-chevron {
+  transform: rotate(180deg);
+}
+
+.tithe-faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height var(--dur-4) var(--ease-out);
+}
+
+.tithe-faq-item.is-open .tithe-faq-answer {
+  max-height: 300px;
+}
+
+.tithe-faq-answer p {
+  margin: 0;
+  padding: 0 var(--s-5) var(--s-5);
+  font-size: var(--fs-1);
+  color: var(--color-text-muted);
+  line-height: var(--lh-relaxed);
+}

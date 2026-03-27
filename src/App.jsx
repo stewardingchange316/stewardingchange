@@ -20,6 +20,7 @@ import Admin from "./pages/Admin";
 import SocialPage from "./pages/SocialPage";
 import GivingProfile from "./pages/GivingProfile";
 import PublicShareCard from "./pages/PublicShareCard";
+import TitheCalculator from "./pages/TitheCalculator";
 import Footer from "./components/Footer";
 
 export default function App() {
@@ -37,6 +38,7 @@ export default function App() {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/update-password" element={<UpdatePassword />} />
         <Route path="/s/:id" element={<PublicShareCard />} />
+        <Route path="/tithe-calculator" element={<TitheCalculator />} />
 
 
         {/* Protected + Onboarding */}
