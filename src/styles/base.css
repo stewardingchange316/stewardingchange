@@ -78,7 +78,7 @@ button, input, textarea, select {
 }
 
 /* Keep page content above the wave canvas */
-.bg-wrap > *:not(.wave-canvas) {
+.bg-wrap > *:not(.wave-canvas):not(.modal-overlay) {
   position: relative;
   z-index: 1;
 }
@@ -1724,6 +1724,8 @@ button.primary:disabled {
   box-shadow: var(--shadow-sm);
   padding: var(--s-6);
   margin: calc(-1 * var(--s-6));
+  position: relative;
+  z-index: 2;
 }
 
 .home-hero-copy .kicker {
