@@ -15,54 +15,58 @@ export default function ChurchSelect() {
 
   useEffect(() => {
     async function init() {
-      const { data: { user } } = await supabase.auth.getUser();
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
 
-      if (!user) {
-        navigate("/", { replace: true });
-        return;
-      }
+        if (!user) {
+          navigate("/", { replace: true });
+          return;
+        }
 
-      const { data: existing } = await supabase
-        .from("users")
-        .select("church_id")
-        .eq("id", user.id)
-        .maybeSingle();
+        const { data: existing } = await supabase
+          .from("users")
+          .select("church_id")
+          .eq("id", user.id)
+          .maybeSingle();
 
-      if (!existing) {
-        await supabase.from("users").upsert(
-          {
-            id: user.id,
-            email: user.email,
-            onboarding_step: "church",
-            church_id: null,
-            weekly_cap: null,
-            bank_connected: false,
-          },
-          { onConflict: "id" }
-        );
-      } else if (existing?.church_id) {
-        setSelected(existing.church_id);
-      }
+        if (!existing) {
+          await supabase.from("users").upsert(
+            {
+              id: user.id,
+              email: user.email,
+              onboarding_step: "church",
+              church_id: null,
+              weekly_cap: null,
+              bank_connected: false,
+            },
+            { onConflict: "id" }
+          );
+        } else if (existing?.church_id) {
+          setSelected(existing.church_id);
+        }
 
-      let { data: churchList, error: churchErr } = await supabase
-        .from("churches")
-        .select("id, name, city, state")
-        .eq("active", true)
-        .order("name");
-
-      // Fallback if city/state columns not yet available
-      if (churchErr) {
-        const fallback = await supabase
+        let { data: churchList, error: churchErr } = await supabase
           .from("churches")
-          .select("id, name")
+          .select("id, name, city, state")
           .eq("active", true)
           .order("name");
-        churchList = fallback.data;
+
+        if (churchErr) {
+          const fallback = await supabase
+            .from("churches")
+            .select("id, name")
+            .eq("active", true)
+            .order("name");
+          churchList = fallback.data;
+        }
+
+        setChurches(churchList ?? []);
+      } catch (err) {
+        console.error("Church select init error:", err);
+        setError("Unable to load churches. Please refresh and try again.");
+      } finally {
+        setLoading(false);
       }
-
-      setChurches(churchList ?? []);
-
-      setLoading(false);
     }
 
     init();

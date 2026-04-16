@@ -124,7 +124,8 @@ export default function Home() {
       .select("id, name, mission_label, mission_title, mission_description, mission_progress")
       .eq("active", true)
       .order("name")
-      .then(({ data }) => { if (data) setChurches(data); });
+      .then(({ data }) => { if (data) setChurches(data); })
+      .catch(console.error);
   }, []);
 
   // Add reveal visibility after first paint so content is always scrollable

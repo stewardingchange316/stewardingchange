@@ -161,14 +161,16 @@ export default function GivingProfile() {
 
       let shareId;
       if (existing) {
-        await supabase.from("share_cards").update(cardData).eq("id", existing.id);
+        const { error: updateErr } = await supabase.from("share_cards").update(cardData).eq("id", existing.id);
+        if (updateErr) throw updateErr;
         shareId = existing.id;
       } else {
-        const { data: inserted } = await supabase
+        const { data: inserted, error: insertErr } = await supabase
           .from("share_cards")
           .insert(cardData)
           .select("id")
           .single();
+        if (insertErr || !inserted) throw insertErr || new Error("Failed to create share card");
         shareId = inserted.id;
       }
 

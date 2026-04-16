@@ -30,99 +30,115 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+
     async function load() {
-      const { data: { session } } = await supabase.auth.getSession();
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
 
-      if (!session?.user) {
-        nav("/", { replace: true });
-        return;
-      }
+        if (!session?.user) {
+          nav("/", { replace: true });
+          return;
+        }
 
-      const user = session.user;
-      setAuthUser(user);
+        const user = session.user;
+        if (cancelled) return;
+        setAuthUser(user);
 
-      const { data, error } = await supabase
-        .from("users")
-        .select("*")
-        .eq("id", user.id)
-        .single();
+        const { data, error } = await supabase
+          .from("users")
+          .select("*")
+          .eq("id", user.id)
+          .single();
 
-      if (error) {
-        console.error("Failed to load profile:", error);
-        nav("/", { replace: true });
-        return;
-      }
+        if (error || !data) {
+          console.error("Failed to load profile:", error);
+          nav("/", { replace: true });
+          return;
+        }
 
-      setProfile(data);
-      setPaused(data.giving_paused ?? false);
+        if (cancelled) return;
+        setProfile(data);
+        setPaused(data.giving_paused ?? false);
 
-      if (data.church_id) {
-        try {
-          const [{ data: churchData }, { data: bannerData }] = await Promise.all([
-            supabase
-              .from("churches")
-              .select("name, mission_label, mission_title, mission_description, mission_progress")
-              .eq("id", data.church_id)
-              .maybeSingle(),
-            supabase
-              .from("church_banners")
-              .select("*")
-              .or(`church_id.eq.${data.church_id},church_id.is.null`)
-              .eq("is_active", true)
-              .order("church_id", { nullsFirst: false })
-              .order("created_at", { ascending: false }),
-          ]);
-          setChurch(churchData);
-          setBanners(bannerData ?? []);
-        } catch (err) {
-          console.error("Error loading church/banners:", err);
-          // Still load dashboard even if banners fail
+        if (data.church_id) {
           const { data: churchData } = await supabase
             .from("churches")
             .select("name, mission_label, mission_title, mission_description, mission_progress")
             .eq("id", data.church_id)
             .maybeSingle();
+
+          if (cancelled) return;
           setChurch(churchData);
+
+          const { data: bannerData } = await supabase
+            .from("church_banners")
+            .select("*")
+            .or(`church_id.eq.${data.church_id},church_id.is.null`)
+            .eq("is_active", true)
+            .order("church_id", { nullsFirst: false })
+            .order("created_at", { ascending: false });
+
+          if (cancelled) return;
+          setBanners(bannerData ?? []);
         }
+
+        const { data: badgeRows } = await supabase
+          .from("user_badges")
+          .select("badge_id")
+          .eq("user_id", user.id);
+
+        if (cancelled) return;
+        setMyBadges(badgeRows ?? []);
+
+        checkAndAwardBadges(user.id).catch(console.error);
+      } catch (err) {
+        console.error("Dashboard load error:", err);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-
-      // Fetch earned badges for header display
-      const { data: badgeRows } = await supabase
-        .from("user_badges")
-        .select("badge_id")
-        .eq("user_id", user.id);
-      setMyBadges(badgeRows ?? []);
-
-      setLoading(false);
-
-      // Background badge check — fire and forget, does not block render
-      checkAndAwardBadges(user.id).catch(console.error);
     }
 
     load();
+    return () => { cancelled = true; };
   }, [nav]);
 
   async function handleTogglePause() {
     const next = !paused;
     setPaused(next);
-    await supabase
-      .from("users")
-      .update({ giving_paused: next })
-      .eq("id", authUser.id);
+    try {
+      const { error } = await supabase
+        .from("users")
+        .update({ giving_paused: next })
+        .eq("id", authUser.id);
+      if (error) throw error;
+    } catch (err) {
+      console.error("Toggle pause error:", err);
+      setPaused(!next); // revert on failure
+    }
   }
 
   async function handleDisconnectBank() {
     if (!confirm("Disconnect your bank account? Giving will stop immediately. You can reconnect at any time.")) return;
-    await supabase
-      .from("users")
-      .update({ bank_connected: false, giving_paused: false })
-      .eq("id", authUser.id);
-    setProfile((p) => ({ ...p, bank_connected: false }));
-    setPaused(false);
+    try {
+      const { error } = await supabase
+        .from("users")
+        .update({ bank_connected: false, giving_paused: false })
+        .eq("id", authUser.id);
+      if (error) throw error;
+      setProfile((p) => ({ ...p, bank_connected: false }));
+      setPaused(false);
+    } catch (err) {
+      console.error("Disconnect bank error:", err);
+    }
   }
 
   async function handleSignOut() {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.error("Sign out error:", err);
+    }
     nav("/");
   }
 

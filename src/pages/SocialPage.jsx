@@ -193,13 +193,17 @@ export default function SocialPage() {
       return { ...prev, [postId]: slot };
     });
 
-    if (current) {
-      await supabase.from("feed_reactions").delete()
-        .eq("post_id", postId).eq("user_id", authUser.id).eq("emoji", current);
-    }
-    if (current !== emoji) {
-      await supabase.from("feed_reactions")
-        .upsert({ post_id: postId, user_id: authUser.id, emoji }, { onConflict: "post_id,user_id,emoji" });
+    try {
+      if (current) {
+        await supabase.from("feed_reactions").delete()
+          .eq("post_id", postId).eq("user_id", authUser.id).eq("emoji", current);
+      }
+      if (current !== emoji) {
+        await supabase.from("feed_reactions")
+          .upsert({ post_id: postId, user_id: authUser.id, emoji }, { onConflict: "post_id,user_id,emoji" });
+      }
+    } catch (err) {
+      console.error("Reaction error:", err);
     }
   }
 
