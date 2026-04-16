@@ -57,22 +57,33 @@ export default function Dashboard() {
       setPaused(data.giving_paused ?? false);
 
       if (data.church_id) {
-        const [{ data: churchData }, { data: bannerData }] = await Promise.all([
-          supabase
+        try {
+          const [{ data: churchData }, { data: bannerData }] = await Promise.all([
+            supabase
+              .from("churches")
+              .select("name, mission_label, mission_title, mission_description, mission_progress")
+              .eq("id", data.church_id)
+              .maybeSingle(),
+            supabase
+              .from("church_banners")
+              .select("*")
+              .or(`church_id.eq.${data.church_id},church_id.is.null`)
+              .eq("is_active", true)
+              .order("church_id", { nullsFirst: false })
+              .order("created_at", { ascending: false }),
+          ]);
+          setChurch(churchData);
+          setBanners(bannerData ?? []);
+        } catch (err) {
+          console.error("Error loading church/banners:", err);
+          // Still load dashboard even if banners fail
+          const { data: churchData } = await supabase
             .from("churches")
             .select("name, mission_label, mission_title, mission_description, mission_progress")
             .eq("id", data.church_id)
-            .maybeSingle(),
-          supabase
-            .from("church_banners")
-            .select("*")
-            .or(`church_id.eq.${data.church_id},church_id.is.null`)
-            .eq("is_active", true)
-            .order("church_id", { nullsFirst: false })
-            .order("created_at", { ascending: false }),
-        ]);
-        setChurch(churchData);
-        setBanners(bannerData ?? []);
+            .maybeSingle();
+          setChurch(churchData);
+        }
       }
 
       // Fetch earned badges for header display
