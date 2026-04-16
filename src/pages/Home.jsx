@@ -187,9 +187,12 @@ export default function Home() {
           </Link>
 
           <div className="header-actions">
-            <Link to="/tithe-calculator" className="header-nav-link">
-              Tithe Calculator
-            </Link>
+            <button
+              className="btn btn-primary btn-sm"
+              onClick={() => nav("/signup")}
+            >
+              Start Giving
+            </button>
             <button
               className="btn btn-secondary btn-sm"
               onClick={() => { setMode("login"); setShowLogin(true); }}
@@ -229,7 +232,7 @@ export default function Home() {
                   className="btn btn-primary btn-lg"
                   onClick={() => nav("/signup")}
                 >
-                  Start Giving
+                  Create an Account
                 </button>
                 <button
                   className="btn btn-secondary btn-lg"

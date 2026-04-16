@@ -248,7 +248,6 @@ export default function Bank() {
         <div className="container-narrow">
           <div className="progress-indicator">
             <div className="progress-dot" />
-            <div className="progress-dot" />
             <div className="progress-dot is-active" />
           </div>
 
@@ -321,7 +320,6 @@ export default function Bank() {
     <div className="page">
       <div className="container-narrow">
         <div className="progress-indicator">
-          <div className="progress-dot" />
           <div className="progress-dot" />
           <div className="progress-dot is-active" />
         </div>

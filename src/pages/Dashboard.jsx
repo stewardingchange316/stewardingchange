@@ -131,10 +131,10 @@ export default function Dashboard() {
     || "Friend";
 
   const givingCap = profile.weekly_cap === null
-    ? "No limit"
+    ? "No limit set"
     : typeof profile.weekly_cap === "number"
     ? `$${profile.weekly_cap} / week`
-    : "Not set";
+    : "No limit set";
 
   const initials = firstName.charAt(0).toUpperCase();
 

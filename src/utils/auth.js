@@ -245,7 +245,7 @@ export async function getNextOnboardingPath() {
   // Canonical map kept in sync with RequireAuth.jsx's STEP_TO_ROUTE.
   const STEP_ROUTE = {
     church: "/church-select",
-    cap:    "/giving-cap",
+    cap:    "/bank",       // cap step removed from onboarding — redirect to bank
     bank:   "/bank",
     done:   "/dashboard",
   };

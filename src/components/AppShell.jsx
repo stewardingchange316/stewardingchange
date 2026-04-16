@@ -22,7 +22,7 @@ export default function AppShell({ children }) {
     alt="Stewarding Change Logo"
     className="h-10 w-10 object-contain"
   />
-  <span>Stewarding Change</span>
+  <span className="brand-name">Stewarding Change</span>
 </Link>
 
           <div className="tagline">Giving that feels personal — updates that feel real</div>

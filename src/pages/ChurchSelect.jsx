@@ -2,10 +2,13 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 
+// FUTURE: Deep link route /give/:churchSlug that pre-selects a church on account creation. QR code support planned.
+
 export default function ChurchSelect() {
   const navigate = useNavigate();
 
   const [churches, setChurches] = useState([]);
+  const [search, setSearch] = useState("");
   const [selected, setSelected] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -41,11 +44,22 @@ export default function ChurchSelect() {
         setSelected(existing.church_id);
       }
 
-      const { data: churchList } = await supabase
+      let { data: churchList, error: churchErr } = await supabase
         .from("churches")
-        .select("id, name, mission_label, mission_goal, giving_cadence")
+        .select("id, name, city, state")
         .eq("active", true)
         .order("name");
+
+      // Fallback if city/state columns not yet available
+      if (churchErr) {
+        const fallback = await supabase
+          .from("churches")
+          .select("id, name")
+          .eq("active", true)
+          .order("name");
+        churchList = fallback.data;
+      }
+
       setChurches(churchList ?? []);
 
       setLoading(false);
@@ -53,6 +67,16 @@ export default function ChurchSelect() {
 
     init();
   }, [navigate]);
+
+  const filtered = search.trim().length > 0
+    ? churches.filter((c) => {
+        const q = search.toLowerCase();
+        return (
+          c.name?.toLowerCase().includes(q) ||
+          c.city?.toLowerCase().includes(q)
+        );
+      })
+    : [];
 
   async function continueNext() {
     if (!selected) return;
@@ -65,7 +89,7 @@ export default function ChurchSelect() {
 
       const { error, data } = await supabase
         .from("users")
-        .update({ church_id: selected, onboarding_step: "cap", church_joined_at: new Date().toISOString() })
+        .update({ church_id: selected, onboarding_step: "bank", weekly_cap: null, church_joined_at: new Date().toISOString() })
         .eq("id", user.id)
         .select();
 
@@ -77,7 +101,7 @@ export default function ChurchSelect() {
         p_new_church_id: selected,
       });
 
-      navigate("/giving-cap", { replace: true });
+      navigate("/bank", { replace: true });
     } catch (err) {
       console.error("Church save error:", err);
       setError("Unable to save your selection. Please try again.");
@@ -99,12 +123,11 @@ export default function ChurchSelect() {
       <div className="progress-indicator">
         <div className="progress-dot is-active" />
         <div className="progress-dot" />
-        <div className="progress-dot" />
       </div>
 
-      <h1>Select your church</h1>
+      <h1>Find your church</h1>
       <p className="onboarding-subtext">
-        This sets your dashboard context. You can add more churches later.
+        Search by church name or city to get started.
       </p>
 
       {error && (
@@ -113,9 +136,35 @@ export default function ChurchSelect() {
         </div>
       )}
 
+      <div className="church-search-wrap">
+        <svg
+          width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+          className="church-search-icon"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <input
+          type="text"
+          placeholder="Search by name or city..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="church-search-input"
+          autoFocus
+        />
+      </div>
+
+      {search.trim().length > 0 && filtered.length === 0 && (
+        <p className="church-no-results">
+          No churches found. Email <a href="mailto:info@stewardingchange.org">info@stewardingchange.org</a> to request your church be added.
+        </p>
+      )}
+
       <div className="church-list">
-        {churches.map((church) => {
+        {filtered.map((church) => {
           const isSelected = selected === church.id;
+          const location = [church.city, church.state].filter(Boolean).join(", ");
 
           return (
             <div
@@ -124,21 +173,13 @@ export default function ChurchSelect() {
               onClick={() => setSelected(church.id)}
             >
               <div className="church-card-header">
-                <h3>{church.name}</h3>
+                <div>
+                  <h3>{church.name}</h3>
+                  {location && (
+                    <p className="church-address">{location}</p>
+                  )}
+                </div>
                 {isSelected && <span className="checkmark">✓</span>}
-              </div>
-
-              <p className="church-mission">{church.mission_label}</p>
-
-              <div className="church-meta">
-                <div>
-                  <span className="label">Monthly goal</span>
-                  <strong>{church.mission_goal}</strong>
-                </div>
-                <div>
-                  <span className="label">Updates</span>
-                  <strong>{church.giving_cadence}</strong>
-                </div>
               </div>
 
               {isSelected && (

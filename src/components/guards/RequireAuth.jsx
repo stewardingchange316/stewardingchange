@@ -11,7 +11,7 @@ import {
 
 const STEP_TO_ROUTE = {
   church: "/church-select",
-  cap:    "/giving-cap",
+  cap:    "/bank",       // cap step removed from onboarding — redirect to bank
   bank:   "/bank",
 };
 

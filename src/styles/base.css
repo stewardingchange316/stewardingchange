@@ -794,6 +794,60 @@ button.primary:disabled {
    10) Church card select
 ========================================================= */
 
+.church-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  margin-bottom: var(--s-5);
+  transition: border-color var(--dur-2) var(--ease-out);
+}
+
+.church-search-wrap:focus-within {
+  border-color: var(--color-brand);
+}
+
+.church-search-icon {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
+
+.church-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: var(--fs-2);
+  font-family: inherit;
+  color: var(--color-text-primary);
+}
+
+.church-search-input::placeholder {
+  color: var(--color-text-muted);
+  opacity: 0.6;
+}
+
+.church-address {
+  font-size: var(--fs-1);
+  color: var(--color-text-muted);
+  margin: var(--s-1) 0 0;
+}
+
+.church-no-results {
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--fs-1);
+  padding: var(--s-6) 0;
+}
+
+.church-no-results a {
+  color: var(--color-brand);
+  font-weight: var(--fw-semibold);
+}
+
 .church-list {
   display: grid;
   gap: var(--s-4);
