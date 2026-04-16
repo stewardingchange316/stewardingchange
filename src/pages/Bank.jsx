@@ -259,7 +259,7 @@ export default function Bank() {
               <p className="muted small">
                 By authorizing, you allow Stewarding Change to electronically
                 debit your bank account for your configured roundup amounts, up
-                to your weekly cap. Debits are subject to{" "}
+                to your monthly cap. Debits are subject to{" "}
                 <a
                   href="https://stripe.com/legal/ach"
                   target="_blank"

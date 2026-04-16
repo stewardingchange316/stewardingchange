@@ -59,7 +59,7 @@ export default function TitheCalculator() {
 
             <p className="tithe-calc-subtitle">
               Enter your estimated yearly income to see what a biblical tithe (10%) looks like
-              broken down weekly, monthly, and yearly.
+              broken down monthly and yearly.
             </p>
 
             <form onSubmit={calculate} className="tithe-calc-form">
@@ -87,8 +87,8 @@ export default function TitheCalculator() {
             {result && (
               <div className="tithe-calc-results">
                 <div className="tithe-calc-result-card tithe-calc-result-main">
-                  <div className="tithe-calc-result-label">Weekly tithe</div>
-                  <div className="tithe-calc-result-amount">{fmt(result.weekly)}</div>
+                  <div className="tithe-calc-result-label">Monthly tithe</div>
+                  <div className="tithe-calc-result-amount">{fmt(result.monthly)}</div>
                 </div>
                 <div className="tithe-calc-result-card">
                   <div className="tithe-calc-result-label">Monthly</div>

@@ -496,7 +496,7 @@ export default function Admin() {
   }
 
   function handleExportCSV() {
-    const headers = ["Name", "Email", "Church", "Weekly Cap", "Bank Connected", "Status", "Joined"];
+    const headers = ["Name", "Email", "Church", "Monthly Cap", "Bank Connected", "Status", "Joined"];
     const rows = filteredUsers.map((u) => [
       [u.first_name, u.last_name].filter(Boolean).join(" ") || "",
       u.email || "",
@@ -736,7 +736,7 @@ export default function Admin() {
                     <th
                       style={{ cursor: "pointer", userSelect: "none", whiteSpace: "nowrap" }}
                       onClick={toggleCapSort}
-                      title="Sort by weekly cap"
+                      title="Sort by monthly cap"
                     >
                       {capSortLabel}
                     </th>
@@ -759,7 +759,7 @@ export default function Admin() {
                     const churchName = churches.find((c) => c.id === u.church_id)?.name;
                     const cap        = u.weekly_cap === null
                       ? <span className="muted">No limit</span>
-                      : `$${u.weekly_cap} / wk`;
+                      : `$${u.weekly_cap} / mo`;
 
                     return (
                       <tr key={u.id}>
@@ -868,7 +868,7 @@ export default function Admin() {
           {/* ── Cap distribution ── */}
           <div className="stack-4">
             <div>
-              <h3 style={{ margin: 0 }}>Weekly Cap Distribution</h3>
+              <h3 style={{ margin: 0 }}>Monthly Cap Distribution</h3>
               <p className="small muted" style={{ margin: "4px 0 0" }}>
                 Based on {doneCount} fully set-up user{doneCount !== 1 ? "s" : ""}{activeChurchName ? ` at ${activeChurchName}` : ""}.
               </p>

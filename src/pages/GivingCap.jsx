@@ -99,11 +99,11 @@ export default function GivingCap() {
 
         <div className="stack-3">
           <h1 className="page-title">
-            Set your weekly giving cap
+            Set your monthly giving cap
           </h1>
           <p className="page-subtitle">
             Choose the maximum amount you'd like your spare change to
-            support your church each week. You remain in control at all times.
+            support your church each month. You remain in control at all times.
           </p>
         </div>
 
@@ -137,7 +137,7 @@ export default function GivingCap() {
             ) : (
               <div className="h2">
                 ${weeklyCap}
-                <span className="muted small"> / week</span>
+                <span className="muted small"> / month</span>
               </div>
             )}
           </div>
@@ -179,7 +179,7 @@ export default function GivingCap() {
           <div className="small">
             Every cent given through Stewarding Change is a tax-deductible
             contribution to your selected church. Detailed giving statements
-            are delivered weekly, with a consolidated annual statement
+            are delivered monthly, with a consolidated annual statement
             provided at year end.
           </div>
         </div>

@@ -317,56 +317,17 @@ export default function SocialPage() {
             </p>
           </div>
 
-          {/* ── Mission progress + Announcements ── */}
-          {church && (
-            <div className="card stack-5">
-              <div className="stack-1">
-                <div className="kicker" style={{ marginBottom: 0 }}>
-                  <span className="dot" />Mission Progress
-                </div>
-                <h3 style={{ margin: 0 }}>{church.mission_title || "Mission"}</h3>
-              </div>
-              {church.mission_description && (
-                <p className="muted" style={{ margin: 0, fontSize: "var(--fs-2)" }}>
-                  {church.mission_description}
-                </p>
-              )}
-              <div className="stack-2">
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span className="small muted">Progress toward goal</span>
-                  <span className="small" style={{ color: "var(--color-brand)", fontWeight: "var(--fw-semibold)" }}>
-                    {church.mission_progress ?? 0}%
-                  </span>
-                </div>
-                <div className="progress-bar">
-                  <div className="progress-fill" style={{ width: `${church.mission_progress ?? 0}%` }} />
-                </div>
-              </div>
-
-              {banners.map((banner) => (
-                <div key={banner.id} style={{ display: "flex", flexDirection: "column", gap: "var(--s-3)" }}>
-                  <div className="dash-divider" />
-                  <div style={{ display: "flex", alignItems: "center", gap: "var(--s-2)" }}>
-                    <div className="status-dot is-active" />
-                    <div style={{ fontWeight: "var(--fw-semibold)", fontSize: "var(--fs-2)", color: "var(--color-text-primary)" }}>
-                      {banner.title}
-                    </div>
-                  </div>
-                  {banner.message && (
-                    <p className="small muted" style={{ margin: 0 }}>
-                      {banner.message}
-                    </p>
-                  )}
-                  {banner.video_url && (
-                    <a href={banner.video_url} target="_blank" rel="noopener noreferrer"
-                       className="btn btn-sm btn-secondary" style={{ alignSelf: "flex-start" }}>
-                      Watch Video
-                    </a>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
+          {/* ── Your Impact ── */}
+          <div className="card stack-3" style={{ textAlign: "center", cursor: "pointer" }} onClick={() => nav("/impact")}>
+            <div style={{ fontSize: "32px" }}>🔥</div>
+            <h3 style={{ margin: 0 }}>Your Giving Impact</h3>
+            <p className="muted" style={{ margin: 0, fontSize: "var(--fs-2)" }}>
+              See your streak, giving ring, activity grid, and shareable impact card.
+            </p>
+            <button className="btn btn-primary btn-sm" style={{ alignSelf: "center" }}>
+              View Impact
+            </button>
+          </div>
 
           {/* ── Community Feed ── */}
           <div className="stack-3">

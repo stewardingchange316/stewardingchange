@@ -31,7 +31,7 @@ export default function Home() {
     },
     {
       q: "How does Stewarding Change work?",
-      a: "You link your bank account, choose your church, and set a weekly cap. Every time you make a purchase, the amount rounds up to the nearest dollar. That spare change goes directly to your church's active mission — automatically.",
+      a: "You link your bank account, choose your church, and set a monthly cap. Every time you make a purchase, the amount rounds up to the nearest dollar. That spare change goes directly to your church's active mission — automatically.",
     },
     {
       q: "Should I tithe on gross or net income?",
@@ -47,7 +47,7 @@ export default function Home() {
     },
     {
       q: "What if I want to stop or pause?",
-      a: "You're always in full control. You can pause giving, adjust your weekly cap, or disconnect your bank at any time from your dashboard — no questions asked.",
+      a: "You're always in full control. You can pause giving, adjust your monthly cap, or disconnect your bank at any time from your dashboard — no questions asked.",
     },
     {
       q: "Is my bank information safe?",
@@ -224,7 +224,7 @@ export default function Home() {
               <p className="lede home-hero-lede">
                 Every purchase rounds up automatically. The difference goes
                 straight to your church's active mission — tax-deductible,
-                every week.
+                every month.
               </p>
 
               <div className="hero-actions home-hero-actions">
@@ -282,10 +282,10 @@ export default function Home() {
 
                   <div className="home-preview-divider" />
 
-                  {/* Weekly amount */}
+                  {/* Monthly amount */}
                   <div style={{ marginBottom: "var(--s-3)" }}>
                     <div style={{ fontSize: "var(--fs-0)", color: "var(--color-text-muted)", marginBottom: "var(--s-1)" }}>
-                      This week
+                      This month
                     </div>
                     <div style={{ fontSize: "var(--fs-5)", fontWeight: "var(--fw-bold)", color: "var(--color-brand)", lineHeight: 1.1 }}>
                       +$1.72
@@ -326,7 +326,7 @@ export default function Home() {
                   {/* Weekly cap */}
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div>
-                      <div style={{ fontSize: "var(--fs-0)", color: "var(--color-text-muted)" }}>Weekly cap</div>
+                      <div style={{ fontSize: "var(--fs-0)", color: "var(--color-text-muted)" }}>Monthly cap</div>
                       <div style={{ fontSize: "var(--fs-2)", fontWeight: "var(--fw-semibold)", color: "var(--color-text-primary)" }}>$25.00</div>
                     </div>
                     <div style={{ fontSize: "var(--fs-0)", padding: "4px 10px", borderRadius: "var(--r-full)", background: "rgba(26, 158, 74, 0.08)", color: "var(--color-success)", fontWeight: "var(--fw-semibold)" }}>
@@ -409,11 +409,12 @@ export default function Home() {
               {
                 icon: (
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
                   </svg>
                 ),
-                title: "Set a weekly cap you’re comfortable with",
-                body: "Choose a weekly limit as low as $5. Once you hit your cap, round-ups pause until the next week. Adjust, pause, or cancel any time — you’re always in full control.",
+                title: "Watch your impact grow",
+                body: "No guessing where your money goes. Your church shares mission updates, progress milestones, and video updates right in the app — so you can see the real difference your giving makes, in real time.",
               },
             ].map((f) => (
               <div key={f.title} className="home-feature-card">
@@ -430,7 +431,7 @@ export default function Home() {
                 Wondering what your tithe should be?
               </h4>
               <p className="muted" style={{ margin: 0, fontSize: "var(--fs-1)" }}>
-                Use our free calculator to see your 10% tithe broken down weekly.
+                Use our free calculator to see your 10% tithe broken down monthly.
               </p>
             </div>
             <Link to="/tithe-calculator" className="btn btn-secondary">
@@ -439,42 +440,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── Church spotlight ── */}
-        {churches.length > 0 && (
-          <section className="steps-section reveal" style={{ paddingBottom: "var(--s-10)" }}>
-            <h2>Missions you'll support</h2>
-            <p className="muted" style={{ textAlign: "center", margin: "-20px auto var(--s-7)", maxWidth: "48ch", fontSize: "var(--fs-2)", lineHeight: "var(--lh-relaxed)" }}>
-              See the real-world impact your spare change makes.
-            </p>
-            <div className="home-spotlight-grid">
-              {churches.map((c) => (
-                <div key={c.id} className="card stack-4">
-                  <div className="stack-1">
-                    <div className="kicker" style={{ marginBottom: 0 }}>
-                      <span className="dot" />
-                      {c.mission_label || c.name}
-                    </div>
-                    <h4 style={{ margin: 0 }}>{c.mission_title || "Mission"}</h4>
-                  </div>
-                  <p className="muted" style={{ margin: 0, fontSize: "var(--fs-1)" }}>
-                    {c.mission_description}
-                  </p>
-                  <div>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "var(--s-2)" }}>
-                      <span className="small muted">Progress toward goal</span>
-                      <span className="small" style={{ color: "var(--color-brand)", fontWeight: "var(--fw-semibold)" }}>
-                        {c.mission_progress ?? 0}%
-                      </span>
-                    </div>
-                    <div className="progress-bar">
-                      <div className="progress-fill" style={{ width: `${c.mission_progress ?? 0}%` }} />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
 
         {/* ── Trust line ── */}
         <div className="trust-line reveal" style={{ padding: "var(--s-5) var(--s-4) var(--s-10)" }}>

@@ -299,7 +299,7 @@ export default function GivingProfile() {
                   <div className="gp-ring-cap">of ${cap}</div>
                 </div>
               </div>
-              <div className="gp-ring-pct">{ringPercent}% of weekly cap</div>
+              <div className="gp-ring-pct">{ringPercent}% of monthly cap</div>
             </div>
 
             {/* Streak */}
@@ -318,7 +318,7 @@ export default function GivingProfile() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--s-4)" }}>
               <div>
                 <h3 style={{ margin: 0, fontSize: "var(--fs-3)" }}>Giving Trend</h3>
-                <p className="small muted" style={{ margin: "2px 0 0" }}>Weekly giving over time</p>
+                <p className="small muted" style={{ margin: "2px 0 0" }}>Monthly giving over time</p>
               </div>
               <div style={{ textAlign: "right" }}>
                 <div style={{ fontSize: "var(--fs-4)", fontWeight: "var(--fw-extrabold)", color: "var(--color-text-primary)", letterSpacing: "-0.03em" }}>

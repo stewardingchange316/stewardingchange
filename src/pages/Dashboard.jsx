@@ -12,6 +12,7 @@ export default function Dashboard() {
   const [authUser, setAuthUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [church, setChurch] = useState(null);
+  const [banners, setBanners] = useState([]);
   const [myBadges,           setMyBadges]           = useState([]);
   const [paused,             setPaused]             = useState(false);
   const [showBadgesModal,    setShowBadgesModal]    = useState(false);
@@ -56,12 +57,22 @@ export default function Dashboard() {
       setPaused(data.giving_paused ?? false);
 
       if (data.church_id) {
-        const { data: churchData } = await supabase
-          .from("churches")
-          .select("name, mission_label, mission_title, mission_description, mission_progress")
-          .eq("id", data.church_id)
-          .maybeSingle();
+        const [{ data: churchData }, { data: bannerData }] = await Promise.all([
+          supabase
+            .from("churches")
+            .select("name, mission_label, mission_title, mission_description, mission_progress")
+            .eq("id", data.church_id)
+            .maybeSingle(),
+          supabase
+            .from("church_banners")
+            .select("*")
+            .or(`church_id.eq.${data.church_id},church_id.is.null`)
+            .eq("is_active", true)
+            .order("church_id", { nullsFirst: false })
+            .order("created_at", { ascending: false }),
+        ]);
         setChurch(churchData);
+        setBanners(bannerData ?? []);
       }
 
       // Fetch earned badges for header display
@@ -133,7 +144,7 @@ export default function Dashboard() {
   const givingCap = profile.weekly_cap === null
     ? "No limit set"
     : typeof profile.weekly_cap === "number"
-    ? `$${profile.weekly_cap} / week`
+    ? `$${profile.weekly_cap} / month`
     : "No limit set";
 
   const initials = firstName.charAt(0).toUpperCase();
@@ -212,52 +223,90 @@ export default function Dashboard() {
             </p>
           </div>
 
-          {/* ── Impact profile teaser ── */}
-          <div className="card stack-3" style={{ textAlign: "center", cursor: "pointer" }} onClick={() => nav("/impact")}>
-            <div style={{ fontSize: "32px" }}>🔥</div>
-            <h3 style={{ margin: 0 }}>Your Giving Impact</h3>
-            <p className="muted" style={{ margin: 0, fontSize: "var(--fs-2)" }}>
-              See your streak, giving ring, activity grid, and shareable impact card.
-            </p>
-            <button className="btn btn-primary btn-sm" style={{ alignSelf: "center" }}>
-              View Impact
-            </button>
-          </div>
-
-          {/* ── Social teaser ── */}
+          {/* ── 1. Mission Progress + Video Box ── */}
           {church && (
-            <div className="card stack-3" style={{ textAlign: "center", cursor: "pointer" }} onClick={() => nav("/social")}>
-              <div className="kicker" style={{ justifyContent: "center", marginBottom: 0 }}>
-                <span className="dot" />{church.name}
+            <div className="card stack-5">
+              <div className="stack-1">
+                <div className="kicker" style={{ marginBottom: 0 }}>
+                  <span className="dot" />Mission Progress
+                </div>
+                <h3 style={{ margin: 0 }}>{church.mission_title || "Mission"}</h3>
               </div>
-              <h3 style={{ margin: 0 }}>See the community feed</h3>
-              <p className="muted" style={{ margin: 0, fontSize: "var(--fs-2)" }}>
-                Check out what your church is accomplishing — badges, milestones, and more.
-              </p>
-              <button className="btn btn-secondary btn-sm" style={{ alignSelf: "center" }}>
-                Open Stewarding Social
+              {church.mission_description && (
+                <p className="muted" style={{ margin: 0, fontSize: "var(--fs-2)" }}>
+                  {church.mission_description}
+                </p>
+              )}
+              <div className="stack-2">
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span className="small muted">Progress toward goal</span>
+                  <span className="small" style={{ color: "var(--color-brand)", fontWeight: "var(--fw-semibold)" }}>
+                    {church.mission_progress ?? 0}%
+                  </span>
+                </div>
+                <div className="progress-bar">
+                  <div className="progress-fill" style={{ width: `${church.mission_progress ?? 0}%` }} />
+                </div>
+              </div>
+
+              {banners.map((banner) => {
+                // Extract YouTube embed ID from various URL formats
+                let embedId = null;
+                if (banner.video_url) {
+                  const url = banner.video_url;
+                  const shortMatch = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+                  const longMatch = url.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
+                  const embedMatch = url.match(/embed\/([a-zA-Z0-9_-]{11})/);
+                  embedId = shortMatch?.[1] || longMatch?.[1] || embedMatch?.[1] || null;
+                }
+
+                return (
+                  <div key={banner.id} style={{ display: "flex", flexDirection: "column", gap: "var(--s-3)" }}>
+                    <div className="dash-divider" />
+
+                    {embedId && (
+                      <div className="dash-video-wrap">
+                        <iframe
+                          src={`https://www.youtube.com/embed/${embedId}`}
+                          title={banner.title}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          className="dash-video-iframe"
+                        />
+                      </div>
+                    )}
+
+                    <div style={{ display: "flex", alignItems: "center", gap: "var(--s-2)" }}>
+                      <div className="status-dot is-active" />
+                      <div style={{ fontWeight: "var(--fw-semibold)", fontSize: "var(--fs-2)", color: "var(--color-text-primary)" }}>
+                        {banner.title}
+                      </div>
+                    </div>
+                    {banner.message && (
+                      <p className="small muted" style={{ margin: 0 }}>
+                        {banner.message}
+                      </p>
+                    )}
+
+                    {/* Fallback link if not a YouTube URL */}
+                    {banner.video_url && !embedId && (
+                      <a href={banner.video_url} target="_blank" rel="noopener noreferrer"
+                         className="btn btn-sm btn-secondary" style={{ alignSelf: "flex-start" }}>
+                        Watch Video
+                      </a>
+                    )}
+                  </div>
+                );
+              })}
+
+              <button className="btn btn-secondary btn-sm" style={{ alignSelf: "center" }} onClick={() => nav("/social")}>
+                See Community Feed
               </button>
             </div>
           )}
 
-          {/* ── Giving stats row ── */}
-          <div className="dash-stats">
-            <div className="dash-stat">
-              <div className="dash-stat-label">This Month</div>
-              <div className="dash-stat-value">$0.00</div>
-            </div>
-            <div className="dash-stat">
-              <div className="dash-stat-label">All Time</div>
-              <div className="dash-stat-value">$0.00</div>
-            </div>
-            <div className="dash-stat">
-              <div className="dash-stat-label">Transactions</div>
-              <div className="dash-stat-value">0</div>
-            </div>
-          </div>
-
-          {/* ── Giving status banner (when bank connected) ── */}
-          {bankConnected && (
+          {/* ── 2. Connect Bank Box ── */}
+          {bankConnected ? (
             <div className={`dash-status-banner ${paused ? "is-paused" : "is-active"}`}>
               <div style={{ display: "flex", alignItems: "center", gap: "var(--s-3)" }}>
                 <div className={`status-dot ${paused ? "is-paused" : "is-active"}`} />
@@ -279,10 +328,7 @@ export default function Dashboard() {
                 {paused ? "Resume" : "Pause"}
               </button>
             </div>
-          )}
-
-          {/* ── Bank connect prompt (when not connected) ── */}
-          {!bankConnected && (
+          ) : (
             <div className="dash-status-banner is-pending">
               <div style={{ display: "flex", alignItems: "center", gap: "var(--s-3)" }}>
                 <div className="status-dot is-pending" />
@@ -299,7 +345,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* ── Account card ── */}
+          {/* ── 3. Account Box ── */}
           <div className="card stack-5">
             <div className="row-between">
               <h3 style={{ margin: 0 }}>Account</h3>
@@ -317,7 +363,7 @@ export default function Dashboard() {
 
             <div className="dash-row">
               <div>
-                <div className="dash-row-label">Weekly Cap</div>
+                <div className="dash-row-label">Giving Cap</div>
                 <div className="dash-row-value">{givingCap}</div>
               </div>
               <button className="btn btn-secondary btn-sm" onClick={() => nav("/giving-cap")}>Edit</button>
@@ -343,7 +389,7 @@ export default function Dashboard() {
             </div>
 
             <p className="small muted" style={{ margin: 0 }}>
-              All donations are 100% tax-deductible. Weekly statements and an annual giving
+              All donations are 100% tax-deductible. Monthly statements and an annual giving
               summary are provided automatically.
             </p>
           </div>
