@@ -144,14 +144,7 @@ export default function Signup() {
       setShowConfirmModal(true);
 
     } catch (err) {
-      if (
-        err.message?.includes("already registered") ||
-        err.message?.includes("already exists")
-      ) {
-        setError("This email is already registered. Please sign in instead.");
-      } else {
-        setError(err.message || "Unable to create account.");
-      }
+      setError("Unable to create account. Please check your information and try again.");
     } finally {
       setSubmitting(false);
     }
