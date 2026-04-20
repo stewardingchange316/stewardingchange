@@ -438,8 +438,8 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* ── 2. Connect Bank Box ── */}
-          {bankConnected ? (
+          {/* ── 2. Giving Status ── */}
+          {bankConnected && (
             <div className={`dash-status-banner ${paused ? "is-paused" : "is-active"}`}>
               <div style={{ display: "flex", alignItems: "center", gap: "var(--s-3)" }}>
                 <div className={`status-dot ${paused ? "is-paused" : "is-active"}`} />
@@ -460,21 +460,6 @@ export default function Dashboard() {
                 disabled={actionLoading}
               >
                 {paused ? "Resume" : "Pause"}
-              </button>
-            </div>
-          ) : (
-            <div className="dash-status-banner is-pending">
-              <div style={{ display: "flex", alignItems: "center", gap: "var(--s-3)" }}>
-                <div className="status-dot is-pending" />
-                <div>
-                  <div style={{ fontWeight: "var(--fw-semibold)", fontSize: "var(--fs-2)", color: "var(--color-text-primary)" }}>
-                    Bank not connected
-                  </div>
-                  <div className="small muted">Connect your bank to start giving</div>
-                </div>
-              </div>
-              <button className="btn btn-primary btn-sm" onClick={() => nav("/bank")}>
-                Connect Now
               </button>
             </div>
           )}
