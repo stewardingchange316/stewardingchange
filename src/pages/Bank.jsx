@@ -338,7 +338,7 @@ export default function Bank() {
           <div className="cap-nav">
             <button
               className="btn btn-secondary btn-sm"
-              onClick={() => navigate("/giving-cap", { replace: true })}
+              onClick={() => navigate("/connect-card", { replace: true })}
               disabled={loading}
             >
               ← Back

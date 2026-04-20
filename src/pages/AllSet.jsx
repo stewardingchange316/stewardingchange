@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
+import { writeProfileCache } from "../lib/profileCache";
 
 export default function AllSet() {
   const navigate = useNavigate();
@@ -44,6 +45,8 @@ export default function AllSet() {
           .from("users")
           .update({ onboarding_step: "done" })
           .eq("id", user.id);
+
+        writeProfileCache(user.id, "done");
       }
     } catch (err) {
       console.error("Error finishing onboarding:", err);
