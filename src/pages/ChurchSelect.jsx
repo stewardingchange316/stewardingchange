@@ -12,6 +12,7 @@ export default function ChurchSelect() {
   const [selected, setSelected] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [advancing, setAdvancing] = useState(false);
 
   useEffect(() => {
     async function init() {
@@ -83,8 +84,8 @@ export default function ChurchSelect() {
     : [];
 
   async function continueNext() {
-    if (!selected) return;
-
+    if (!selected || advancing) return;
+    setAdvancing(true);
     setError("");
 
     try {
@@ -191,12 +192,13 @@ export default function ChurchSelect() {
               {isSelected && (
                 <button
                   className="church-continue-btn"
+                  disabled={advancing}
                   onClick={(e) => {
                     e.stopPropagation();
                     continueNext();
                   }}
                 >
-                  Continue →
+                  {advancing ? "Saving..." : "Continue →"}
                 </button>
               )}
             </div>

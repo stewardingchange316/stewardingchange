@@ -144,7 +144,11 @@ export default function Dashboard() {
     return () => { cancelled = true; };
   }, [nav]);
 
+  const [actionLoading, setActionLoading] = useState(false);
+
   async function handleTogglePause() {
+    if (actionLoading) return;
+    setActionLoading(true);
     const next = !paused;
     setPaused(next);
     try {
@@ -155,12 +159,16 @@ export default function Dashboard() {
       if (error) throw error;
     } catch (err) {
       console.error("Toggle pause error:", err);
-      setPaused(!next); // revert on failure
+      setPaused(!next);
+    } finally {
+      setActionLoading(false);
     }
   }
 
   async function handleDisconnectBank() {
+    if (actionLoading) return;
     if (!confirm("Disconnect your bank account? Giving will stop immediately. You can reconnect at any time.")) return;
+    setActionLoading(true);
     try {
       const { error } = await supabase
         .from("users")
@@ -171,16 +179,20 @@ export default function Dashboard() {
       setPaused(false);
     } catch (err) {
       console.error("Disconnect bank error:", err);
+    } finally {
+      setActionLoading(false);
     }
   }
 
   async function handleSignOut() {
+    if (actionLoading) return;
+    setActionLoading(true);
     try {
       await supabase.auth.signOut();
     } catch (err) {
       console.error("Sign out error:", err);
     }
-    nav("/");
+    nav("/", { replace: true });
   }
 
   if (loading || !profile) {
@@ -445,6 +457,7 @@ export default function Dashboard() {
               <button
                 className={`btn btn-sm ${paused ? "btn-primary" : "btn-secondary"}`}
                 onClick={handleTogglePause}
+                disabled={actionLoading}
               >
                 {paused ? "Resume" : "Pause"}
               </button>
@@ -500,7 +513,7 @@ export default function Dashboard() {
                 </div>
               </div>
               {bankConnected
-                ? <button className="btn btn-danger btn-sm" onClick={handleDisconnectBank}>
+                ? <button className="btn btn-danger btn-sm" onClick={handleDisconnectBank} disabled={actionLoading}>
                     Disconnect
                   </button>
                 : <button className="btn btn-primary btn-sm" onClick={() => nav("/bank")}>
@@ -526,7 +539,10 @@ export default function Dashboard() {
                     </div>
                   ))}
                   <PlaidLinkButton
-                    onSuccess={() => window.location.reload()}
+                    onSuccess={async () => {
+                      const { data } = await supabase.from("plaid_accounts").select("id, account_name, account_type, institution_name, is_active").eq("user_id", authUser.id).eq("is_active", true);
+                      setPlaidAccounts(data ?? []);
+                    }}
                     buttonText="+ Add Account"
                     buttonClass="btn btn-secondary btn-sm"
                   />
@@ -535,7 +551,10 @@ export default function Dashboard() {
                 <div className="stack-2">
                   <div className="small muted">No spending accounts connected</div>
                   <PlaidLinkButton
-                    onSuccess={() => window.location.reload()}
+                    onSuccess={async () => {
+                      const { data } = await supabase.from("plaid_accounts").select("id, account_name, account_type, institution_name, is_active").eq("user_id", authUser.id).eq("is_active", true);
+                      setPlaidAccounts(data ?? []);
+                    }}
                     buttonText="Connect Spending Account"
                     buttonClass="btn btn-primary btn-sm"
                   />

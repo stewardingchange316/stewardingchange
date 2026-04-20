@@ -7,6 +7,7 @@ export default function AllSet() {
   const navigate = useNavigate();
   const [churchName, setChurchName] = useState("");
   const [firstName, setFirstName] = useState("");
+  const [advancing, setAdvancing] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -38,6 +39,8 @@ export default function AllSet() {
   }, []);
 
   async function goToDashboard() {
+    if (advancing) return;
+    setAdvancing(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
@@ -110,9 +113,10 @@ export default function AllSet() {
         <button
           className="btn btn-primary btn-lg btn-wide"
           onClick={goToDashboard}
+          disabled={advancing}
           style={{ maxWidth: "380px", margin: "0 auto" }}
         >
-          Go to Dashboard
+          {advancing ? "Loading..." : "Go to Dashboard"}
         </button>
       </div>
     </div>

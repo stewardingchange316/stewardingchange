@@ -23,7 +23,9 @@ if (typeof document !== "undefined") {
             refresh_token: session.refresh_token,
           });
         }
-      }).catch(() => {});
+      }).catch((err) => {
+        console.warn("Session refresh failed on app resume:", err);
+      });
     }
   });
 }

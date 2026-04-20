@@ -8,8 +8,11 @@ export default function ConnectCard() {
   const [connected, setConnected] = useState(false);
   const [accountName, setAccountName] = useState("");
   const [error, setError] = useState("");
+  const [advancing, setAdvancing] = useState(false);
 
   async function goToBank() {
+    if (advancing) return;
+    setAdvancing(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -93,8 +96,9 @@ export default function ConnectCard() {
           <button
             className="btn btn-primary btn-lg btn-wide"
             onClick={goToBank}
+            disabled={advancing}
           >
-            Continue
+            {advancing ? "Continuing..." : "Continue"}
           </button>
         </div>
       )}
