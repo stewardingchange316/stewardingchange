@@ -113,8 +113,7 @@ async function onSetupIntentSucceeded(si: Stripe.SetupIntent) {
     .update({
       stripe_bank_pm_id: pmId,
       bank_connected: true,
-      // Move to plaid step (connect spending accounts)
-      onboarding_step: "plaid",
+      onboarding_step: "allset",
     })
     .eq("id", userId);
 

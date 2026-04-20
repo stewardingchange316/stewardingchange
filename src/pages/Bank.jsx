@@ -124,7 +124,7 @@ export default function Bank() {
       if (user) {
         await supabase
           .from("users")
-          .update({ onboarding_step: "plaid" })
+          .update({ onboarding_step: "allset" })
           .eq("id", user.id);
 
         writeProfileCache(user.id, "plaid");
@@ -158,7 +158,7 @@ export default function Bank() {
 
       if (data?.bank_connected) {
         // Webhook has fired — proceed to connect spending accounts
-        navigate("/connect-spending", { replace: true });
+        navigate("/all-set", { replace: true });
         return;
       }
 
@@ -192,7 +192,7 @@ export default function Bank() {
       if (error) throw error;
 
       writeProfileCache(user.id, "done");
-      navigate("/dashboard", { replace: true });
+      navigate("/all-set", { replace: true });
     } catch (err) {
       console.error("[Bank] handleSkipForNow:", err);
       setError(err.message ?? "Something went wrong. Please try again.");
@@ -247,6 +247,7 @@ export default function Bank() {
       <div className="page">
         <div className="container-narrow">
           <div className="progress-indicator">
+            <div className="progress-dot" />
             <div className="progress-dot" />
             <div className="progress-dot is-active" />
             <div className="progress-dot" />

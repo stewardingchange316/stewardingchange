@@ -93,7 +93,7 @@ export default function ChurchSelect() {
 
       const { error, data } = await supabase
         .from("users")
-        .update({ church_id: selected, onboarding_step: "bank", weekly_cap: null, church_joined_at: new Date().toISOString() })
+        .update({ church_id: selected, onboarding_step: "plaid", weekly_cap: null, church_joined_at: new Date().toISOString() })
         .eq("id", user.id)
         .select();
 
@@ -105,7 +105,7 @@ export default function ChurchSelect() {
         p_new_church_id: selected,
       });
 
-      navigate("/bank", { replace: true });
+      navigate("/connect-card", { replace: true });
     } catch (err) {
       console.error("Church save error:", err);
       setError("Unable to save your selection. Please try again.");
@@ -126,6 +126,7 @@ export default function ChurchSelect() {
     <div className="onboarding-page">
       <div className="progress-indicator">
         <div className="progress-dot is-active" />
+        <div className="progress-dot" />
         <div className="progress-dot" />
         <div className="progress-dot" />
       </div>
