@@ -71,6 +71,14 @@ export default function ConnectCard() {
             Skip for now
           </button>
 
+          <button
+            className="link-button"
+            onClick={() => navigate("/church-select", { replace: true })}
+            style={{ marginTop: "var(--s-2)" }}
+          >
+            ← Back to church select
+          </button>
+
           <p className="small muted" style={{ maxWidth: "44ch", margin: "0 auto" }}>
             You can connect multiple cards later from your dashboard.
             We never store your login credentials — connections are handled
