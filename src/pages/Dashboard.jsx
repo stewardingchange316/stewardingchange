@@ -4,6 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import BadgesModal from "../components/BadgesModal";
 import EditProfileModal from "../components/EditProfileModal";
 import { checkAndAwardBadges, BADGE_DISPLAY } from "../services/badgeService";
+import PlaidLinkButton from "../components/PlaidLink";
 
 export default function Dashboard() {
   const nav = useNavigate();
@@ -18,6 +19,10 @@ export default function Dashboard() {
   const [showBadgesModal,    setShowBadgesModal]    = useState(false);
   const [showEditProfile,    setShowEditProfile]    = useState(false);
   const [menuOpen,           setMenuOpen]           = useState(false);
+  const [monthlyRoundUps,    setMonthlyRoundUps]    = useState(0);
+  const [monthlyTxCount,     setMonthlyTxCount]     = useState(0);
+  const [plaidAccounts,      setPlaidAccounts]      = useState([]);
+  const [notifications,      setNotifications]      = useState([]);
   const menuRef = useRef(null);
 
   // Close avatar menu on outside click — must be before any early returns
@@ -90,6 +95,42 @@ export default function Dashboard() {
 
         if (cancelled) return;
         setMyBadges(badgeRows ?? []);
+
+        // Load this month's round-ups
+        const firstOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+          .toISOString().slice(0, 10);
+        const { data: txData } = await supabase
+          .from("transactions")
+          .select("round_up_amount")
+          .eq("user_id", user.id)
+          .gte("date", firstOfMonth);
+
+        if (!cancelled && txData) {
+          setMonthlyTxCount(txData.length);
+          setMonthlyRoundUps(
+            Math.round(txData.reduce((s, t) => s + Number(t.round_up_amount), 0) * 100) / 100
+          );
+        }
+
+        // Load connected Plaid accounts
+        const { data: plaidData } = await supabase
+          .from("plaid_accounts")
+          .select("id, account_name, account_type, institution_name, is_active")
+          .eq("user_id", user.id)
+          .eq("is_active", true);
+
+        if (!cancelled) setPlaidAccounts(plaidData ?? []);
+
+        // Load unread notifications
+        const { data: notifData } = await supabase
+          .from("notifications")
+          .select("id, type, title, message, created_at")
+          .eq("user_id", user.id)
+          .eq("read", false)
+          .order("created_at", { ascending: false })
+          .limit(10);
+
+        if (!cancelled) setNotifications(notifData ?? []);
 
         checkAndAwardBadges(user.id).catch(console.error);
       } catch (err) {
@@ -332,6 +373,59 @@ export default function Dashboard() {
             </div>
           )}
 
+          {/* ── Notifications ── */}
+          {notifications.length > 0 && (
+            <div className="stack-2">
+              {notifications.map((n) => (
+                <div key={n.id} className="dash-status-banner is-pending">
+                  <div style={{ display: "flex", alignItems: "center", gap: "var(--s-3)" }}>
+                    <div className="status-dot is-pending" />
+                    <div>
+                      <div style={{ fontWeight: "var(--fw-semibold)", fontSize: "var(--fs-2)", color: "var(--color-text-primary)" }}>
+                        {n.title}
+                      </div>
+                      <div className="small muted">{n.message}</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* ── Round-ups this month ── */}
+          {profile.plaid_connected && (
+            <div className="card stack-3">
+              <h3 style={{ margin: 0 }}>This Month's Round-Ups</h3>
+              <div style={{ display: "flex", gap: "var(--s-6)" }}>
+                <div>
+                  <div className="small muted">Total round-ups</div>
+                  <div style={{ fontSize: "var(--fs-5)", fontWeight: "var(--fw-bold)", color: "var(--color-brand)" }}>
+                    ${monthlyRoundUps.toFixed(2)}
+                  </div>
+                </div>
+                <div>
+                  <div className="small muted">Transactions</div>
+                  <div style={{ fontSize: "var(--fs-5)", fontWeight: "var(--fw-bold)", color: "var(--color-text-primary)" }}>
+                    {monthlyTxCount}
+                  </div>
+                </div>
+              </div>
+              {profile.weekly_cap && (
+                <div className="stack-2">
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <span className="small muted">Monthly cap progress</span>
+                    <span className="small" style={{ color: "var(--color-brand)", fontWeight: "var(--fw-semibold)" }}>
+                      ${monthlyRoundUps.toFixed(2)} / ${profile.weekly_cap}
+                    </span>
+                  </div>
+                  <div className="progress-bar">
+                    <div className="progress-fill" style={{ width: `${Math.min(100, (monthlyRoundUps / profile.weekly_cap) * 100)}%` }} />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* ── 2. Connect Bank Box ── */}
           {bankConnected ? (
             <div className={`dash-status-banner ${paused ? "is-paused" : "is-active"}`}>
@@ -414,6 +508,42 @@ export default function Dashboard() {
                   </button>
               }
             </div>
+
+            <div className="dash-divider" />
+
+            <div>
+              <div className="dash-row-label" style={{ marginBottom: "var(--s-2)" }}>Spending Accounts</div>
+              {plaidAccounts.length > 0 ? (
+                <div className="stack-2">
+                  {plaidAccounts.map((acct) => (
+                    <div key={acct.id} className="dash-row">
+                      <div>
+                        <div className="dash-row-value" style={{ fontSize: "var(--fs-1)" }}>
+                          {acct.institution_name || "Account"}
+                        </div>
+                        <div className="small muted">{acct.account_type || "Connected"}</div>
+                      </div>
+                    </div>
+                  ))}
+                  <PlaidLinkButton
+                    onSuccess={() => window.location.reload()}
+                    buttonText="+ Add Account"
+                    buttonClass="btn btn-secondary btn-sm"
+                  />
+                </div>
+              ) : (
+                <div className="stack-2">
+                  <div className="small muted">No spending accounts connected</div>
+                  <PlaidLinkButton
+                    onSuccess={() => window.location.reload()}
+                    buttonText="Connect Spending Account"
+                    buttonClass="btn btn-primary btn-sm"
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="dash-divider" />
 
             <p className="small muted" style={{ margin: 0 }}>
               All donations are 100% tax-deductible. Monthly statements and an annual giving
