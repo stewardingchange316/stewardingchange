@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { BADGE_DISPLAY } from "../services/badgeService";
+import { IconFlame, BadgeIcon } from "../components/Icons";
 
 export default function GivingProfile() {
   const nav = useNavigate();
@@ -306,7 +307,7 @@ export default function GivingProfile() {
 
             {/* Streak */}
             <div className="gp-streak-card card">
-              <div className="gp-streak-flame">🔥</div>
+              <div className="gp-streak-flame"><IconFlame size={40} /></div>
               <div className="gp-streak-count">{mockStreak}</div>
               <div className="gp-streak-label">week streak</div>
               <div className="gp-streak-sub">
@@ -365,7 +366,7 @@ export default function GivingProfile() {
                 {earnedBadges.length > 0 && (
                   <div className="gp-share-badges">
                     {earnedBadges.map((b) => (
-                      <span key={b.id} title={b.name}>{b.emoji}</span>
+                      <span key={b.id} title={b.name} style={{ color: "var(--color-brand)" }}><BadgeIcon badgeId={b.id} size={20} /></span>
                     ))}
                   </div>
                 )}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { getUserBadges, getBadgeSettings, setBadgeSettings } from "../services/badgeService";
+import { BadgeIcon } from "./Icons";
 
 export default function BadgesModal({ userId, onClose }) {
   const [badges,      setBadges]      = useState([]);
@@ -57,7 +58,7 @@ export default function BadgesModal({ userId, onClose }) {
           <>
             {/* ── Badge grid ── */}
             <div className="badges-grid">
-              {badges.map(({ id, emoji, name, desc, earned, awardedAt }) => (
+              {badges.map(({ id, name, desc, earned, awardedAt }) => (
                 <div
                   key={id}
                   className={`badge-tile ${earned ? "is-earned" : "is-locked"}`}
@@ -65,7 +66,7 @@ export default function BadgesModal({ userId, onClose }) {
                     ? `Earned ${new Date(awardedAt).toLocaleDateString()}`
                     : desc}
                 >
-                  <div className="badge-tile-icon">{emoji}</div>
+                  <div className="badge-tile-icon"><BadgeIcon badgeId={id} size={28} /></div>
                   <div className="badge-tile-name">{name}</div>
                   <div className="badge-tile-desc">{desc}</div>
                   {earned && <div className="badge-tile-earned-label">Earned</div>}

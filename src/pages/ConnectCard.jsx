@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import PlaidLinkButton from "../components/PlaidLink";
+import { IconCheckCircle } from "../components/Icons";
 
 export default function ConnectCard() {
   const navigate = useNavigate();
@@ -88,7 +89,7 @@ export default function ConnectCard() {
       ) : (
         <div className="stack-5" style={{ textAlign: "center" }}>
           <div className="card stack-3" style={{ textAlign: "center" }}>
-            <div style={{ fontSize: "32px" }}>✅</div>
+            <div style={{ color: "var(--color-success)" }}><IconCheckCircle size={32} /></div>
             <h3 style={{ margin: 0 }}>{accountName}</h3>
             <p className="muted" style={{ margin: 0 }}>
               Connected! We'll track your purchases for round-ups.

@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { IconCheckCircle } from "../components/Icons";
 
 export default function Verified() {
   const navigate = useNavigate();
@@ -8,7 +9,9 @@ export default function Verified() {
       <div className="auth-card">
         <h2 className="brand-header">Stewarding Change</h2>
 
-        <h1>Email Verified ✅</h1>
+        <h1 style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+          Email Verified <span style={{ color: "var(--color-success)" }}><IconCheckCircle size={28} /></span>
+        </h1>
 
         <p className="auth-subtitle">
           Your account has been successfully confirmed.

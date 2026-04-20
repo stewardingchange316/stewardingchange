@@ -5,6 +5,7 @@ import BadgesModal from "../components/BadgesModal";
 import EditProfileModal from "../components/EditProfileModal";
 import { checkAndAwardBadges, BADGE_DISPLAY } from "../services/badgeService";
 import PlaidLinkButton from "../components/PlaidLink";
+import { IconMedal, IconPencil, IconSignOut } from "../components/Icons";
 
 export default function Dashboard() {
   const nav = useNavigate();
@@ -253,7 +254,7 @@ export default function Dashboard() {
 
           <div style={{ display: "flex", alignItems: "center", gap: "var(--s-3)" }}>
             <button className="btn btn-secondary btn-sm" onClick={() => setShowBadgesModal(true)}>
-              🏅 My Badges
+              <IconMedal size={15} /> My Badges
             </button>
 
             {/* Avatar + hamburger menu */}
@@ -275,14 +276,14 @@ export default function Dashboard() {
                     className="avatar-dropdown-item"
                     onClick={() => { setMenuOpen(false); setShowEditProfile(true); }}
                   >
-                    <span>✏️</span> Edit Profile
+                    <IconPencil size={14} /> Edit Profile
                   </button>
                   <div className="avatar-dropdown-divider" />
                   <button
                     className="avatar-dropdown-item is-danger"
                     onClick={handleSignOut}
                   >
-                    <span>→</span> Sign Out
+                    <IconSignOut size={14} /> Sign Out
                   </button>
                 </div>
               )}

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
+import { IconEyeOpen, IconEyeClosed } from "../components/Icons";
 
 export default function UpdatePassword() {
   const navigate = useNavigate();
@@ -143,7 +144,7 @@ export default function UpdatePassword() {
               }}
               aria-label="Toggle password visibility"
             >
-              {showPassword ? "🙈" : "👁️"}
+              {showPassword ? <IconEyeClosed /> : <IconEyeOpen />}
             </button>
           </div>
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { writeProfileCache } from "../lib/profileCache";
+import { IconParty, IconCheck } from "../components/Icons";
 
 export default function AllSet() {
   const navigate = useNavigate();
@@ -67,7 +68,7 @@ export default function AllSet() {
       </div>
 
       <div className="stack-6" style={{ marginTop: "var(--s-6)" }}>
-        <div style={{ fontSize: "64px", lineHeight: 1 }}>🎉</div>
+        <div style={{ color: "var(--color-brand)" }}><IconParty size={56} /></div>
 
         <div className="stack-2">
           <h1 style={{ margin: 0 }}>
@@ -85,7 +86,7 @@ export default function AllSet() {
               <div className="small muted">Church</div>
               <div style={{ fontWeight: "var(--fw-semibold)" }}>{churchName || "Selected"}</div>
             </div>
-            <span style={{ color: "var(--color-success)", fontSize: "18px" }}>✓</span>
+            <span style={{ color: "var(--color-success)" }}><IconCheck size={18} /></span>
           </div>
           <div className="dash-divider" />
           <div className="dash-row">
@@ -93,7 +94,7 @@ export default function AllSet() {
               <div className="small muted">Spending card</div>
               <div style={{ fontWeight: "var(--fw-semibold)" }}>Connected</div>
             </div>
-            <span style={{ color: "var(--color-success)", fontSize: "18px" }}>✓</span>
+            <span style={{ color: "var(--color-success)" }}><IconCheck size={18} /></span>
           </div>
           <div className="dash-divider" />
           <div className="dash-row">
@@ -101,7 +102,7 @@ export default function AllSet() {
               <div className="small muted">Bank account</div>
               <div style={{ fontWeight: "var(--fw-semibold)" }}>Connected</div>
             </div>
-            <span style={{ color: "var(--color-success)", fontSize: "18px" }}>✓</span>
+            <span style={{ color: "var(--color-success)" }}><IconCheck size={18} /></span>
           </div>
         </div>
 

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { BADGE_DISPLAY } from "../services/badgeService";
 import BadgesModal from "../components/BadgesModal";
+import { BadgeIcon, IconMedal, IconFlame } from "../components/Icons";
 
 const REACTIONS = [
   { emoji: "🙏", label: "Amen" },
@@ -43,7 +44,7 @@ function FeedItem({ item, myEmoji, reactionCounts, onReact, isLast }) {
 
           {badge && (
             <div className="social-item-badge-line">
-              <span className="social-badge-emoji">{badge.emoji}</span>
+              <span className="social-badge-emoji"><BadgeIcon badgeId={badge.id} size={20} /></span>
               <span className="social-badge-name">Earned {badge.name}</span>
             </div>
           )}
@@ -231,9 +232,9 @@ export default function SocialPage() {
 
   // ── Earned badge emojis for header ────────────────────────────────────────
 
-  const earnedEmojis = myBadges
-    .map((row) => BADGE_DISPLAY.find((b) => b.id === row.badge_id)?.emoji)
-    .filter(Boolean);
+  const earnedBadgeIds = myBadges
+    .map((row) => row.badge_id)
+    .filter((id) => BADGE_DISPLAY.some((b) => b.id === id));
 
   // ── Loading ───────────────────────────────────────────────────────────────
 
@@ -300,7 +301,7 @@ export default function SocialPage() {
 
           <div style={{ display: "flex", alignItems: "center", gap: "var(--s-3)" }}>
             <button className="btn btn-secondary btn-sm" onClick={() => setShowBadgesModal(true)}>
-              🏅 My Badges
+              <IconMedal size={15} /> My Badges
             </button>
             <button className="btn btn-ghost btn-sm" onClick={() => nav("/dashboard")}>
               ← Dashboard
@@ -323,7 +324,7 @@ export default function SocialPage() {
 
           {/* ── Your Impact ── */}
           <div className="card stack-3" style={{ textAlign: "center", cursor: "pointer" }} onClick={() => nav("/impact")}>
-            <div style={{ fontSize: "32px" }}>🔥</div>
+            <div style={{ color: "var(--color-brand)" }}><IconFlame size={32} /></div>
             <h3 style={{ margin: 0 }}>Your Giving Impact</h3>
             <p className="muted" style={{ margin: 0, fontSize: "var(--fs-2)" }}>
               See your streak, giving ring, activity grid, and shareable impact card.
