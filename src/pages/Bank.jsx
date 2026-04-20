@@ -5,7 +5,8 @@ import { supabase } from "../lib/supabase";
 import { writeProfileCache } from "../lib/profileCache";
 
 // Stripe.js is loaded once at module level — avoids reloading on re-render
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+const stripePromise = stripeKey ? loadStripe(stripeKey) : null;
 
 
 // Polling config: check every 2 s for up to 30 s
