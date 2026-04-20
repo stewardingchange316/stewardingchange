@@ -21,6 +21,7 @@ import SocialPage from "./pages/SocialPage";
 import GivingProfile from "./pages/GivingProfile";
 import PublicShareCard from "./pages/PublicShareCard";
 import TitheCalculator from "./pages/TitheCalculator";
+import ConnectSpending from "./pages/ConnectSpending";
 import Footer from "./components/Footer";
 
 export default function App() {
@@ -46,6 +47,7 @@ export default function App() {
           <Route path="/church-select" element={<ChurchSelect />} />
           <Route path="/giving-cap" element={<GivingCap />} />
           <Route path="/bank" element={<Bank />} />
+          <Route path="/connect-spending" element={<ConnectSpending />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/social"    element={<SocialPage />} />
           <Route path="/impact"    element={<GivingProfile />} />

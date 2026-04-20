@@ -13,6 +13,7 @@ const STEP_TO_ROUTE = {
   church: "/church-select",
   cap:    "/bank",       // cap step removed from onboarding — redirect to bank
   bank:   "/bank",
+  plaid:  "/connect-spending",
 };
 
 const ONBOARDING_ROUTES = new Set(Object.values(STEP_TO_ROUTE));

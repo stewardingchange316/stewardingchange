@@ -127,6 +127,7 @@ export default function ChurchSelect() {
       <div className="progress-indicator">
         <div className="progress-dot is-active" />
         <div className="progress-dot" />
+        <div className="progress-dot" />
       </div>
 
       <h1>Find your church</h1>

@@ -247,6 +247,7 @@ export async function getNextOnboardingPath() {
     church: "/church-select",
     cap:    "/bank",       // cap step removed from onboarding — redirect to bank
     bank:   "/bank",
+    plaid:  "/connect-spending",
     done:   "/dashboard",
   };
 

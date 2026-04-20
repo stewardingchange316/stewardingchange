@@ -124,10 +124,10 @@ export default function Bank() {
       if (user) {
         await supabase
           .from("users")
-          .update({ onboarding_step: "done" })
+          .update({ onboarding_step: "plaid" })
           .eq("id", user.id);
 
-        writeProfileCache(user.id, "done");
+        writeProfileCache(user.id, "plaid");
 
         // Poll for bank_connected = true (set by webhook)
         setView("verifying");
@@ -157,8 +157,8 @@ export default function Bank() {
         .single();
 
       if (data?.bank_connected) {
-        // Webhook has fired — head to dashboard
-        navigate("/dashboard", { replace: true });
+        // Webhook has fired — proceed to connect spending accounts
+        navigate("/connect-spending", { replace: true });
         return;
       }
 
@@ -249,6 +249,7 @@ export default function Bank() {
           <div className="progress-indicator">
             <div className="progress-dot" />
             <div className="progress-dot is-active" />
+            <div className="progress-dot" />
           </div>
 
           <h1 className="page-title">Authorize bank debits</h1>

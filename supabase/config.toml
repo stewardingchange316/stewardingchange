@@ -7,3 +7,20 @@ verify_jwt = false
 # stripe-webhook is called by Stripe — no Supabase JWT exists
 [functions.stripe-webhook]
 verify_jwt = false
+
+# Plaid functions handle their own JWT verification
+[functions.plaid-link-token]
+verify_jwt = false
+
+[functions.plaid-exchange-token]
+verify_jwt = false
+
+[functions.plaid-remove-account]
+verify_jwt = false
+
+# Server-triggered functions (cron / admin only)
+[functions.plaid-sync-transactions]
+verify_jwt = false
+
+[functions.process-monthly-charges]
+verify_jwt = false
