@@ -1,36 +1,36 @@
 /* src/styles/tokens.css */
-/* Stewarding Change — Venmo / PayPal-inspired light mode design tokens */
+/* Stewarding Change — Dark navy design tokens */
 
 :root {
-  /* ---- Colors ---- */
-  --color-bg:            #f5f7fa;   /* off-white page background */
-  --color-surface:       #ffffff;   /* card / panel background */
-  --color-surface-2:     #f0f2f7;   /* secondary surface, hover states */
-  --color-border:        #e0e5ef;   /* default borders */
-  --color-border-strong: #c4cad9;   /* emphasized borders */
+  /* ---- Colors (dark navy palette) ---- */
+  --color-bg:            #060B1F;   /* deep navy page background */
+  --color-surface:       rgba(255, 255, 255, 0.06);  /* translucent card fill */
+  --color-surface-2:     rgba(255, 255, 255, 0.09);  /* secondary surface, hover */
+  --color-border:        rgba(255, 255, 255, 0.12);  /* default borders */
+  --color-border-strong: rgba(255, 255, 255, 0.20);  /* emphasized borders */
 
-  --color-text-primary:  #0a0d14;   /* headings */
-  --color-text-body:     #3c4261;   /* body copy */
-  --color-text-muted:    #7a83a8;   /* labels, helper text */
-  --color-text-inverse:  #ffffff;   /* text on brand bg */
+  --color-text-primary:  #F6F8FC;   /* headings */
+  --color-text-body:     rgba(246, 248, 252, 0.72);  /* body copy */
+  --color-text-muted:    rgba(246, 248, 252, 0.54);  /* labels, helper text */
+  --color-text-inverse:  #0B1A46;   /* text on white/bright bg */
 
-  --color-brand:         #1a4fd4;   /* deeper chrome blue */
-  --color-brand-hover:   #1340b0;
-  --color-brand-light:   rgba(26, 79, 212, 0.08); /* brand tint */
+  --color-brand:         #4F8FF7;   /* bright brand blue */
+  --color-brand-hover:   #6BA3FF;
+  --color-brand-light:   rgba(79, 143, 247, 0.12); /* brand tint */
 
-  --color-danger:        #d92b2b;
-  --color-danger-light:  rgba(217, 43, 43, 0.08);
-  --color-success:       #1a9e4a;
-  --color-success-light: rgba(26, 158, 74, 0.08);
-  --color-warning:       #b87000;
-  --color-warning-light: rgba(184, 112, 0, 0.08);
+  --color-danger:        #FF6B6B;
+  --color-danger-light:  rgba(255, 107, 107, 0.12);
+  --color-success:       #6BF0B2;
+  --color-success-light: rgba(107, 240, 178, 0.12);
+  --color-warning:       #FFB37D;
+  --color-warning-light: rgba(255, 179, 125, 0.12);
 
-  /* ---- Shadows (light mode — soft) ---- */
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.06);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.07), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.09), 0 4px 8px rgba(0, 0, 0, 0.05);
-  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.11), 0 8px 16px rgba(0, 0, 0, 0.06);
+  /* ---- Shadows (dark mode — deep glows) ---- */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5), 0 4px 8px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.6), 0 8px 16px rgba(0, 0, 0, 0.3);
 
   /* ---- Radii ---- */
   --r-sm:   8px;
@@ -92,10 +92,10 @@
   /* ---- Layout ---- */
   --container-max:    1100px;
   --content-max:      480px;
-  --container:        1100px;      /* backward compat alias */
-  --container-narrow: 480px;       /* backward compat alias */
+  --container:        1100px;
+  --container-narrow: 480px;
   --header-h:         72px;
 
   /* ---- Focus ---- */
-  --focus-ring: 0 0 0 3px rgba(0, 112, 224, 0.20);
+  --focus-ring: 0 0 0 3px rgba(79, 143, 247, 0.30);
 }

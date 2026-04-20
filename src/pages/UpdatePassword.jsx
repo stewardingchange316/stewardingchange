@@ -166,7 +166,7 @@ export default function UpdatePassword() {
               style={{
                 height: 6,
                 borderRadius: 6,
-                background: "#e5e7eb",
+                background: "rgba(255, 255, 255, 0.12)",
                 overflow: "hidden",
               }}
             >

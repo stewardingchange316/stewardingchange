@@ -20,72 +20,7 @@ export default function Home() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const [churches, setChurches] = useState([]);
-  const [faqOpen, setFaqOpen] = useState(false);
-  const [openFaq, setOpenFaq] = useState(null);
-
-  const faqs = [
-    {
-      q: "What is a tithe?",
-      a: "A tithe is a biblical practice of giving 10% of your income to your church. The word \"tithe\" literally means \"a tenth.\" It's referenced throughout the Bible as a way to honor God with your finances and support the work of the church.",
-    },
-    {
-      q: "How does Stewarding Change work?",
-      a: "You link your bank account, choose your church, and set a monthly cap. Every time you make a purchase, the amount rounds up to the nearest dollar. That spare change goes directly to your church's active mission — automatically.",
-    },
-    {
-      q: "Should I tithe on gross or net income?",
-      a: "This is a personal decision. Some people tithe on their gross (pre-tax) income, while others tithe on their net (after-tax) income. Both are valid — what matters most is giving cheerfully and consistently.",
-    },
-    {
-      q: "Do I have to give exactly 10%?",
-      a: "No. A tithe of 10% is a biblical guideline, not a strict requirement. Many Christians use it as a starting point. You're free to give any amount you're comfortable with — even small, consistent giving makes an impact.",
-    },
-    {
-      q: "Is my giving tax-deductible?",
-      a: "Yes. Donations made through Stewarding Change to your church are tax-deductible. You'll receive records of your giving that you can use when filing your taxes.",
-    },
-    {
-      q: "What if I want to stop or pause?",
-      a: "You're always in full control. You can pause giving, adjust your monthly cap, or disconnect your bank at any time from your dashboard — no questions asked.",
-    },
-    {
-      q: "Is my bank information safe?",
-      a: "Absolutely. We use bank-grade encryption and never store your banking credentials. Your financial data is handled securely through trusted, industry-standard providers.",
-    },
-    {
-      q: "How much does it cost to use Stewarding Change?",
-      a: "Stewarding Change is completely free for givers. There are no fees or deductions from your donations — 100% of your round-ups go directly to your church.",
-    },
-    {
-      q: "My church isn't listed — can I still use it?",
-      a: "Yes! If your church isn't on the platform yet, just email us at info@stewardingchange.org and let us know. We'll reach out to your church and work to get them set up so you can start giving.",
-    },
-    {
-      q: "Do you have access to my bank account?",
-      a: "No. We never hold your money and we never have access to your bank login or account details. Your round-ups are calculated once a week and transferred directly to your church — we simply facilitate the connection. Your information is handled securely through trusted, bank-level providers.",
-    },
-    {
-      q: "What happens to my money if my church leaves the platform?",
-      a: "If your church ever leaves Stewarding Change, all giving is immediately paused. No money is taken without an active church to receive it. Any funds already in transit go directly to your church as intended, and if anything can't be delivered, it's returned to you.",
-    },
-    {
-      q: "Can I see where my money actually goes?",
-      a: "Absolutely. Your church updates their active mission and goals on a regular basis, and many churches post video updates directly on the mission feed so you can see the real-world impact of your giving. You'll always know exactly what your spare change is helping accomplish.",
-    },
-    {
-      q: "I already give at church on Sundays. Is this a replacement?",
-      a: "Not at all — Stewarding Change is designed to complement your existing giving, not replace it. Think of it as an easy way to give a little extra throughout the week without even thinking about it. Whether you give at church, here, or both, every bit makes a difference. There's no pressure either way.",
-    },
-    {
-      q: "How do I get my tax receipt?",
-      a: "At the end of each year, a tax receipt summarizing all of your donations will be sent to the email address on your account. You can use it when filing your taxes — no need to track anything yourself.",
-    },
-    {
-      q: "Who is behind Stewarding Change?",
-      a: "Stewarding Change was founded by Terence and Andrew — two friends who met working at Waffle House. Terence is a father of one, a restaurant GM, and a lifelong entrepreneur. Andrew is a father of three and a lead pastor at Countryside Christian in Clearwater, FL. They built this because they believe giving should be simple, honest, and something everyone can do — no matter how small the amount.",
-    },
-  ];
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Clean URL after auth (but NOT during password recovery)
   useEffect(() => {
@@ -116,24 +51,6 @@ export default function Home() {
     };
     checkUser();
   }, [nav]);
-
-  // Load churches for spotlight section
-  useEffect(() => {
-    supabase
-      .from("churches")
-      .select("id, name, mission_label, mission_title, mission_description, mission_progress")
-      .eq("active", true)
-      .order("name")
-      .then(({ data }) => { if (data) setChurches(data); })
-      .catch(console.error);
-  }, []);
-
-  // Add reveal visibility after first paint so content is always scrollable
-  useEffect(() => {
-    document.querySelectorAll(".reveal").forEach((el) => {
-      el.classList.add("is-visible");
-    });
-  }, [churches]);
 
   async function handleLogin(e) {
     e.preventDefault();
@@ -172,362 +89,393 @@ export default function Home() {
   }
 
   return (
-    <div className="bg-wrap">
+    <div className="landing">
+
+      {/* ── Background effects ── */}
+      <div className="landing-flow" aria-hidden="true">
+        <div className="landing-orb landing-orb-a" />
+        <div className="landing-orb landing-orb-b" />
+        <div className="landing-orb landing-orb-c" />
+        <svg className="landing-stroke landing-s1" viewBox="0 0 1600 600" fill="none" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0%" stopColor="#7DB7FF" stopOpacity="0"/>
+              <stop offset="45%" stopColor="#7DB7FF" stopOpacity="0.55"/>
+              <stop offset="100%" stopColor="#A98BFF" stopOpacity="0"/>
+            </linearGradient>
+          </defs>
+          <path d="M-100,320 C200,140 420,520 780,300 C1120,90 1300,440 1700,260" stroke="url(#g1)" strokeWidth="2.2" fill="none"/>
+          <path d="M-100,360 C220,200 440,560 780,340 C1140,120 1320,480 1700,300" stroke="url(#g1)" strokeWidth="1.2" strokeOpacity="0.6" fill="none"/>
+        </svg>
+        <svg className="landing-stroke landing-s2" viewBox="0 0 1600 500" fill="none" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="g2" x1="0" x2="1" y1="0" y2="0">
+              <stop offset="0%" stopColor="#A98BFF" stopOpacity="0"/>
+              <stop offset="55%" stopColor="#CFE0FF" stopOpacity="0.6"/>
+              <stop offset="100%" stopColor="#7DB7FF" stopOpacity="0"/>
+            </linearGradient>
+          </defs>
+          <path d="M0,200 C300,60 600,380 900,200 C1200,20 1400,340 1600,160" stroke="url(#g2)" strokeWidth="1.5" fill="none"/>
+        </svg>
+      </div>
+
       <WaveBackground />
-      {/* ── Header ── */}
-      <header className="header">
-        <div className="header-inner">
-          <Link to="/" className="brand">
-            <img
-              src="/logo.png"
-              alt="Stewarding Change"
-              className="brand-mark"
-              style={{ height: "36px", width: "36px", objectFit: "contain" }}
-            />
-            <span className="brand-name">Stewarding Change</span>
-          </Link>
 
-          <div className="header-actions">
-            <button
-              className="btn btn-primary btn-sm"
-              onClick={() => nav("/signup")}
-            >
-              Start Giving
-            </button>
-            <button
-              className="btn btn-secondary btn-sm"
-              onClick={() => { setMode("login"); setShowLogin(true); }}
-            >
-              Sign in
-            </button>
+      {/* ── Nav ── */}
+      <nav className="landing-nav" style={{ position: "relative" }}>
+        <div className="landing-brand">
+          <div className="landing-brand-mark">
+            <img src="/logo.png" alt="Stewarding Change" />
           </div>
+          <span>Stewarding Change</span>
         </div>
-      </header>
+        <div className="landing-nav-cta">
+          <button className="landing-btn-sm" onClick={() => { setMode("login"); setShowLogin(true); }}>
+            Sign in
+          </button>
+          <button className="landing-btn-sm landing-btn-sm-primary" onClick={() => nav("/signup")}>
+            Create account
+          </button>
+          <button
+            className={`landing-menu-btn ${menuOpen ? "open" : ""}`}
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="Open menu"
+            aria-expanded={menuOpen}
+          >
+            <span className="landing-menu-bars"><span /><span /><span /></span>
+          </button>
+        </div>
 
-      <main>
-        {/* ── Hero ── */}
-        <section className="hero home-hero">
-          <div className="home-glow" />
+        {/* Menu panel */}
+        <div className={`landing-menu-panel ${menuOpen ? "open" : ""}`} role="menu">
+          <Link to="/faq" role="menuitem" onClick={() => setMenuOpen(false)}>
+            FAQ
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </Link>
+          <a href="#how-it-works" role="menuitem" onClick={() => setMenuOpen(false)}>
+            How it works
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </a>
+          <Link to="/tithe-calculator" role="menuitem" onClick={() => setMenuOpen(false)}>
+            Tithe Calculator
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </Link>
+          <Link to="/about" role="menuitem" onClick={() => setMenuOpen(false)}>
+            About us
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </Link>
+          <Link to="/help" role="menuitem" onClick={() => setMenuOpen(false)}>
+            Help
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </Link>
+          <Link to="/add-church" role="menuitem" onClick={() => setMenuOpen(false)}>
+            Add your church
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </Link>
+        </div>
+      </nav>
 
-          <div className="home-hero-grid">
-            {/* Left: copy */}
-            <div className="home-hero-copy">
-              <div className="kicker">
-                <span className="dot" />
-                Effortless church giving
+      {/* ── Hero ── */}
+      <section className="landing-hero">
+        <div className="landing-hero-inner">
+          {/* Left: copy */}
+          <div className="landing-copy">
+            <span className="landing-eyebrow">
+              <span className="landing-eyebrow-dot" />
+              Effortless church giving
+            </span>
+
+            <h1 className="landing-headline">
+              Your spare change, <span className="landing-serif">purposefully</span> given.
+            </h1>
+
+            <p className="landing-sub">
+              Every purchase rounds up automatically. The difference goes straight to your church's active mission<span className="landing-hide-mobile"> — tax-deductible, every month</span>.
+            </p>
+
+            <div className="landing-cta-row">
+              <button className="landing-btn landing-btn-primary" onClick={() => nav("/signup")}>
+                Create an Account
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </button>
+              <button className="landing-btn landing-btn-ghost" onClick={() => { setMode("login"); setShowLogin(true); }}>
+                Sign in
+              </button>
+            </div>
+
+            <div className="landing-powered">
+              <span className="landing-powered-label">Powered by</span>
+              <span className="landing-powered-sep" aria-hidden="true" />
+              <span className="landing-powered-logo">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 8l4 4 8-8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                Stripe
+              </span>
+              <span className="landing-powered-dot" aria-hidden="true" />
+              <span className="landing-powered-logo">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="2.5" y="3" width="11" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.3"/><path d="M2.5 6.5h11" stroke="currentColor" strokeWidth="1.3"/></svg>
+                Plaid
+              </span>
+              <span className="landing-powered-note">Bank-grade security</span>
+            </div>
+          </div>
+
+          {/* Right: Phone */}
+          <div className="landing-phone-wrap">
+            {/* Floating chips */}
+            <div className="landing-chip landing-chip-1">
+              <div className="landing-chip-icon">☕</div>
+              <div>
+                <div style={{ fontSize: "11px", opacity: 0.75, lineHeight: 1 }}>Coffee Shop</div>
+                <div style={{ lineHeight: 1 }}>$4.20 → <span className="landing-chip-amt">+$0.80</span></div>
               </div>
-
-              <h1 className="hero-title home-hero-title">
-                Your spare change,<br />
-                <span className="text-brand">purposefully given.</span>
-              </h1>
-
-              <p className="lede home-hero-lede">
-                Every purchase rounds up automatically. The difference goes
-                straight to your church's active mission — tax-deductible,
-                every month.
-              </p>
-
-              <div className="hero-actions home-hero-actions">
-                <button
-                  className="btn btn-primary btn-lg"
-                  onClick={() => nav("/signup")}
-                >
-                  Create an Account
-                </button>
-                <button
-                  className="btn btn-secondary btn-lg"
-                  onClick={() => { setMode("login"); setShowLogin(true); }}
-                >
-                  Sign in
-                </button>
+            </div>
+            <div className="landing-chip landing-chip-2">
+              <div className="landing-chip-icon">⛽</div>
+              <div>
+                <div style={{ fontSize: "11px", opacity: 0.75, lineHeight: 1 }}>Gas Station</div>
+                <div style={{ lineHeight: 1 }}>$38.59 → <span className="landing-chip-amt">+$0.41</span></div>
+              </div>
+            </div>
+            <div className="landing-chip landing-chip-3" style={{ padding: "10px 14px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                <div style={{ fontSize: "10px", opacity: 0.7, letterSpacing: "0.04em", textTransform: "uppercase" }}>Mission</div>
+                <div style={{ fontWeight: 600, fontSize: "13px" }}>64% funded</div>
+              </div>
+              <div style={{
+                width: "36px", height: "36px", borderRadius: "50%",
+                background: "conic-gradient(#6BF0B2 0 64%, rgba(255,255,255,0.18) 64% 100%)",
+                display: "grid", placeItems: "center"
+              }}>
+                <div style={{
+                  width: "26px", height: "26px", borderRadius: "50%",
+                  background: "#0B1A46", display: "grid", placeItems: "center",
+                  fontSize: "9px", fontWeight: 700, color: "#6BF0B2"
+                }}>64</div>
               </div>
             </div>
 
-            {/* Right: product preview in phone frame */}
-            <div className="home-preview-wrap">
-              <div className="phone-frame">
-                <div className="phone-notch" />
-                <div className="home-preview-card">
+            <div className="landing-phone">
+              <div className="landing-phone-screen">
+                <div className="landing-phone-notch" />
 
-                  {/* Status bar */}
-                  <div className="phone-status-bar">
-                    <span>9:41</span>
-                    <div className="phone-status-icons">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 12.55a10.94 10.94 0 0 1 5.17-2.39M10.71 5.05A16 16 0 0 1 22.56 9M1.42 9a15.91 15.91 0 0 1 4.7-2.88M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="1" y="6" width="4" height="12" rx="1" opacity=".3"/><rect x="7" y="4" width="4" height="14" rx="1" opacity=".5"/><rect x="13" y="2" width="4" height="16" rx="1" opacity=".7"/><rect x="19" y="0" width="4" height="18" rx="1"/></svg>
-                      <svg width="18" height="14" viewBox="0 0 28 14" fill="currentColor"><rect x="0" y="1" width="24" height="12" rx="3" stroke="currentColor" strokeWidth="1.5" fill="none"/><rect x="25" y="4.5" width="2.5" height="5" rx="1" opacity=".4"/><rect x="2" y="3" width="16" height="8" rx="1.5" fill="var(--color-brand)"/></svg>
-                    </div>
+                {/* Status bar */}
+                <div className="landing-status-bar">
+                  <span>9:41</span>
+                  <div className="landing-status-icons">
+                    <svg width="16" height="10" viewBox="0 0 16 10" fill="currentColor"><rect x="0" y="5" width="3" height="5" rx="0.5"/><rect x="4.3" y="3" width="3" height="7" rx="0.5"/><rect x="8.7" y="1" width="3" height="9" rx="0.5"/><rect x="13" y="0" width="3" height="10" rx="0.5" opacity=".4"/></svg>
+                    <svg width="14" height="10" viewBox="0 0 14 10" fill="none"><path d="M7 2.5c2 0 3.7.8 5 2M7 2.5c-2 0-3.7.8-5 2M7 5.5c1 0 2 .4 2.8 1.1M7 5.5c-1 0-2 .4-2.8 1.1" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/><circle cx="7" cy="8.5" r="0.9" fill="currentColor"/></svg>
+                    <svg width="24" height="11" viewBox="0 0 24 11" fill="none"><rect x="0.5" y="0.5" width="20" height="10" rx="2.5" stroke="currentColor" opacity=".45"/><rect x="2" y="2" width="15" height="7" rx="1.2" fill="currentColor"/><rect x="21" y="3.5" width="1.5" height="4" rx="0.5" fill="currentColor" opacity=".45"/></svg>
                   </div>
+                </div>
 
-                  {/* App header */}
-                  <div className="home-preview-header">
-                    <span style={{ fontWeight: "var(--fw-semibold)", fontSize: "var(--fs-1)", color: "var(--color-text-primary)" }}>
+                {/* App content */}
+                <div className="landing-app">
+                  <div className="landing-app-top">
+                    <div className="landing-app-logo">
+                      <div className="landing-app-mark"><img src="/logo.png" alt="" /></div>
                       Stewarding Change
-                    </span>
-                    <div className="home-preview-avatar">T</div>
+                    </div>
+                    <div className="landing-app-avatar">TH</div>
                   </div>
 
-                  {/* Status */}
-                  <div className="home-preview-status">
-                    <div style={{ display: "flex", alignItems: "center", gap: "var(--s-2)" }}>
-                      <div className="status-dot is-active" />
-                      <span style={{ fontSize: "var(--fs-1)", fontWeight: "var(--fw-semibold)", color: "var(--color-text-primary)" }}>
-                        Giving Active
-                      </span>
+                  {/* Hero card (dark gradient) */}
+                  <div className="landing-hero-card">
+                    <div className="landing-hero-card-row">
+                      <span className="landing-hero-pill"><span className="landing-hero-live" /> Active</span>
+                      <span style={{ opacity: 0.75 }}>Grace Community</span>
                     </div>
-                    <span style={{ fontSize: "var(--fs-0)", color: "var(--color-text-muted)" }}>
-                      Countryside Christian
-                    </span>
-                  </div>
-
-                  <div className="home-preview-divider" />
-
-                  {/* Monthly amount */}
-                  <div style={{ marginBottom: "var(--s-3)" }}>
-                    <div style={{ fontSize: "var(--fs-0)", color: "var(--color-text-muted)", marginBottom: "var(--s-1)" }}>
-                      This month
+                    <div className="landing-hero-amount">
+                      <span className="landing-hero-big"><span style={{ opacity: 0.9, fontWeight: 500 }}>+</span>$1.72</span>
+                      <span className="landing-hero-label">today</span>
                     </div>
-                    <div style={{ fontSize: "var(--fs-5)", fontWeight: "var(--fw-bold)", color: "var(--color-brand)", lineHeight: 1.1 }}>
-                      +$1.72
+                    <div className="landing-hero-sub-row">
+                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 7l3-3 3 3" stroke="#6BF0B2" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      <span className="landing-hero-trend">+$21.46</span><span>this month</span>
+                    </div>
+                    <div className="landing-hero-progress">
+                      <div className="landing-hero-progress-bar"><div className="landing-hero-progress-fill" /></div>
+                      <div className="landing-hero-progress-meta">
+                        <span>Roof Restoration Fund</span>
+                        <span>$21.46 / $33.42</span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Transactions */}
-                  <div className="home-preview-txns">
+                  {/* Round-ups */}
+                  <div className="landing-section-title">
+                    <span>Round-ups</span>
+                    <span className="landing-seeall">See all</span>
+                  </div>
+
+                  <div className="landing-txns">
                     {[
-                      { name: "Coffee Shop", amt: "+$0.73" },
-                      { name: "Gas Station",  amt: "+$0.41" },
-                      { name: "Grocery Store", amt: "+$0.58" },
-                      { name: "Restaurant",     amt: "+$0.22" },
-                      { name: "Pharmacy",       amt: "+$0.37" },
+                      {
+                        icon: <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5h7v4a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V5zM10 6h1.5a1.5 1.5 0 0 1 0 3H10M4 1v2M7 1v2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>,
+                        name: "Coffee Shop", detail: "Today · $4.27", amt: "+$0.73"
+                      },
+                      {
+                        icon: <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="3" width="7" height="8" rx="1" stroke="currentColor" strokeWidth="1.2"/><path d="M9 6h2l1 1v3a1 1 0 0 1-1 1" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/><circle cx="11" cy="8" r="0.6" fill="currentColor"/></svg>,
+                        name: "Gas Station", detail: "Yesterday · $38.59", amt: "+$0.41"
+                      },
+                      {
+                        icon: <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="3" width="10" height="8" rx="1" stroke="currentColor" strokeWidth="1.2"/><path d="M5 6h4M5 8h3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/><path d="M3 1v2M11 1v2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>,
+                        name: "Theater Tickets", detail: "Apr 18 · $24.42", amt: "+$0.58"
+                      },
                     ].map((t) => (
-                      <div key={t.name} className="home-preview-txn">
-                        <span style={{ fontSize: "var(--fs-0)", color: "var(--color-text-muted)" }}>{t.name}</span>
-                        <span style={{ fontSize: "var(--fs-0)", color: "var(--color-brand)", fontWeight: "var(--fw-semibold)" }}>{t.amt}</span>
+                      <div key={t.name} className="landing-txn">
+                        <div className="landing-txn-icon">{t.icon}</div>
+                        <div className="landing-txn-meta">
+                          <div className="landing-txn-name">{t.name}</div>
+                          <div className="landing-txn-detail">{t.detail}</div>
+                        </div>
+                        <div className="landing-txn-amt">
+                          {t.amt}
+                          <span className="landing-txn-round">rounded</span>
+                        </div>
                       </div>
                     ))}
                   </div>
 
-                  <div className="home-preview-divider" />
-
-                  {/* Mission progress */}
-                  <div>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "var(--s-2)" }}>
-                      <span style={{ fontSize: "var(--fs-0)", color: "var(--color-text-muted)" }}>Mission progress</span>
-                      <span style={{ fontSize: "var(--fs-0)", color: "var(--color-brand)", fontWeight: "var(--fw-semibold)" }}>64%</span>
+                  {/* Tab bar */}
+                  <div className="landing-tab-bar">
+                    <div className="landing-tab landing-tab-active">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 7l6-5 6 5v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/></svg>
+                      Home
                     </div>
-                    <div className="progress-bar">
-                      <div className="progress-fill" style={{ width: "64%" }} />
+                    <div className="landing-tab">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM2 14c.8-2.4 3.2-4 6-4s5.2 1.6 6 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
+                      Mission
                     </div>
-                  </div>
-
-                  <div className="home-preview-divider" />
-
-                  {/* Weekly cap */}
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div>
-                      <div style={{ fontSize: "var(--fs-0)", color: "var(--color-text-muted)" }}>Monthly cap</div>
-                      <div style={{ fontSize: "var(--fs-2)", fontWeight: "var(--fw-semibold)", color: "var(--color-text-primary)" }}>$25.00</div>
-                    </div>
-                    <div style={{ fontSize: "var(--fs-0)", padding: "4px 10px", borderRadius: "var(--r-full)", background: "rgba(26, 158, 74, 0.08)", color: "var(--color-success)", fontWeight: "var(--fw-semibold)" }}>
-                      $23.28 left
+                    <div className="landing-tab">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.5 1.5M11.5 11.5L13 13M3 13l1.5-1.5M11.5 4.5L13 3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
+                      Settings
                     </div>
                   </div>
-
-                  {/* Bottom tab bar */}
-                  <div className="phone-tab-bar">
-                    <div className="phone-tab is-active">
-                      <div className="phone-tab-dot">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-                      </div>
-                      <span>Home</span>
-                    </div>
-                    <div className="phone-tab">
-                      <div className="phone-tab-dot">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                      </div>
-                      <span>Social</span>
-                    </div>
-                    <div className="phone-tab">
-                      <div className="phone-tab-dot">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                      </div>
-                      <span>Settings</span>
-                    </div>
-                  </div>
-
                 </div>
-                <div className="phone-home-bar" />
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* ── Stats bar ── */}
-        <div className="home-stats-bar reveal">
+      {/* ── Trust Indicators ── */}
+      <section className="landing-trust">
+        <div className="landing-trust-inner">
+          <div className="landing-trust-cell">
+            <div className="landing-trust-num">2 <span className="landing-trust-unit">min</span></div>
+            <div className="landing-trust-lbl">to set up</div>
+          </div>
+          <div className="landing-trust-cell">
+            <div className="landing-trust-num"><span className="landing-trust-unit">$</span>0</div>
+            <div className="landing-trust-lbl">in fees</div>
+          </div>
+          <div className="landing-trust-cell">
+            <div className="landing-trust-num">100<span className="landing-trust-unit">%</span></div>
+            <div className="landing-trust-lbl">tax-deductible</div>
+          </div>
+          <div className="landing-trust-cell">
+            <div className="landing-trust-num" style={{ fontSize: "clamp(20px, 3.8vw, 28px)" }}>Cancel</div>
+            <div className="landing-trust-lbl">any time</div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Signal row ── */}
+      <div className="landing-signals">
+        <span className="landing-signal-item">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1l5 2v4c0 3-2.2 5.4-5 6-2.8-.6-5-3-5-6V3l5-2z" stroke="currentColor" strokeWidth="1.2"/></svg>
+          Bank-grade encryption
+        </span>
+        <span className="landing-signal-item">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3 3 7-7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          IRS-compliant receipts
+        </span>
+        <span className="landing-signal-item">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="3" width="10" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.2"/><path d="M2 6h10" stroke="currentColor" strokeWidth="1.2"/></svg>
+          Plaid-secured connections
+        </span>
+        <span className="landing-signal-item">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.2"/><path d="M7 4v3l2 1" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
+          Cancel anytime
+        </span>
+      </div>
+
+      {/* ── How it works ── */}
+      <section className="landing-features" id="how-it-works">
+        <h2 className="landing-section-heading">How it works</h2>
+        <p className="landing-section-sub">Three simple steps to start giving effortlessly.</p>
+        <div className="landing-features-grid">
           {[
-            { val: "2 min",  label: "to set up" },
-            { val: "$0",     label: "in fees" },
-            { val: "100%",   label: "tax-deductible" },
-            { val: "Cancel", label: "any time" },
-          ].map((s) => (
-            <div key={s.label} className="home-stat-item">
-              <div className="home-stat-val">{s.val}</div>
-              <div className="home-stat-label">{s.label}</div>
+            {
+              icon: (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                  <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
+              ),
+              title: "Choose your church",
+              body: "Select the congregation you want to give to. Every dollar goes directly to their active mission — not a general fund.",
+            },
+            {
+              icon: (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                </svg>
+              ),
+              title: "Spend normally, give automatically",
+              body: "Link your bank and keep spending like you always do. Every purchase rounds up — those extra cents go straight to your church's mission.",
+            },
+            {
+              icon: (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              ),
+              title: "Watch your impact grow",
+              body: "Your church shares mission updates, milestones, and video updates in the app — so you see the real difference your giving makes.",
+            },
+          ].map((f) => (
+            <div key={f.title} className="landing-feature-card">
+              <div className="landing-feature-icon">{f.icon}</div>
+              <h4>{f.title}</h4>
+              <p>{f.body}</p>
             </div>
           ))}
         </div>
 
-        {/* ── How it works ── */}
-        <section className="steps-section reveal">
-          <h2>How it works</h2>
-          <p className="muted" style={{ textAlign: "center", margin: "-20px auto var(--s-7)", maxWidth: "48ch", fontSize: "var(--fs-2)", lineHeight: "var(--lh-relaxed)" }}>
-            Three simple steps to start giving effortlessly.
-          </p>
-
-          <div className="home-features-grid">
-            {[
-              {
-                icon: (
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                    <polyline points="9 22 9 12 15 12 15 22" />
-                  </svg>
-                ),
-                title: "Choose your church",
-                body: "Select the congregation you want to give to. Every dollar goes directly to their active mission — not a general fund.",
-              },
-              {
-                icon: (
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-                  </svg>
-                ),
-                title: "Spend normally, give automatically",
-                body: "Link your bank account and keep spending like you always do. Every purchase rounds up to the nearest dollar — those extra cents go straight to your church’s mission. A $4.20 coffee becomes $5.00, and the $0.80 difference is your donation.",
-              },
-              {
-                icon: (
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                    <circle cx="12" cy="12" r="3" />
-                  </svg>
-                ),
-                title: "Watch your impact grow",
-                body: "No guessing where your money goes. Your church shares mission updates, progress milestones, and video updates right in the app — so you can see the real difference your giving makes, in real time.",
-              },
-            ].map((f) => (
-              <div key={f.title} className="home-feature-card">
-                <div className="home-feature-icon">{f.icon}</div>
-                <h4 style={{ margin: "0 0 var(--s-2)", fontSize: "var(--fs-2)" }}>{f.title}</h4>
-                <p className="muted" style={{ margin: 0, fontSize: "var(--fs-1)" }}>{f.body}</p>
-              </div>
-            ))}
+        <div className="landing-calc-callout">
+          <div>
+            <h4>Wondering what your tithe should be?</h4>
+            <p>Use our free calculator to see your 10% tithe broken down monthly.</p>
           </div>
-
-          <div className="tithe-calc-callout">
-            <div className="tithe-calc-callout-text">
-              <h4 style={{ margin: "0 0 var(--s-1)", fontSize: "var(--fs-2)" }}>
-                Wondering what your tithe should be?
-              </h4>
-              <p className="muted" style={{ margin: 0, fontSize: "var(--fs-1)" }}>
-                Use our free calculator to see your 10% tithe broken down monthly.
-              </p>
-            </div>
-            <Link to="/tithe-calculator" className="btn btn-secondary">
-              Try the Calculator
-            </Link>
-          </div>
-        </section>
-
-
-        {/* ── Trust line ── */}
-        <div className="trust-line reveal" style={{ padding: "var(--s-5) var(--s-4) var(--s-10)" }}>
-          <span className="trust-item">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            Bank-grade security
-          </span>
-          <span className="trust-dot" />
-          <span className="trust-item">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            100% tax-deductible
-          </span>
-          <span className="trust-dot" />
-          <span className="trust-item">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-            Cancel any time
-          </span>
-          <span className="trust-dot" />
-          <span className="trust-item">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-            No hidden fees
-          </span>
+          <Link to="/tithe-calculator" className="landing-btn landing-btn-ghost" style={{ flexShrink: 0 }}>
+            Try the Calculator
+          </Link>
         </div>
+      </section>
 
-        {/* ── FAQs ── */}
-        <section className="home-faq-section reveal">
-          <button
-            className="home-faq-toggle"
-            onClick={() => setFaqOpen(!faqOpen)}
-            aria-expanded={faqOpen}
-          >
-            <h2 style={{ margin: 0, fontSize: "clamp(22px, 3vw, 28px)" }}>FAQs</h2>
-            <svg
-              width="20" height="20" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-              className={`home-faq-toggle-icon ${faqOpen ? "is-open" : ""}`}
-            >
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
-          </button>
-
-          <div className={`home-faq-body ${faqOpen ? "is-open" : ""}`}>
-            <div className="tithe-faq-list">
-              {faqs.map((faq, i) => (
-                <div key={i} className={`tithe-faq-item ${openFaq === i ? "is-open" : ""}`}>
-                  <button
-                    className="tithe-faq-question"
-                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                    aria-expanded={openFaq === i}
-                  >
-                    <span>{faq.q}</span>
-                    <svg
-                      width="18" height="18" viewBox="0 0 24 24" fill="none"
-                      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                      className="tithe-faq-chevron"
-                    >
-                      <polyline points="6 9 12 15 18 9" />
-                    </svg>
-                  </button>
-                  <div className="tithe-faq-answer">
-                    <p>{faq.a}</p>
-                  </div>
-                </div>
-              ))}
+      {/* ── Footer ── */}
+      <footer className="landing-footer">
+        <div className="landing-footer-inner">
+          <div className="landing-brand" style={{ fontSize: "15px" }}>
+            <div className="landing-brand-mark" style={{ width: "24px", height: "24px" }}>
+              <img src="/logo.png" alt="" />
             </div>
+            Stewarding Change
           </div>
-        </section>
-
-        {/* FAQ structured data for Google */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "FAQPage",
-              mainEntity: faqs.map((faq) => ({
-                "@type": "Question",
-                name: faq.q,
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: faq.a,
-                },
-              })),
-            }),
-          }}
-        />
-      </main>
+          <div className="landing-footer-links">
+            <Link to="/faq">FAQ</Link>
+            <Link to="/about">About</Link>
+            <Link to="/help">Help</Link>
+            <Link to="/terms">Terms</Link>
+            <Link to="/privacy">Privacy</Link>
+          </div>
+          <div className="landing-footer-copy">
+            © {new Date().getFullYear()} Stewarding Change
+          </div>
+        </div>
+      </footer>
 
       {/* ── Login Modal ── */}
       {showLogin && (

@@ -19,6 +19,9 @@ export default function Footer() {
         </div>
 
         <div className="footer-links">
+          <Link to="/faq">FAQ</Link>
+          <Link to="/about">About</Link>
+          <Link to="/help">Help</Link>
           <Link to="/terms">Terms of Service</Link>
           <Link to="/privacy">Privacy Policy</Link>
           {isAdmin && <Link to="/admin">Admin</Link>}

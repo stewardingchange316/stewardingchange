@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 
 import Home from "./pages/Home";
 import Signin from "./pages/Signin";
@@ -21,13 +21,21 @@ import SocialPage from "./pages/SocialPage";
 import GivingProfile from "./pages/GivingProfile";
 import PublicShareCard from "./pages/PublicShareCard";
 import TitheCalculator from "./pages/TitheCalculator";
+import Faq from "./pages/Faq";
+import About from "./pages/About";
+import Help from "./pages/Help";
+import AddChurch from "./pages/AddChurch";
 import ConnectCard from "./pages/ConnectCard";
 import AllSet from "./pages/AllSet";
 import Footer from "./components/Footer";
 
 export default function App() {
+  const location = useLocation();
+  const darkPages = ["/", "/about", "/help", "/add-church"];
+  const isDarkPage = darkPages.includes(location.pathname);
+
   return (
-    <div className="bg-wrap">
+    <div className={isDarkPage ? "" : "bg-wrap"}>
       <Routes>
 
         {/* Public */}
@@ -41,6 +49,10 @@ export default function App() {
         <Route path="/update-password" element={<UpdatePassword />} />
         <Route path="/s/:id" element={<PublicShareCard />} />
         <Route path="/tithe-calculator" element={<TitheCalculator />} />
+        <Route path="/faq" element={<Faq />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/help" element={<Help />} />
+        <Route path="/add-church" element={<AddChurch />} />
 
 
         {/* Protected + Onboarding */}
@@ -66,7 +78,7 @@ export default function App() {
 
       </Routes>
 
-      <Footer />
+      {!isDarkPage && <Footer />}
     </div>
   );
 }
