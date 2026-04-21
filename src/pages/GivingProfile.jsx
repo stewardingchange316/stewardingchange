@@ -94,7 +94,7 @@ export default function GivingProfile() {
         <header className="header">
           <div className="header-inner">
             <Link to="/" className="brand">
-              <img src="/logo.png" alt="Stewarding Change" className="brand-mark" style={{ height: "44px", width: "44px", objectFit: "contain" }} />
+              <img src="/logo.png" alt="Stewarding Change" className="brand-mark" style={{ height: "44px", width: "52px", objectFit: "contain", objectPosition: "left center" }} />
               <span className="brand-name">Stewarding Change</span>
             </Link>
           </div>
@@ -199,7 +199,7 @@ export default function GivingProfile() {
       <header className="header">
         <div className="header-inner">
           <Link to="/" className="brand">
-            <img src="/logo.png" alt="Stewarding Change" className="brand-mark" style={{ height: "44px", width: "44px", objectFit: "contain" }} />
+            <img src="/logo.png" alt="Stewarding Change" className="brand-mark" style={{ height: "44px", width: "52px", objectFit: "contain", objectPosition: "left center" }} />
             <span className="brand-name">Stewarding Change</span>
           </Link>
           <button className="btn btn-secondary btn-sm" onClick={() => nav("/dashboard")}>

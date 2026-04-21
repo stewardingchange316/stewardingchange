@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Stewarding Change — Brand Identity</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#060D24; --bg2:#040917;
+    --navy1:#0B1F3A; --navy2:#1E3A8A;
+    --blue:#2563EB; --bright:#4F8FF7; --sky:#60A5FA;
+    --ice:#E6F0FF; --white:#FFFFFF;
+    --text:#FFFFFF; --textDim:#B8C4DD; --textMute:#6B7BA3;
+    --border:rgba(96,165,250,0.14);
+    --card:rgba(15,28,58,0.55);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; background:
+    radial-gradient(60% 50% at 50% 0%, rgba(37,99,235,0.12) 0%, rgba(6,13,36,0) 60%),
+    linear-gradient(180deg, #060D24 0%, #040917 100%);
+    color: var(--text); font-family: Inter, -apple-system, sans-serif;
+    min-height: 100vh;
+  }
+  .sheet { max-width: 1280px; margin: 0 auto; padding: 60px 48px 80px; }
+
+  /* HERO */
+  .hero { display:grid; grid-template-columns: 460px 1fr; gap: 60px; align-items:center; padding: 40px 0 80px; }
+  .hero-wordmark { font-weight: 600; letter-spacing: -0.03em; line-height: 1.02; }
+  .hero-wordmark .l1 { font-size: 88px; color: #fff; }
+  .hero-wordmark .l2 { font-size: 88px; color: #4F8FF7; display: block; }
+
+  /* DIVIDER */
+  hr.div { border:none; border-top: 1px solid var(--border); margin: 48px 0; }
+
+  /* GRID — unified 3-column grid: left/mid content cards, right column = phone spanning all rows */
+  .brand-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr 320px;
+    grid-template-rows: auto auto;
+    gap: 28px;
+    margin-bottom: 28px;
+  }
+  .brand-grid .phone-col { grid-column: 3; grid-row: 1 / span 2; display:flex; justify-content:center; align-items:flex-start; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 22px 26px;
+    backdrop-filter: blur(6px);
+  }
+  .label { font-size: 11px; letter-spacing: 0.14em; color: var(--textMute); text-transform: uppercase; font-weight: 600; margin-bottom: 18px; }
+
+  /* LOGO VARIATIONS */
+  .variations { display:flex; gap: 28px; align-items:center; padding: 4px 0 8px; }
+
+  /* APP ICON */
+  .icons { display:flex; gap: 20px; align-items:center; }
+  .ios-icon { border-radius: 26%; box-shadow: 0 18px 40px -12px rgba(0,0,0,0.6); overflow:hidden; display:grid; place-items:center; }
+
+  /* BRAND MEANING */
+  .meaning { display:grid; grid-template-columns: 180px 1fr; gap: 22px; align-items:center; }
+  .meaning-list { display:flex; flex-direction:column; gap: 18px; }
+  .meaning-item { display:grid; grid-template-columns: 20px 1fr; gap: 14px; align-items:start; }
+  .meaning-mark { width:18px; height:18px; margin-top:2px; }
+  .meaning-title { color:#fff; font-weight: 600; font-size: 13px; letter-spacing: 0.02em; margin-bottom: 4px; }
+  .meaning-body { color: var(--textDim); font-size: 12px; line-height: 1.55; }
+  .tagline { color: var(--textDim); font-size: 13px; margin-top: 18px; line-height: 1.5; }
+  .tagline em { color: var(--sky); font-style: normal; font-weight: 500; }
+
+  /* PALETTE */
+  .swatches { display:flex; gap: 14px; }
+  .swatch { flex:1; }
+  .swatch-chip { aspect-ratio: 1; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 8px; }
+  .swatch-hex { color: var(--textDim); font-size: 10px; letter-spacing: 0.08em; text-align:center; font-weight: 500; }
+
+  /* TYPOGRAPHY */
+  .type-card { display:grid; grid-template-columns: 140px 1fr; gap: 22px; align-items:center; }
+  .type-aa { font-family: Inter, -apple-system, sans-serif; font-weight: 500; font-size: 110px; color: #fff; letter-spacing: -0.04em; line-height: 0.9; }
+  .type-name { color: #fff; font-weight: 600; font-size: 22px; letter-spacing: -0.01em; margin-bottom: 4px; }
+  .type-weights { color: var(--textDim); font-size: 12px; margin-bottom: 14px; }
+  .type-specimen { color: var(--textDim); font-size: 11px; line-height: 1.7; letter-spacing: 0.01em; font-family: Inter; }
+
+  /* APPLICATIONS */
+  .apps { display:grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 36px; }
+  .app-card { aspect-ratio: 1.4; border-radius: 14px; overflow:hidden; border: 1px solid var(--border); position:relative; }
+  .app-business-card { background: linear-gradient(135deg, #0B1F3A 0%, #060D24 100%); display:flex; align-items:center; gap: 16px; padding: 22px; }
+  .app-letterhead { background: linear-gradient(135deg, #1E3A8A 0%, #0B1F3A 100%); position:relative; }
+  .app-letterhead svg.wave { position:absolute; bottom:0; left:0; right:0; opacity:0.5; }
+  .app-polo { background: linear-gradient(145deg, #1a2540 0%, #0B1224 100%); display:grid; place-items:center; }
+  .app-bottle { background: linear-gradient(145deg, #151c34 0%, #07101f 100%); display:grid; place-items:center; }
+
+  /* PHONE */
+  .phone-wrap { display:flex; justify-content:center; align-items:flex-start; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="brand/coin.jsx"></script>
+<script type="text/babel" src="brand/phone.jsx"></script>
+
+<script type="text/babel">
+function BrandSheet() {
+  return (
+    <div className="sheet">
+      {/* ===== HERO ===== */}
+      <section className="hero">
+        <div style={{display:'grid', placeItems:'center'}}>
+          <Coin3D size={440}/>
+        </div>
+        <div className="hero-wordmark">
+          <div className="l1">Stewarding</div>
+          <div className="l2">Change</div>
+        </div>
+      </section>
+
+      <hr className="div"/>
+
+      {/* ===== UNIFIED BRAND GRID =====
+          Col 1: Logo Variations (row 1) + Brand Meaning (row 2)
+          Col 2: App Icon (row 1) + Palette/Typography stacked (row 2)
+          Col 3: Phone (spans both rows)
+      */}
+      <div className="brand-grid">
+        {/* ROW 1 */}
+        <div className="card">
+          <div className="label">Logo Variations</div>
+          <div className="variations">
+            <FlatMark size={72} variant="navy-filled"/>
+            <FlatMark size={72} variant="navy-outline"/>
+            <FlatMark size={72} variant="bolt-only"/>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="label">App Icon</div>
+          <div className="icons">
+            <div className="ios-icon" style={{width:92, height:92, background:'linear-gradient(135deg,#1E3A8A,#0B1F3A)'}}>
+              <FlatMark size={68} variant="navy-filled"/>
+            </div>
+            <div className="ios-icon" style={{width:92, height:92, background:'linear-gradient(135deg,#FFFFFF,#E6F0FF)'}}>
+              <FlatMark size={68} variant="white-filled"/>
+            </div>
+          </div>
+        </div>
+
+        <div className="phone-col">
+          <PhoneMockup scale={0.92}/>
+        </div>
+
+        {/* ROW 2 */}
+        <div className="card">
+          <div className="label">Brand Meaning</div>
+          <div className="meaning">
+            <div style={{display:'grid', placeItems:'center'}}>
+              <FlatMark size={150} variant="navy-filled"/>
+            </div>
+            <div className="meaning-list">
+              <div className="meaning-item">
+                <svg className="meaning-mark" viewBox="0 0 20 20" fill="none">
+                  <path d="M12 3L6 11h3l-2 6 6-8h-3l2-6z" fill="#60A5FA"/>
+                </svg>
+                <div>
+                  <div className="meaning-title">THE S / LIGHTNING BOLT</div>
+                  <div className="meaning-body">Represents energy, momentum, and the spark that creates change.</div>
+                </div>
+              </div>
+              <div className="meaning-item">
+                <svg className="meaning-mark" viewBox="0 0 20 20" fill="none">
+                  <circle cx="10" cy="10" r="7" stroke="#60A5FA" strokeWidth="1.6"/>
+                </svg>
+                <div>
+                  <div className="meaning-title">THE COIN</div>
+                  <div className="meaning-body">Symbolizes stewardship, completeness, and the resources entrusted to us.</div>
+                </div>
+              </div>
+              <div className="meaning-item">
+                <svg className="meaning-mark" viewBox="0 0 20 20" fill="none">
+                  <path d="M10 3l1.6 5.4L17 10l-5.4 1.6L10 17l-1.6-5.4L3 10l5.4-1.6L10 3z" fill="#60A5FA"/>
+                </svg>
+                <div>
+                  <div className="meaning-title">THE POINT</div>
+                  <div className="meaning-body">Where small actions create extraordinary impact.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="tagline">
+            Stewarding Change empowers everyday moments to create lasting <em>impact.</em>
+          </div>
+        </div>
+
+        <div style={{display:'flex', flexDirection:'column', gap:28}}>
+          <div className="card">
+            <div className="label">Color Palette</div>
+            <div className="swatches">
+              <div className="swatch"><div className="swatch-chip" style={{background:'#0B1F3A'}}/><div className="swatch-hex">#0B1F3A</div></div>
+              <div className="swatch"><div className="swatch-chip" style={{background:'#1E3A8A'}}/><div className="swatch-hex">#1E3A8A</div></div>
+              <div className="swatch"><div className="swatch-chip" style={{background:'#2563EB'}}/><div className="swatch-hex">#2563EB</div></div>
+              <div className="swatch"><div className="swatch-chip" style={{background:'#60A5FA'}}/><div className="swatch-hex">#60A5FA</div></div>
+              <div className="swatch"><div className="swatch-chip" style={{background:'#E6F0FF'}}/><div className="swatch-hex">#E6F0FF</div></div>
+            </div>
+          </div>
+
+          <div className="card">
+            <div className="label">Typography</div>
+            <div className="type-card">
+              <div className="type-aa">Aa</div>
+              <div>
+                <div className="type-name">Inter</div>
+                <div className="type-weights">Medium · Semibold</div>
+                <div className="type-specimen">
+                  ABCDEFGHIJKLMNOPQRSTUVWXYZ<br/>
+                  abcdefghijklmnopqrstuvwxyz<br/>
+                  0123456789
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ===== APPLICATIONS ===== */}
+      <div style={{marginTop: 12}}>
+        <div className="label" style={{marginLeft: 4, marginBottom: 16}}>Brand Applications</div>
+        <div className="apps">
+          <div className="app-card app-business-card">
+            <FlatMark size={52} variant="navy-filled"/>
+            <div>
+              <div style={{color:'#fff', fontWeight:600, fontSize:14, letterSpacing:'-0.01em'}}>Stewarding</div>
+              <div style={{color:'#4F8FF7', fontWeight:600, fontSize:14, letterSpacing:'-0.01em'}}>Change</div>
+            </div>
+          </div>
+          <div className="app-card app-letterhead">
+            <div style={{position:'absolute', top:22, left:22}}><FlatMark size={56} variant="navy-filled"/></div>
+            <svg className="wave" viewBox="0 0 400 200" preserveAspectRatio="none" width="100%" height="80">
+              <path d="M0 140 Q 100 60, 200 120 T 400 100 L 400 200 L 0 200 Z" fill="#2563EB" opacity="0.3"/>
+              <path d="M0 160 Q 100 100, 200 150 T 400 130 L 400 200 L 0 200 Z" fill="#60A5FA" opacity="0.2"/>
+            </svg>
+          </div>
+          <div className="app-card app-polo">
+            {/* simplified polo shirt silhouette with bolt on chest */}
+            <svg viewBox="0 0 200 200" width="88%" height="88%">
+              <path d="M60 40 L 80 28 Q 100 38, 120 28 L 140 40 L 170 60 L 160 90 L 140 80 L 140 180 L 60 180 L 60 80 L 40 90 L 30 60 Z"
+                fill="#0A1424" stroke="#1a2540" strokeWidth="1"/>
+              <path d="M80 28 L 100 50 L 120 28" fill="none" stroke="#1a2540" strokeWidth="1.5"/>
+              <g transform="translate(108 80) scale(0.22)">
+                <circle cx="100" cy="100" r="60" fill="none" stroke="#4F8FF7" strokeWidth="4"/>
+                <path d="M 122 58 L 74 128 Q 70 134 78 134 L 104 134 L 76 184 Q 72 190 80 186 L 132 118 Q 136 112 128 112 L 102 112 Z" fill="#4F8FF7"/>
+              </g>
+            </svg>
+          </div>
+          <div className="app-card app-bottle">
+            {/* water bottle silhouette with bolt */}
+            <svg viewBox="0 0 200 240" width="60%" height="92%">
+              <rect x="80" y="8" width="40" height="16" rx="3" fill="#0a1020"/>
+              <path d="M70 30 L 130 30 L 140 60 Q 150 100, 140 180 Q 135 220, 100 225 Q 65 220, 60 180 Q 50 100, 60 60 Z"
+                fill="#0B1224" stroke="#1a2540" strokeWidth="1"/>
+              <g transform="translate(72 105) scale(0.28)">
+                <circle cx="100" cy="100" r="80" fill="none" stroke="#4F8FF7" strokeWidth="5"/>
+                <path d="M 122 38 L 74 108 Q 70 114 78 114 L 104 114 L 76 164 Q 72 170 80 166 L 132 98 Q 136 92 128 92 L 102 92 Z" fill="#4F8FF7"/>
+              </g>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+const render = () => root.render(<BrandSheet/>);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(render); else render();
+</script>
+</body>
+</html>

@@ -516,8 +516,9 @@ button.primary:disabled {
 
 .brand-mark {
   height: 44px;
-  width: 44px;
+  width: 52px;
   object-fit: contain;
+  object-position: left center;
   flex-shrink: 0;
   overflow: visible;
 }
@@ -3721,7 +3722,7 @@ button.primary:disabled {
 }
 
 .landing-brand-mark {
-  width: 40px;
+  width: 48px;
   height: 40px;
   display: grid;
   place-items: center;

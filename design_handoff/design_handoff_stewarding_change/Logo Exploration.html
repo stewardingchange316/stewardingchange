@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Stewarding Change — S-Bolt Logo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  html, body { margin:0; padding:0; font-family: Inter, sans-serif; }
+  .tile { display:flex; align-items:center; justify-content:center; width:100%; height:100%; }
+  .panel-navy { background: #0A1F4C; }
+  .panel-deep { background: linear-gradient(135deg, #060E2B 0%, #0A1F4C 55%, #1B3FA6 100%); }
+  .panel-mesh {
+    background:
+      radial-gradient(60% 60% at 20% 20%, rgba(46,107,255,0.35) 0%, rgba(10,31,76,0) 60%),
+      radial-gradient(50% 50% at 80% 80%, rgba(111,168,255,0.22) 0%, rgba(10,31,76,0) 70%),
+      #0A1F4C;
+  }
+  .panel-white { background:#FFFFFF; }
+  .panel-ice { background:#E7EEFB; }
+  .appicon-ios { border-radius: 26%; box-shadow: 0 30px 60px -18px rgba(0,0,0,0.55); overflow:hidden; }
+
+  .tweaks {
+    position: fixed; right: 16px; top: 16px; width: 280px;
+    background: rgba(10,20,40,0.95); color:#fff;
+    border: 1px solid rgba(255,255,255,0.12); border-radius: 16px;
+    padding: 16px; font-size: 12.5px; z-index: 1000;
+    backdrop-filter: blur(18px);
+    box-shadow: 0 30px 80px -20px rgba(0,0,0,0.6); font-family: Inter, sans-serif;
+  }
+  .tweaks h4 { margin:0 0 12px; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:rgba(255,255,255,0.6); font-weight:600;}
+  .tweaks .field { margin-bottom:12px; }
+  .tweaks label { font-size:11px; color:rgba(255,255,255,0.7); margin-bottom:6px; font-weight:500; display:block;}
+  .tweaks .chips { display:flex; flex-wrap:wrap; gap:6px; }
+  .tweaks .chip {
+    font-family:inherit; font-size:11.5px;
+    padding:6px 10px; border-radius:999px;
+    background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12);
+    color:#fff; cursor:pointer; transition:all .15s;
+  }
+  .tweaks .chip.active { background:#6FA8FF; color:#0A1F4C; border-color:#6FA8FF; font-weight:600;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<div class="tweaks" id="tweaks">
+  <h4>Tweaks</h4>
+  <div class="field">
+    <label>Featured bolt</label>
+    <div class="chips" data-tweak="featured">
+      <button class="chip" data-v="v1">V1 Classic</button>
+      <button class="chip" data-v="v2">V2 Chiseled</button>
+      <button class="chip" data-v="v3">V3 Ribbon</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="logo/design-canvas.jsx"></script>
+<script type="text/babel" src="logo/marks.jsx"></script>
+
+<script type="text/babel">
+const BOLTS = {
+  v1: { title:'V1 · Classic',  desc:'Two-segment lightning with sharp tips. Closest to the reference — archetypal and instantly legible.' },
+  v2: { title:'V2 · Chiseled', desc:'Narrower bolt with a subtle bevel split. Feels stamped / engraved — authoritative.' },
+  v3: { title:'V3 · Ribbon',   desc:'Thicker bolt with soft rounded corners. Reads almost as an italic "S" — softer, more approachable.' },
+};
+
+const state = { featured: 'v1' };
+
+function App() {
+  const k = state.featured, d = BOLTS[k];
+  return (
+    <DesignCanvas>
+      <div style={{padding:'24px 60px 32px', maxWidth: 960}}>
+        <div style={{fontSize:34, fontWeight:700, letterSpacing:'-0.02em', color:'#2a241d'}}>
+          Stewarding Change · S-Bolt Logo
+        </div>
+        <div style={{fontSize:14, color:'rgba(60,50,40,0.65)', marginTop:8, lineHeight:1.5, maxWidth:720}}>
+          Lightning bolt doubling as a stylized "S", set inside a navy coin. Three geometric
+          constructions — pick a bolt in the Tweaks panel to focus. Navy + electric blue only.
+        </div>
+      </div>
+
+      <DCSection title={`★ Featured · ${d.title}`} subtitle={d.desc}>
+        <DCArtboard label="Primary · navy" width={380} height={380}>
+          <div className="tile panel-deep">
+            <Mark bolt={k} size={240} variant="navy"/>
+          </div>
+        </DCArtboard>
+        <DCArtboard label="Gradient · hero" width={380} height={380}>
+          <div className="tile panel-mesh">
+            <Mark bolt={k} size={240} variant="gradient"/>
+          </div>
+        </DCArtboard>
+        <DCArtboard label="Reversed · white" width={380} height={380}>
+          <div className="tile panel-white">
+            <Mark bolt={k} size={240} variant="white"/>
+          </div>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection title="Wordmark lockup">
+        <DCArtboard label="On navy" width={640} height={200}>
+          <div className="tile panel-deep">
+            <Wordmark bolt={k} size={96} light variant="navy"/>
+          </div>
+        </DCArtboard>
+        <DCArtboard label="On white" width={640} height={200}>
+          <div className="tile panel-white">
+            <Wordmark bolt={k} size={96} variant="white"/>
+          </div>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection title="Scale test · 16 / 22 / 32 / 48 / 72 / 120 / 200 px">
+        <DCArtboard label="Navy" width={760} height={260}>
+          <div className="tile panel-deep" style={{gap:20, padding:'0 28px'}}>
+            {[16,22,32,48,72,120,200].map(s => <Mark key={s} bolt={k} size={s} variant="navy"/>)}
+          </div>
+        </DCArtboard>
+        <DCArtboard label="White" width={760} height={260}>
+          <div className="tile panel-white" style={{gap:20, padding:'0 28px'}}>
+            {[16,22,32,48,72,120,200].map(s => <Mark key={s} bolt={k} size={s} variant="white"/>)}
+          </div>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection title="iOS app icon">
+        <DCArtboard label="Navy" width={220} height={240} style={{background:'transparent', boxShadow:'none'}}>
+          <div style={{padding:20, display:'flex', justifyContent:'center'}}>
+            <div className="appicon-ios panel-deep" style={{width:180, height:180, display:'grid', placeItems:'center'}}>
+              <Mark bolt={k} size={150} variant="navy"/>
+            </div>
+          </div>
+        </DCArtboard>
+        <DCArtboard label="Gradient" width={220} height={240} style={{background:'transparent', boxShadow:'none'}}>
+          <div style={{padding:20, display:'flex', justifyContent:'center'}}>
+            <div className="appicon-ios panel-mesh" style={{width:180, height:180, display:'grid', placeItems:'center'}}>
+              <Mark bolt={k} size={150} variant="gradient"/>
+            </div>
+          </div>
+        </DCArtboard>
+        <DCArtboard label="White" width={220} height={240} style={{background:'transparent', boxShadow:'none'}}>
+          <div style={{padding:20, display:'flex', justifyContent:'center'}}>
+            <div className="appicon-ios panel-white" style={{width:180, height:180, display:'grid', placeItems:'center'}}>
+              <Mark bolt={k} size={150} variant="white"/>
+            </div>
+          </div>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection title="All three · navy">
+        {Object.entries(BOLTS).map(([key,m]) => (
+          <DCArtboard key={key} label={m.title} width={260} height={260}>
+            <div className="tile panel-deep"><Mark bolt={key} size={170} variant="navy"/></div>
+          </DCArtboard>
+        ))}
+      </DCSection>
+
+      <DCSection title="All three · white">
+        {Object.entries(BOLTS).map(([key,m]) => (
+          <DCArtboard key={key} label={m.title} width={260} height={260}>
+            <div className="tile panel-white"><Mark bolt={key} size={170} variant="white"/></div>
+          </DCArtboard>
+        ))}
+      </DCSection>
+
+      <div style={{height: 80}}/>
+    </DesignCanvas>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+const render = () => root.render(<App/>);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(render); else render();
+
+document.querySelectorAll('[data-tweak]').forEach(container => {
+  const key = container.dataset.tweak;
+  container.querySelectorAll('[data-v]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state[key] = btn.dataset.v;
+      refreshChips(); render();
+    });
+  });
+});
+function refreshChips() {
+  document.querySelectorAll('[data-tweak]').forEach(container => {
+    const key = container.dataset.tweak;
+    container.querySelectorAll('[data-v]').forEach(btn => {
+      btn.classList.toggle('active', String(btn.dataset.v) === String(state[key]));
+    });
+  });
+}
+refreshChips();
+</script>
+</body>
+</html>

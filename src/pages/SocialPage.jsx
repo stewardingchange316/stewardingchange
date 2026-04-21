@@ -245,7 +245,7 @@ export default function SocialPage() {
           <div className="header-inner">
             <Link to="/dashboard" className="brand">
               <img src="/logo.png" alt="Stewarding Change" className="brand-mark"
-                   style={{ height: "44px", width: "44px", objectFit: "contain" }} />
+                   style={{ height: "44px", width: "52px", objectFit: "contain", objectPosition: "left center" }} />
               <span className="brand-name">Stewarding Change</span>
             </Link>
           </div>
@@ -264,7 +264,7 @@ export default function SocialPage() {
           <div className="header-inner">
             <Link to="/dashboard" className="brand">
               <img src="/logo.png" alt="Stewarding Change" className="brand-mark"
-                   style={{ height: "44px", width: "44px", objectFit: "contain" }} />
+                   style={{ height: "44px", width: "52px", objectFit: "contain", objectPosition: "left center" }} />
               <span className="brand-name">Stewarding Change</span>
             </Link>
             <button className="btn btn-ghost btn-sm" onClick={() => nav("/dashboard")}>← Dashboard</button>
@@ -295,7 +295,7 @@ export default function SocialPage() {
         <div className="header-inner">
           <Link to="/dashboard" className="brand">
             <img src="/logo.png" alt="Stewarding Change" className="brand-mark"
-                 style={{ height: "44px", width: "44px", objectFit: "contain" }} />
+                 style={{ height: "44px", width: "52px", objectFit: "contain", objectPosition: "left center" }} />
             <span className="brand-name">Stewarding Change</span>
           </Link>
 
