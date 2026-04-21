@@ -420,6 +420,10 @@ export default function Admin() {
   const [capSort,      setCapSort]      = useState(null);  // null | "desc" | "asc"
   const [copied,          setCopied]          = useState(false);
   const [copiedIncomplete, setCopiedIncomplete] = useState(false);
+  const [churchSearch,    setChurchSearch]    = useState("");
+  const [stripeFilter,    setStripeFilter]    = useState("all"); // "all" | "connected" | "not_connected"
+  const [churchPage,      setChurchPage]      = useState(0);
+  const CHURCHES_PER_PAGE = 10;
 
   useEffect(() => {
     async function load() {
@@ -950,14 +954,83 @@ export default function Admin() {
           </div>
 
           {/* ── Churches section ── */}
-          <div className="stack-3">
-            <h3 style={{ margin: 0 }}>Churches</h3>
-            <div className="grid-2">
-              {churches.map((c) => (
-                <ChurchCard key={c.id} church={c} onSaved={handleChurchSaved} />
-              ))}
-            </div>
-          </div>
+          {(() => {
+            const filtered = churches.filter((c) => {
+              if (churchSearch && !c.name.toLowerCase().includes(churchSearch.toLowerCase())) return false;
+              if (stripeFilter === "connected" && !c.stripe_account_id) return false;
+              if (stripeFilter === "not_connected" && c.stripe_account_id) return false;
+              return true;
+            });
+            const totalPages = Math.ceil(filtered.length / CHURCHES_PER_PAGE);
+            const page = Math.min(churchPage, Math.max(0, totalPages - 1));
+            const paged = filtered.slice(page * CHURCHES_PER_PAGE, (page + 1) * CHURCHES_PER_PAGE);
+            const stripeCount = churches.filter((c) => c.stripe_account_id).length;
+
+            return (
+              <div className="stack-4">
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "var(--s-3)" }}>
+                  <h3 style={{ margin: 0 }}>Churches <span className="small muted" style={{ fontWeight: "var(--fw-normal)" }}>({churches.length} total · {stripeCount} Stripe connected)</span></h3>
+                </div>
+
+                <div style={{ display: "flex", gap: "var(--s-3)", flexWrap: "wrap", alignItems: "center" }}>
+                  <input
+                    className="input"
+                    style={{ maxWidth: 240, padding: "7px 12px", fontSize: "var(--fs-1)" }}
+                    placeholder="Search churches…"
+                    value={churchSearch}
+                    onChange={(e) => { setChurchSearch(e.target.value); setChurchPage(0); }}
+                  />
+                  <div style={{ display: "flex", gap: "var(--s-2)" }}>
+                    {[
+                      { value: "all",           label: "All" },
+                      { value: "connected",     label: "Stripe ✓" },
+                      { value: "not_connected", label: "No Stripe" },
+                    ].map(({ value, label }) => (
+                      <button
+                        key={value}
+                        className={`btn btn-sm ${stripeFilter === value ? "btn-primary" : "btn-secondary"}`}
+                        onClick={() => { setStripeFilter(value); setChurchPage(0); }}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {paged.length === 0 ? (
+                  <div className="small muted" style={{ padding: "var(--s-4) 0" }}>No churches match your filters.</div>
+                ) : (
+                  <div className="grid-2">
+                    {paged.map((c) => (
+                      <ChurchCard key={c.id} church={c} onSaved={handleChurchSaved} />
+                    ))}
+                  </div>
+                )}
+
+                {totalPages > 1 && (
+                  <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "var(--s-3)" }}>
+                    <button
+                      className="btn btn-secondary btn-sm"
+                      disabled={page === 0}
+                      onClick={() => setChurchPage((p) => p - 1)}
+                    >
+                      ← Prev
+                    </button>
+                    <span className="small muted">
+                      Page {page + 1} of {totalPages}
+                    </span>
+                    <button
+                      className="btn btn-secondary btn-sm"
+                      disabled={page >= totalPages - 1}
+                      onClick={() => setChurchPage((p) => p + 1)}
+                    >
+                      Next →
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {/* ── Banners section ── */}
           {churches.length > 0 && (
