@@ -202,7 +202,7 @@ export default function Dashboard() {
         <header className="header">
           <div className="header-inner">
             <Link to="/" className="brand">
-              <img src="/logo.png" alt="Stewarding Change" className="brand-mark" style={{ height: "44px", width: "44px", objectFit: "contain" }} />
+              <img src="/logo.png" alt="Stewarding Change" className="brand-mark" style={{ height: "44px", width: "58px", objectFit: "contain" }} />
               <span className="brand-name">Stewarding Change</span>
             </Link>
           </div>
@@ -247,7 +247,7 @@ export default function Dashboard() {
               src="/logo.png"
               alt="Stewarding Change"
               className="brand-mark"
-              style={{ height: "44px", width: "44px", objectFit: "contain" }}
+              style={{ height: "44px", width: "58px", objectFit: "contain" }}
             />
             <span className="brand-name">Stewarding Change</span>
           </Link>
