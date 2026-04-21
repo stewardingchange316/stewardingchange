@@ -515,10 +515,11 @@ button.primary:disabled {
 }
 
 .brand-mark {
-  height: 36px;
-  width: 36px;
+  height: 44px;
+  width: 44px;
   object-fit: contain;
   flex-shrink: 0;
+  overflow: visible;
 }
 
 .brand-name {
