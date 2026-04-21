@@ -42,7 +42,7 @@ export default function TitheCalculator() {
               src="/logo.png"
               alt="Stewarding Change"
               className="brand-mark"
-              style={{ height: "36px", width: "36px", objectFit: "contain" }}
+              style={{ height: "44px", width: "44px", objectFit: "contain" }}
             />
             <span className="brand-name">Stewarding Change</span>
           </Link>

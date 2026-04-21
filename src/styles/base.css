@@ -3720,8 +3720,8 @@ button.primary:disabled {
 }
 
 .landing-brand-mark {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   display: grid;
   place-items: center;
   filter: drop-shadow(0 6px 14px rgba(125,183,255,0.45));
