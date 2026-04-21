@@ -29,11 +29,40 @@ function StepBadge({ step }) {
 function ChurchCard({ church, onSaved }) {
   const [editing, setEditing] = useState(false);
   const [saving,  setSaving]  = useState(false);
+  const [connectLoading, setConnectLoading] = useState(false);
   const [form, setForm] = useState({
     mission_title:       church.mission_title ?? "",
     mission_description: church.mission_description ?? "",
     mission_progress:    church.mission_progress ?? 0,
   });
+
+  async function handleStripeConnect() {
+    setConnectLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL || "https://rhghtegxlamvhxytwomx.supabase.co"}/functions/v1/stripe-connect-onboard`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ church_id: church.id }),
+        }
+      );
+      const data = await res.json();
+      if (data.url) {
+        window.open(data.url, "_blank");
+      } else {
+        alert(data.error || "Failed to start Stripe onboarding");
+      }
+    } catch (err) {
+      console.error("Stripe Connect error:", err);
+      alert("Failed to connect. Check console for details.");
+    }
+    setConnectLoading(false);
+  }
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -82,6 +111,26 @@ function ChurchCard({ church, onSaved }) {
             {editing ? "Cancel" : "Edit"}
           </button>
         </div>
+      </div>
+
+      {/* Stripe Connect status */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "var(--s-3) 0", borderTop: "1px solid var(--color-border)", borderBottom: "1px solid var(--color-border)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "var(--s-2)" }}>
+          <div className={`status-dot ${church.stripe_account_id ? "is-active" : "is-pending"}`} />
+          <span className="small" style={{ color: church.stripe_account_id ? "var(--color-success)" : "var(--color-text-muted)" }}>
+            {church.stripe_account_id ? "Stripe connected" : "Stripe not connected"}
+          </span>
+        </div>
+        {!church.stripe_account_id && (
+          <button
+            className="btn btn-primary btn-sm"
+            onClick={handleStripeConnect}
+            disabled={connectLoading}
+            style={{ fontSize: "var(--fs-0)" }}
+          >
+            {connectLoading ? "Setting up…" : "Connect Stripe"}
+          </button>
+        )}
       </div>
 
       <div className="stack-2">
