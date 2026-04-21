@@ -54,6 +54,7 @@ Deno.serve(async (req) => {
         products: ["transactions"],
         country_codes: ["US"],
         language: "en",
+        webhook: `${supabaseUrl}/functions/v1/plaid-webhook`,
         account_filters: {
           depository: { account_subtypes: ["checking", "savings"] },
           credit: { account_subtypes: ["credit card"] },
