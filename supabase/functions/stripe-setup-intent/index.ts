@@ -3,8 +3,10 @@ import Stripe from "npm:stripe@13";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/cors.ts";
 
+let corsHeaders: Record<string, string> = {};
+
 Deno.serve(async (req) => {
-  const corsHeaders = getCorsHeaders(req.headers.get("Origin"));
+  corsHeaders = getCorsHeaders(req.headers.get("Origin"));
 
   if (req.method === "OPTIONS") {
     return Object.keys(corsHeaders).length
